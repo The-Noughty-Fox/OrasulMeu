@@ -1,5 +1,151 @@
 openapi: 3.0.0
 paths:
+  /auth/test/{id}:
+    post:
+      operationId: login-test-user
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: &a1
+        - auth
+  /auth/apple:
+    post:
+      operationId: authenticateApple
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/appleToken"
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a1
+  /auth/google:
+    post:
+      operationId: authenticateGoogle
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/token"
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a1
+  /auth/facebook:
+    post:
+      operationId: authenticateWithFacebookPo
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/token"
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a1
+  /users:
+    post:
+      operationId: create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDto"
+      responses:
+        "201":
+          description: ""
+      tags: &a2
+        - users
+    get:
+      operationId: findAll
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+  /users/{id}:
+    get:
+      operationId: findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+    patch:
+      operationId: update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+    delete:
+      operationId: remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+  /users/search:
+    get:
+      operationId: search
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a2
   /echo:
     get:
       operationId: get-echo
@@ -24,4 +170,21 @@ tags:
     description: ""
 servers: []
 components:
-  schemas: {}
+  schemas:
+    UserDto:
+      type: object
+      properties: {}
+    appleToken:
+      type: object
+      properties:
+        authorizationCode:
+          type: string
+      required:
+        - authorizationCode
+    token:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
