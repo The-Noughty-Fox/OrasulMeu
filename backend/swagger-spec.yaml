@@ -1,0 +1,27 @@
+openapi: 3.0.0
+paths:
+  /echo:
+    get:
+      operationId: get-echo
+      summary: ""
+      parameters: []
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: string
+      tags:
+        - echo
+info:
+  title: Orasul Meu
+  description: Orasul Meu Swagger API
+  version: "1.0"
+  contact: {}
+tags:
+  - name: orasul_meu
+    description: ""
+servers: []
+components:
+  schemas: {}
