@@ -1,0 +1,13 @@
+README.md
+build.gradle
+docs/EchoApi.md
+settings.gradle
+src/main/kotlin/org/openapitools/client/apis/EchoApi.kt
+src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt
+src/main/kotlin/org/openapitools/client/infrastructure/ByteArrayAdapter.kt
+src/main/kotlin/org/openapitools/client/infrastructure/CollectionFormats.kt
+src/main/kotlin/org/openapitools/client/infrastructure/LocalDateAdapter.kt
+src/main/kotlin/org/openapitools/client/infrastructure/LocalDateTimeAdapter.kt
+src/main/kotlin/org/openapitools/client/infrastructure/OffsetDateTimeAdapter.kt
+src/main/kotlin/org/openapitools/client/infrastructure/ResponseExt.kt
+src/main/kotlin/org/openapitools/client/infrastructure/Serializer.kt

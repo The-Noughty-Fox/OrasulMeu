@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Default platform to "all"
+platform="all"
+
+# Function to show usage
+usage() {
+    echo "Usage: $0 <input_file_path> <output_path_ios> <output_path_android> [platform]"
+    echo "       $0 <input_file_path> <output_path> -- for platform 'all'"
+}
+
+# Validate input arguments
+if [ "$#" -lt 2 ]; then
+    usage
+    exit 1
+fi
+
+input_file="$1"
+platform="all" # Default platform
+
+# Determine argument scenario
+if [ "$#" -eq 2 ]; then
+    # Default to 'all' with a single output path for both
+    output_file_ios="$2"
+    output_file_android="$2"
+elif [ "$#" -eq 3 ] && ([ "$3" == "ios" ] || [ "$3" == "android" ]); then
+    # Platform explicitly specified with only one output path
+    platform="$3"
+    output_file_ios="$2"
+    output_file_android="$2"
+elif [ "$#" -eq 3 ]; then
+    # Assumed 'all' with two different output paths
+    output_file_ios="$2"
+    output_file_android="$3"
+elif [ "$#" -eq 4 ]; then
+    # All arguments provided
+    output_file_ios="$2"
+    output_file_android="$3"
+    platform="$4"
+else
+    usage
+    exit 1
+fi
+
+# Function to process iOS platform
+process_ios() {
+    echo "Processing for iOS..."
+    openapi-generator generate -g swift5 -i "$input_file" -o "$output_file_ios" --additional-properties=responseAs=AsyncAwait,projectName=API,useSPMFileStructure=true &
+}
+
+# Function to process Android platform
+process_android() {
+    echo "Processing for Android..."
+    openapi-generator generate -g kotlin -i "$input_file" -o "$output_file_android" --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string &
+}
+
+# Function to process all platforms
+process_all() {
+    echo "Processing for all platforms..."
+    process_ios
+    process_android
+}
+
+# Process based on the platform argument
+case "$platform" in
+    ios)
+        process_ios
+        ;;
+    android)
+        process_android
+        ;;
+    all)
+        process_all
+        ;;
+    *)
+        echo "Invalid platform specified. Valid options are: ios, android, all."
+        exit 2
+        ;;
+esac
+
+# Wait for all background processes to finish
+wait
+
+echo "Processing complete."

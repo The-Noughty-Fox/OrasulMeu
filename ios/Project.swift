@@ -22,7 +22,8 @@ let project = Project(
                 .external(name: "GoogleSignIn"),
                 .external(name: "FacebookLogin"),
                 .external(name: "NoughtyUI"),
-                .external(name: "NoughtyEnvironment")
+                .external(name: "NoughtyEnvironment"),
+                .external(name: "API")
             ]
         ),
         .target(
