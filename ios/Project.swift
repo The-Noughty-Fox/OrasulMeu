@@ -15,7 +15,7 @@ let project = Project(
             ),
             sources: ["OrasulMeu/Sources/**"],
             resources: ["OrasulMeu/Resources/**"],
-            dependencies: []
+            dependencies: [.external(name: "Nuke"), .external(name: "NukeUI")]
         ),
         .target(
             name: "OrasulMeuTests",
