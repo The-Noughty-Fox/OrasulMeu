@@ -10,7 +10,9 @@ import SwiftUI
 struct AuthView: View {
     var body: some View {
         VStack {
-            
+            Button("Login with apple") {}
+            Button("Login with google") {}
+            Button("Login with facebook") {}
         }
     }
 }
