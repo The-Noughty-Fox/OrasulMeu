@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "621373385747",
+    "project_id": "orasulmeu-31a58",
+    "storage_bucket": "orasulmeu-31a58.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:621373385747:android:61468c1518c39a327223e6",
+        "android_client_info": {
+          "package_name": "com.thenoughtfox.orasulmeu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjECiL_KWk1501-bke-4tOqUDmuB6Tiwc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

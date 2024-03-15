@@ -1,12 +1,16 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-kapt'
-    id 'dagger.hilt.android.plugin'
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.crashlytics)
     id 'kotlin-parcelize'
-    id 'com.google.firebase.crashlytics'
-//    id 'com.google.gms.google-services'
+    id 'com.google.gms.google-services'
+    id 'kotlin-kapt'
 }
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     namespace 'com.thenoughtfox.orasulmeu'
@@ -25,20 +29,49 @@ android {
         }
     }
 
+    signingConfigs {
+        releaseConfig {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources = true
+            signingConfig signingConfigs.releaseConfig
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "app_name", "OrasulMeu"
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
+        }
+
+        debug {
+            minifyEnabled false
+            shrinkResources = false
+            debuggable true
+            resValue "string", "app_name", "OrasulMeu Dev"
+            signingConfig signingConfigs.releaseConfig
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -46,7 +79,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.1'
+        kotlinCompilerExtensionVersion '1.5.4'
     }
 
     packaging {
@@ -111,6 +144,9 @@ dependencies {
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.analytics.ktx
     implementation libs.firebase.crashlytics
+
+    //Desugar java library
+    coreLibraryDesugaring libs.desugar.jdk.libs
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
