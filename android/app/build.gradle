@@ -87,10 +87,16 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['build/generated/api/src/main/java']
+        }
+    }
 }
 
 dependencies {
-
+    implementation project(":generated:api")
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.activity.compose
@@ -147,6 +153,9 @@ dependencies {
 
     //Desugar java library
     coreLibraryDesugaring libs.desugar.jdk.libs
+
+    //Noughty lib
+    implementation libs.noughty.authentication.lib.android
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
