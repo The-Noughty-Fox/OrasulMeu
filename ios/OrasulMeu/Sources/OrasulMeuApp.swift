@@ -1,4 +1,6 @@
 import SwiftUI
+import Nuke
+import NukeUI
 
 @main
 struct OrasulMeuApp: App {
