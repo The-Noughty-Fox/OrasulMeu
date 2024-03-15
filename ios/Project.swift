@@ -15,7 +15,15 @@ let project = Project(
             ),
             sources: ["OrasulMeu/Sources/**"],
             resources: ["OrasulMeu/Resources/**"],
-            dependencies: [.external(name: "Nuke"), .external(name: "NukeUI")]
+            dependencies: [
+                .external(name: "Nuke"),
+                .external(name: "NukeUI"),
+                .external(name: "MapboxMaps"),
+                .external(name: "GoogleSignIn"),
+                .external(name: "FacebookLogin"),
+                .external(name: "NoughtyUI"),
+                .external(name: "NoughtyEnvironment")
+            ]
         ),
         .target(
             name: "OrasulMeuTests",
