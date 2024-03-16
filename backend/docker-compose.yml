@@ -22,7 +22,7 @@ services:
       /usr/app
     volumes:
       - .:/usr/app/
-      - /usr/app/node_modules
+      - node_modules:/usr/app/node_modules
     ports:
       - $PORT:$PORT
       - 9229:9229 # debug
@@ -30,4 +30,6 @@ services:
       - db
     env_file:
       - .env.docker
+volumes:
+  node_modules:
 

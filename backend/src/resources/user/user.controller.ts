@@ -10,7 +10,6 @@ import {
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserCreateDto } from './dto/user-create.dto';
 
 @Controller('users')
 @ApiTags('users')

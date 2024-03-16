@@ -16,12 +16,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserDto } from '../user/dto/user.dto';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
-import { AnonymousAppleAuthGuard } from './auth-providers/apple/apple-auth.guard';
-import { FacebookAuthGuard } from './auth-providers/facebook/facebook-auth.guard';
+import { UserDto } from '../user/dto/user.dto';
 import { GoogleAuthGuard } from './auth-providers/google/google-auth.guard';
+import { AppleAuthGuard } from './auth-providers/apple/apple-auth.guard';
 
 class token {
   @ApiProperty()
@@ -72,7 +71,7 @@ export class AuthController {
     return user;
   }
 
-  @UseGuards(AnonymousAppleAuthGuard)
+  @UseGuards(AppleAuthGuard)
   @Post('apple')
   @ApiBody({ type: appleToken })
   @ApiResponse({
@@ -125,7 +124,6 @@ export class AuthController {
     throw new UnauthorizedException('Google authorization failed.');
   }
 
-  @UseGuards(FacebookAuthGuard)
   @Post('facebook')
   @ApiBody({ type: token })
   @ApiResponse({

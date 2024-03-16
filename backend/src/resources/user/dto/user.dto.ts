@@ -36,10 +36,12 @@ export class UserDto {
   @AutoMap()
   @IsOptional()
   @IsString()
+  @ApiProperty({ required: false })
   facebook_token?: string;
 
   @AutoMap()
   @IsOptional()
   @IsString()
+  @ApiProperty({ required: false })
   socialProfilePictureUrl?: string;
 }

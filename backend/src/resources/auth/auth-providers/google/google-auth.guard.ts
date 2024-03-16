@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
-import { SocialMedia } from '../../../../shared/types';
-import { UserService } from '../../../user/user.service';
 import { ConfigService } from '@nestjs/config';
+import { UserService } from '../../../user/user.service';
+import { SocialMedia } from '../../../../shared/types';
 
 @Injectable()
 export class GoogleAuthGuard implements CanActivate {
