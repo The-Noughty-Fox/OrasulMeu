@@ -174,10 +174,26 @@ components:
     UserDto:
       type: object
       properties:
+        id:
+          type: number
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        apple_token:
+          type: string
+        google_token:
+          type: string
         facebook_token:
           type: string
         socialProfilePictureUrl:
           type: string
+      required:
+        - email
+        - firstName
+        - lastName
     appleToken:
       type: object
       properties:

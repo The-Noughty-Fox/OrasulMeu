@@ -19,8 +19,8 @@ import {
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { UserDto } from '../user/dto/user.dto';
-import { GoogleAuthGuard } from './auth-providers/google/google-auth.guard';
-import { AppleAuthGuard } from './auth-providers/apple/apple-auth.guard';
+import { GoogleAuthGuard } from './passport/guards/google.guard';
+import { AppleAuthGuard } from './passport/guards/apple.guard';
 
 class token {
   @ApiProperty()

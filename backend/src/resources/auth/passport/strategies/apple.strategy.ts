@@ -1,22 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import * as PassportAppleStrategy from '@nicokaiser/passport-apple';
-import * as fs from 'fs';
 import { UserService } from '../../../user/user.service';
 import { UserDto } from '../../../user/dto/user.dto';
 import { SocialMedia } from '../../../../shared/types';
+import { AppleConfig } from '../../../../app-config/apple/apple.config';
 
 @Injectable()
 export class AppleStrategy extends PassportStrategy(
   PassportAppleStrategy.Strategy,
   'apple',
 ) {
-  constructor(private readonly userService: UserService) {
+  constructor(
+    private readonly userService: UserService,
+    @Inject('APPLE_CONFIG') private appleConfig: AppleConfig,
+  ) {
     super({
-      clientID: process.env.APPLE_CLIENT_ID,
-      teamID: process.env.APPLE_TEAM_ID,
-      keyID: process.env.APPLE_KEY_ID,
-      key: fs.readFileSync('./apple_config/AuthKey.p8'),
+      ...appleConfig,
       passReqToCallback: true,
     });
   }

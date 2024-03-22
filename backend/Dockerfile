@@ -1,27 +1,47 @@
-FROM node:18.16.0-alpine3.17
+###################
+# BUILD FOR LOCAL DEVELOPMENT
+###################
 
-# Install ssh client, git, and bash
-RUN apk add --no-cache openssh-client git bash
-
-# Download public key for github.com
-RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+FROM node:18-alpine As development
+RUN npm install -g pnpm
 
 WORKDIR /usr/app
 
-COPY package.json pnpm-lock.yaml* /usr/app/
-RUN npm install -g pnpm
+COPY pnpm-lock.yaml ./
+
+RUN pnpm fetch --prod
+
+COPY . .
 RUN pnpm install
 
-# Installing ts-node-dev globally using pnpm
-RUN pnpm add -g ts-node-dev
+###################
+# BUILD FOR PRODUCTION DEVELOPMENT
+###################
 
-# Remove any existing .tsbuildinfo files
-RUN rm -f *.tsbuildinfo
+FROM node:18-alpine As build
+RUN npm install -g pnpm
 
-# Copy the rest of the application code
-COPY . /usr/app
+WORKDIR /usr/app
+COPY --chown=node:node pnpm-lock.yaml ./
 
-EXPOSE 8080
+COPY --chown=node:node --from=development /usr/app/node_modules ./node_modules
+COPY --chown=node:node . .
 
-# Use pnpm to run the start script
-CMD ["pnpm", "run", "start:prod"]
+RUN pnpm build
+
+ENV NODE_ENV production
+
+RUN pnpm install --prod
+
+USER node
+
+###################
+# PRODUCTION
+###################
+
+FROM node:18-alpine As production
+
+COPY --chown=node:node --from=build /usr/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/app/dist ./dist
+
+CMD [ "node", "dist/main.js" ]

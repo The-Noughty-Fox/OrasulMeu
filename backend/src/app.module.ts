@@ -7,6 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { AuthModule } from './resources/auth/auth.module';
+import * as path from 'path';
+import { CookieResolver, I18nModule } from 'nestjs-i18n';
+import { AppConfigModule } from './app-config/app-config.module';
 
 @Module({
   imports: [
@@ -19,15 +22,28 @@ import { AuthModule } from './resources/auth/auth.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '12345678',
-      database: 'orasul-meu',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || '5432'),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [User],
       synchronize: true,
       migrationsTableName: 'migrations',
     }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      fallbacks: {
+        en_US: 'en',
+        da_DK: 'da',
+      },
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [new CookieResolver()],
+    }),
+    AppConfigModule,
     EchoModule,
     UserModule,
     AuthModule,
