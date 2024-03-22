@@ -1,46 +1,50 @@
 package com.thenoughtfox.orasulmeu
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import com.noughtyfox.authentication.google.GoogleSignIn
+import com.thenoughtfox.orasulmeu.ui.login.presentation.LoginPage
+import com.thenoughtfox.orasulmeu.ui.login.presentation.LoginViewModel
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: LoginViewModel by viewModels()
+
+    private val googleSignIn by lazy {
+        GoogleSignIn(this, activityResultRegistry,
+            onSignIn = { account ->
+                //On success, get data from google account.
+                Timber.i("GOOD $account")
+            },
+            onFails = { exception ->
+                Timber.i("GOOD $exception")
+            })
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycle.addObserver(googleSignIn)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                Color.TRANSPARENT, Color.TRANSPARENT
+            )
+        )
+
         setContent {
             OrasulMeuTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
+                LoginPage(viewModel) {
+                    googleSignIn.signInWithGoogle(getString(R.string.default_web_client_id))
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    OrasulMeuTheme {
-        Greeting("Android")
     }
 }

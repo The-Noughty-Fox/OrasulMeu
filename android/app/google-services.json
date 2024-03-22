@@ -12,7 +12,20 @@
           "package_name": "com.thenoughtfox.orasulmeu"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "621373385747-gr9a924vdcrlo5edvgsuo4fda362m73t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thenoughtfox.orasulmeu",
+            "certificate_hash": "76b8c736dacccd41f9f0b7cf70527963fbcf92c2"
+          }
+        },
+        {
+          "client_id": "621373385747-g2pt4pb6ulbagnvt0r6p3o3efv9f84ur.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAjECiL_KWk1501-bke-4tOqUDmuB6Tiwc"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "621373385747-g2pt4pb6ulbagnvt0r6p3o3efv9f84ur.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "621373385747-t533b1o2bprcf0qqbia8eldv57uqa2ea.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tnf.OrasulMeu"
+              }
+            }
+          ]
         }
       }
     }

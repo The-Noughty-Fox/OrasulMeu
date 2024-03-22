@@ -75,6 +75,7 @@ android {
     }
 
     buildFeatures {
+        viewBinding true
         compose true
     }
 
@@ -88,11 +89,11 @@ android {
         }
     }
 
-    sourceSets {
-        main {
-            java.srcDirs = ['build/generated/api/src/main/java']
-        }
-    }
+//    sourceSets {
+//        main {
+//            java.srcDirs = ['build/generated/api/src/main/java']
+//        }
+//    }
 }
 
 dependencies {
@@ -156,6 +157,12 @@ dependencies {
 
     //Noughty lib
     implementation libs.noughty.authentication.lib.android
+
+    //ViewBinding
+    implementation libs.view.binding.property.delegate
+
+    //Fragment
+    implementation libs.androidx.fragment.ktx
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

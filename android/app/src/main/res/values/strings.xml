@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">OrasulMeu</string>
+    <string name="no_network">No network available, please check your WiFi or Data connection</string>
+    <string name="sign_in_title">Salut, chisinaunieni!</string>
+    <string name="sign_in_to_start">Sign in to start</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_with_facebook">Sign in with Facebook</string>
+    <string name="built_by_the_noughty_fox">Built by The Noughty Fox</string>
 </resources>
