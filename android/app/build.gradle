@@ -164,6 +164,9 @@ dependencies {
     //Fragment
     implementation libs.androidx.fragment.ktx
 
+    //Cicerone
+    implementation libs.cicerone
+
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.3.0"
+cicerone = "7.1"
 desugar_jdk_libs = "2.0.4"
 firebaseBom = "32.7.4"
 fragmentKtx = "1.6.2"
@@ -31,6 +32,7 @@ viewbindingpropertydelegate = "1.5.3"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+cicerone = { module = "com.github.terrakok:cicerone", version.ref = "cicerone" }
 joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
