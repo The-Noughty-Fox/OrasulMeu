@@ -10,7 +10,15 @@ import SwiftUI
 struct AuthView: View {
     var body: some View {
         VStack {
-            Button("Login with apple") {}
+            Button("Login with apple") {
+                Task {
+                    do {
+                        let user = try await AppEnvironment.current.authentication.authenticateWithApple()
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
             Button("Login with google") {}
             Button("Login with facebook") {}
         }

@@ -7,7 +7,7 @@ let project = Project(
             name: "OrasulMeu",
             destinations: .iOS,
             product: .app,
-            bundleId: "io.tuist.OrasulMeu",
+            bundleId: "com.thenoughtyfox.OrasulMeu",
             infoPlist: .extendingDefault(
                 with: [
                     "UILaunchStoryboardName": "LaunchScreen.storyboard",
