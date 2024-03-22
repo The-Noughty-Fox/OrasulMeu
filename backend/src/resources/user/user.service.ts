@@ -6,6 +6,7 @@ import { SocialMedia } from '../../shared/types';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { UserDto } from './dto/user.dto';
+import { UserCreateDto } from './dto/user-create.dto';
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
     private readonly mapper: Mapper,
   ) {}
 
-  async create(createUserDto: UserDto) {
+  async create(createUserDto: UserCreateDto) {
     const userEntity = this.userRepository.create(createUserDto);
 
     const user = await this.userRepository.save(userEntity);

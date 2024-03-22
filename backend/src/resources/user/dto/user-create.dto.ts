@@ -1,14 +1,8 @@
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class UserDto {
-  @AutoMap()
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, type: 'integer' })
-  id: number;
-
+export class UserCreateDto {
   @AutoMap()
   @IsNotEmpty()
   @IsString()
@@ -26,6 +20,21 @@ export class UserDto {
   @IsString()
   @ApiProperty({ required: true })
   lastName: string;
+
+  @AutoMap()
+  @IsString()
+  @ApiProperty({ required: false })
+  apple_token?: string;
+
+  @AutoMap()
+  @IsString()
+  @ApiProperty({ required: false })
+  google_token?: string;
+
+  @AutoMap()
+  @IsString()
+  @ApiProperty({ required: false })
+  facebook_token?: string;
 
   @AutoMap()
   @IsOptional()

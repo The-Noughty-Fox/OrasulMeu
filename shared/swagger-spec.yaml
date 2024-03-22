@@ -14,6 +14,152 @@ paths:
                 type: string
       tags:
         - echo
+  /users:
+    post:
+      operationId: create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDto"
+      responses:
+        "201":
+          description: ""
+      tags: &a1
+        - users
+    get:
+      operationId: findAll
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /users/{id}:
+    get:
+      operationId: findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+    patch:
+      operationId: update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+    delete:
+      operationId: remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /users/search:
+    get:
+      operationId: search
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /auth/test/{id}:
+    post:
+      operationId: login-test-user
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: &a2
+        - auth
+  /auth/apple:
+    post:
+      operationId: authenticateApple
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/appleToken"
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a2
+  /auth/google:
+    post:
+      operationId: authenticateGoogle
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/token"
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a2
+  /auth/facebook:
+    post:
+      operationId: authenticateWithFacebookPo
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/token"
+      responses:
+        "201":
+          description: The user has been successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a2
 info:
   title: Orasul Meu
   description: Orasul Meu Swagger API
@@ -24,4 +170,36 @@ tags:
     description: ""
 servers: []
 components:
-  schemas: {}
+  schemas:
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        socialProfilePictureUrl:
+          type: string
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+    appleToken:
+      type: object
+      properties:
+        authorizationCode:
+          type: string
+      required:
+        - authorizationCode
+    token:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
