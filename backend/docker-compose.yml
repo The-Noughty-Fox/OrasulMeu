@@ -16,18 +16,23 @@ services:
 
   server:
     image: node:18.16.0-alpine3.17
-    build: .
-    command: npm run start:docker
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    command: npm run start:dev
     working_dir:
       /usr/app
     volumes:
       - .:/usr/app/
-      - /usr/app/node_modules
+      - node_modules:/usr/app/node_modules
     ports:
       - $PORT:$PORT
       - 9229:9229 # debug
     depends_on:
       - db
     env_file:
-      - .env.docker
+      - .env
+volumes:
+  node_modules:
 

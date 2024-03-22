@@ -7,6 +7,7 @@
 
 import Foundation
 import NoughtyEnvironment
+import API
 
 struct AppEnvironment {
     let userStore: UserStore
@@ -17,7 +18,7 @@ struct AppEnvironment {
             environment: .init(
                 api: {
                     .init { credential in
-                        fatalError()
+                        
                     } authenticateWithGoogle: { credendial in
                         fatalError()
                     } authenticateWithFacebook: { credential in

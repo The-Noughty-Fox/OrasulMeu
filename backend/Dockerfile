@@ -1,19 +1,47 @@
-FROM node:18.16.0-alpine3.17
+###################
+# BUILD FOR LOCAL DEVELOPMENT
+###################
 
-# Install ssh client and git
-RUN apk add --no-cache openssh-client git
-
-# Download public key for github.com
-RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-RUN apk update && apk add bash
+FROM node:18-alpine As development
+RUN npm install -g pnpm
 
 WORKDIR /usr/app
-ARG CACHEBUSTER=unknown
-COPY package*.json ./
-RUN rm -f *.tsbuildinfo
-RUN npm install -g ts-node-dev
-RUN echo "$CACHEBUSTER" && npm install
-COPY . .
 
-EXPOSE 8080
-CMD ["npm", "run", "start:prod"]
+COPY pnpm-lock.yaml ./
+
+RUN pnpm fetch --prod
+
+COPY . .
+RUN pnpm install
+
+###################
+# BUILD FOR PRODUCTION DEVELOPMENT
+###################
+
+FROM node:18-alpine As build
+RUN npm install -g pnpm
+
+WORKDIR /usr/app
+COPY --chown=node:node pnpm-lock.yaml ./
+
+COPY --chown=node:node --from=development /usr/app/node_modules ./node_modules
+COPY --chown=node:node . .
+
+RUN pnpm build
+
+ENV NODE_ENV production
+
+RUN pnpm install --prod
+
+USER node
+
+###################
+# PRODUCTION
+###################
+
+FROM node:18-alpine As production
+
+COPY --chown=node:node --from=build /usr/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/app/dist ./dist
+
+CMD [ "node", "dist/main.js" ]
