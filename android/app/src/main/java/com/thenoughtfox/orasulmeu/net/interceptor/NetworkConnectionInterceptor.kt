@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.net
+package com.thenoughtfox.orasulmeu.net.interceptor
 
 import android.content.Context
 import android.net.ConnectivityManager

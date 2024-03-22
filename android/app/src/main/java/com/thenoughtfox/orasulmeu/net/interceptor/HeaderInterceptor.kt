@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.net
+package com.thenoughtfox.orasulmeu.net.interceptor
 
 import okhttp3.Interceptor
 import okhttp3.Request

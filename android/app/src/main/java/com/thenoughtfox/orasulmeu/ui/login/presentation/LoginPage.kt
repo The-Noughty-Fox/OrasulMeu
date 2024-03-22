@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -40,9 +39,10 @@ import com.thenoughtfox.orasulmeu.ui.theme.bodyModifier
 import com.thenoughtfox.orasulmeu.ui.theme.headlineModified
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 import com.thenoughtfox.orasulmeu.utils.view.EnclavesCircleProgress
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginPage(viewModel: LoginViewModel = viewModel(), googleSignIn: (() -> Unit)? = null) {
+fun LoginPage(viewModel: LoginViewModel = viewModel()) {
 
     val uiState by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -78,14 +78,24 @@ fun LoginPage(viewModel: LoginViewModel = viewModel(), googleSignIn: (() -> Unit
 
             SignInButton(
                 modifier = Modifier.padding(top = 41.dp),
+                isLoading = uiState.isLoadingGoogle,
                 type = SingInType.Google,
-                onClick = { googleSignIn?.invoke() }
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.event.send(Event.Auth(it))
+                    }
+                }
             )
 
             SignInButton(
                 modifier = Modifier.padding(top = 25.dp),
+                isLoading = uiState.isLoadingFacebook,
                 type = SingInType.Facebook,
-                onClick = {}
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.event.send(Event.Auth(it))
+                    }
+                }
             )
         }
 
@@ -130,11 +140,11 @@ private fun SignInButton(
         modifier = modifier
             .width(340.dp)
             .height(48.dp)
-            .clickable { onClick.invoke(type) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.clickable { onClick.invoke(type) }
         ) {
             if (!isLoading) {
                 Image(
@@ -156,16 +166,6 @@ private fun SignInButton(
             }
         }
     }
-}
-
-enum class SingInType(
-    @StringRes val text: Int,
-    @ColorRes val textColor: Int,
-    @ColorRes val backgroundColor: Int,
-    @ColorRes val imageColor: Int,
-) {
-    Google(R.string.sign_in_with_google, R.color.black, R.color.white, R.color.black),
-    Facebook(R.string.sign_in_with_facebook, R.color.white, R.color.facebook_color, R.color.white),
 }
 
 @Preview

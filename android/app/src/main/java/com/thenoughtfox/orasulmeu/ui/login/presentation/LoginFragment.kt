@@ -8,12 +8,41 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.noughtyfox.authentication.facebook.FacebookSignIn
+import com.noughtyfox.authentication.google.GoogleSignIn
+import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.ui.MainActivity
+import com.thenoughtfox.orasulmeu.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     private val viewModel: LoginViewModel by viewModels()
+
+    private val googleSignIn by lazy {
+        GoogleSignIn(requireContext(), requireActivity().activityResultRegistry,
+            onSignIn = { account ->
+                lifecycleScope.launch {
+                    viewModel.event.send(
+                        Event.SendToken(
+                            type = SingInType.Google, account.idToken ?: ""
+                        )
+                    )
+                }
+            },
+            onFails = { exception ->
+                lifecycleScope.launch {
+                    viewModel.event.send(
+                        Event.FailedAuth(
+                            type = SingInType.Google, msg = exception.message ?: ""
+                        )
+                    )
+                }
+            })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,6 +52,57 @@ class LoginFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             LoginPage(viewModel)
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        lifecycle.addObserver(googleSignIn)
+        subscribeObservables()
+    }
+
+    private fun subscribeObservables() {
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+            viewModel.action.collect { action ->
+                when (action) {
+                    is Action.ShowToast -> context?.showToast(action.msg)
+                    is Action.Auth -> {
+                        when (action.type) {
+                            SingInType.Google -> googleSignIn.signInWithGoogle(
+                                context?.getString(R.string.default_web_client_id)
+                            )
+
+                            SingInType.Facebook -> loginWithFacebook()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loginWithFacebook() {
+        (activity as? MainActivity)?.let { activity ->
+            FacebookSignIn.signInWithFacebook(activity,
+                permissions = listOf("public_profile"),
+                onSignIn = { account ->
+                    lifecycleScope.launch {
+                        viewModel.event.send(
+                            Event.SendToken(
+                                type = SingInType.Facebook, token = account.accessToken.token
+                            )
+                        )
+                    }
+                },
+                onFails = { exception ->
+                    lifecycleScope.launch {
+                        viewModel.event.send(
+                            Event.FailedAuth(
+                                type = SingInType.Facebook, msg = exception.message ?: ""
+                            )
+                        )
+                    }
+                }
+            )
         }
     }
 

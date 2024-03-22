@@ -1,4 +1,8 @@
 <resources>
+    <string name="facebook_app_id">769401101788099</string>
+    <string name="fb_login_protocol_scheme">fb769401101788099</string>
+    <string name="facebook_client_token">2e7961e9ca2d7dfb7692bb6f7f03f367</string>
+
     <string name="app_name">OrasulMeu</string>
     <string name="no_network">No network available, please check your WiFi or Data connection</string>
     <string name="sign_in_title">Salut, chisinaunieni!</string>
