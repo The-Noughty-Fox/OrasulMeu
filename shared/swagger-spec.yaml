@@ -505,49 +505,12 @@ components:
           type: string
         content:
           type: string
-    File:
-      type: object
-      properties:
-        fieldname:
-          type: string
-        originalname:
-          type: string
-        encoding:
-          type: string
-        mimetype:
-          type: string
-        size:
-          type: integer
-        stream:
-          type: string
-          format: binary
-        destination:
-          type: string
-        filename:
-          type: string
-        path:
-          type: string
-        buffer:
-          type: string
-          format: binary
-      required:
-        - fieldname
-        - originalname
-        - encoding
-        - mimetype
-        - size
-        - stream
-        - destination
-        - filename
-        - path
-        - buffer
     MediaDto:
       type: object
       properties:
         files:
-          type: array
-          items:
-            $ref: "#/components/schemas/File"
+          type: string
+          format: binary
       required:
         - files
     CreateCommentDto:
