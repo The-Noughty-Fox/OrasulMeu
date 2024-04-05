@@ -19,6 +19,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { MediaService } from '@/resources/media/media.service';
 import {
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -96,6 +97,7 @@ export class PostController {
   })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiResponse({ type: PostDto })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
       limits: { fileSize: 1024 * 1024 * 50 }, // 50MB
@@ -104,7 +106,6 @@ export class PostController {
   )
   addMedia(
     @Param('id') id: string,
-    @Body() body: any,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     return this.postService.addMedia(+id, files);
