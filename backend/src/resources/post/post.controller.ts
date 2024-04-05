@@ -106,7 +106,7 @@ export class PostController {
   )
   addMedia(
     @Param('id') id: string,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     return this.postService.addMedia(+id, files);
   }
