@@ -22,7 +22,7 @@ export class EchoController {
       throw new Error('Test error');
       return this.echoService.echo();
     } catch (error) {
-      this.logger.error('EchoController.echo', error.stack);
+      this.logger.error('EchoController.echo', (error as Error).stack);
       this.logger.error(error);
       throw error;
     }

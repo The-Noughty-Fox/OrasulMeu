@@ -29,11 +29,11 @@ export class PostProfile extends AutomapperProfile {
         ),
         forMember(
           (d) => d.likes,
-          mapFrom((s) => s.likes.length),
+          mapFrom((s) => s.likes?.length ?? 0),
         ),
         forMember(
           (d) => d.dislikes,
-          mapFrom((s) => s.dislikes.length),
+          mapFrom((s) => s.dislikes?.length ?? 0),
         ),
       );
     };

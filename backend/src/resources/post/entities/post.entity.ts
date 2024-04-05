@@ -30,10 +30,10 @@ export class Post {
   content: string;
 
   @OneToMany(() => PostLike, (postLike) => postLike.post)
-  likes: PostLike[];
+  likes?: PostLike[];
 
   @OneToMany(() => PostDislike, (postDislike) => postDislike.post)
-  dislikes: PostDislike[];
+  dislikes?: PostDislike[];
 
   @ManyToOne(() => User, (user) => user.posts)
   @AutoMap()

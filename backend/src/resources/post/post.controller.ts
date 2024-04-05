@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
 import { File } from '@/shared/types';
+import { MediaDto } from '@/resources/media/dto/media.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -91,9 +92,7 @@ export class PostController {
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiBody({
-    type: File,
-    isArray: true,
-    examples: { files: { value: 'file' } },
+    type: MediaDto,
   })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiResponse({ type: PostDto })
@@ -105,6 +104,7 @@ export class PostController {
   )
   addMedia(
     @Param('id') id: string,
+    @Body() body: any,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     return this.postService.addMedia(+id, files);
