@@ -108,58 +108,285 @@ paths:
         - auth
   /auth/apple:
     post:
-      operationId: authenticateApple
+      operationId: auth-with-apple
+      summary: ""
+      tags: *a2
       parameters: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/appleToken"
+              $ref: "#/components/schemas/AppleApiBody"
       responses:
-        "201":
-          description: The user has been successfully authenticated.
+        "200":
+          description: ""
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
-      tags: *a2
+        "401":
+          description: ""
   /auth/google:
     post:
-      operationId: authenticateGoogle
+      operationId: auth-with-google
+      summary: ""
+      tags: *a2
       parameters: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/token"
+              $ref: "#/components/schemas/ApiBodyWithToken"
       responses:
-        "201":
-          description: The user has been successfully authenticated.
+        "200":
+          description: ""
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
-      tags: *a2
+        "401":
+          description: ""
   /auth/facebook:
     post:
-      operationId: authenticateWithFacebookPo
+      operationId: auth-with-facebook
+      summary: ""
+      tags: *a2
       parameters: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/token"
+              $ref: "#/components/schemas/ApiBodyWithToken"
       responses:
-        "201":
-          description: The user has been successfully authenticated.
+        "200":
+          description: ""
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
-      tags: *a2
+        "401":
+          description: ""
+  /posts:
+    post:
+      operationId: create-post
+      summary: ""
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostDto"
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: &a3
+        - posts
+    get:
+      operationId: get-posts
+      summary: ""
+      parameters: []
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostDto"
+      tags: *a3
+  /posts/{id}:
+    get:
+      operationId: get-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: *a3
+    patch:
+      operationId: update-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePostDto"
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: *a3
+    delete:
+      operationId: delete-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+  /posts/{id}/like:
+    post:
+      operationId: like-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+  /posts/{id}/dislike:
+    post:
+      operationId: dislike-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+  /posts/{id}/media:
+    post:
+      operationId: upload-post-media
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/"
+            examples:
+              files:
+                value: file
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: *a3
+  /media:
+    post:
+      operationId: upload
+      parameters: []
+      responses:
+        "201":
+          description: ""
+  /media/files:
+    post:
+      operationId: uploadFiles
+      parameters: []
+      responses:
+        "201":
+          description: ""
+  /comment:
+    post:
+      operationId: create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentDto"
+      responses:
+        "201":
+          description: ""
+    get:
+      operationId: findAll
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  /comment/{id}:
+    get:
+      operationId: findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    patch:
+      operationId: update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCommentDto"
+      responses:
+        "200":
+          description: ""
+    delete:
+      operationId: remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
 info:
   title: Orasul Meu
   description: Orasul Meu Swagger API
@@ -189,17 +416,32 @@ components:
         - email
         - firstName
         - lastName
-    appleToken:
+    AppleApiBody:
       type: object
       properties:
         authorizationCode:
           type: string
       required:
         - authorizationCode
-    token:
+    ApiBodyWithToken:
       type: object
       properties:
         token:
           type: string
       required:
         - token
+    CreatePostDto:
+      type: object
+      properties: {}
+    PostDto:
+      type: object
+      properties: {}
+    UpdatePostDto:
+      type: object
+      properties: {}
+    CreateCommentDto:
+      type: object
+      properties: {}
+    UpdateCommentDto:
+      type: object
+      properties: {}

@@ -28,7 +28,6 @@ export class AppleStrategy extends PassportStrategy(
     profile: any,
   ): Promise<UserDto> {
     const { id, email } = profile;
-
     if (!id)
       return Promise.reject(
         "Apple jwt token does not contain the 'sub' field.",
@@ -42,8 +41,8 @@ export class AppleStrategy extends PassportStrategy(
       (await this.userService.findByEmail(email)) ||
       (await this.userService.create({
         email,
-        firstName: (req.body as any)?.userInfo?.Name.given,
-        lastName: (req.body as any)?.userInfo?.Name.family,
+        firstName: (req.body as any)?.userInfo?.Name.given ?? 'Anonymous',
+        lastName: (req.body as any)?.userInfo?.Name.family ?? 'Anonymous',
         apple_token: id,
       }));
 

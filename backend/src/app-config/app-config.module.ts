@@ -3,7 +3,20 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppleConfig } from './apple/apple.config';
 import { GoogleConfig } from './google/google.config';
 import * as fs from 'fs';
-import { GOOGLE_AUDIENCE, GOOGLE_CLIENT_ID } from './google/constants';
+import {
+  GOOGLE_AUDIENCE,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_SCOPE,
+} from './google/constants';
+import {
+  APPLE_CLIENT_ID,
+  APPLE_KEY_ID,
+  APPLE_SCOPE,
+  APPLE_TEAM_ID,
+} from './apple/constants';
+import { FacebookConfig } from '@/app-config/facebook/facebook.config';
+import { FACEBOOK_CLIENT_ID } from '@/app-config/facebook/constants';
+import * as path from 'path';
 
 @Global()
 @Module({
@@ -11,26 +24,43 @@ import { GOOGLE_AUDIENCE, GOOGLE_CLIENT_ID } from './google/constants';
   providers: [
     {
       provide: 'APPLE_CONFIG',
-      useFactory: (configService: ConfigService): AppleConfig => {
-        const clientID = configService.get<string>('APPLE_CLIENT_ID');
-        const teamID = configService.get<string>('APPLE_TEAM_ID');
-        const keyID = configService.get<string>('APPLE_KEY_ID');
-        const key = fs.readFileSync('./apple_config/AuthKey.p8');
-        const scope = configService.get<string[]>('APPLE_SCOPE');
+      useFactory: (): AppleConfig => {
+        const key = fs.readFileSync(
+          path.join(__dirname, 'files/AuthKey_9555S3QMPW.p8'),
+        );
 
-        return new AppleConfig(clientID, teamID, keyID, key, scope);
+        return new AppleConfig(
+          APPLE_CLIENT_ID,
+          APPLE_TEAM_ID,
+          APPLE_KEY_ID,
+          key,
+          APPLE_SCOPE,
+        );
       },
       inject: [ConfigService],
     },
     {
       provide: 'GOOGLE_CONFIG',
       useFactory: (configService: ConfigService): GoogleConfig => {
-        const clientID = GOOGLE_CLIENT_ID;
         const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
-        const audience = GOOGLE_AUDIENCE;
-        const scope = ['name', 'email'];
 
-        return new GoogleConfig(clientID, clientSecret, audience, scope);
+        return new GoogleConfig(
+          GOOGLE_CLIENT_ID,
+          clientSecret,
+          GOOGLE_AUDIENCE,
+          GOOGLE_SCOPE,
+        );
+      },
+      inject: [ConfigService],
+    },
+    {
+      provide: 'FACEBOOK_CONFIG',
+      useFactory: (configService: ConfigService): FacebookConfig => {
+        const clientSecret = configService.get<string>(
+          'FACEBOOK_CLIENT_SECRET',
+        );
+
+        return new FacebookConfig(FACEBOOK_CLIENT_ID, clientSecret);
       },
       inject: [ConfigService],
     },

@@ -9,11 +9,14 @@ import * as yaml from 'yaml';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as cookieParser from 'cookie-parser';
+import { AppLogger } from './infrastructure/logging/app-logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
   app.use(cookieParser());
-
+  app.useLogger(new AppLogger());
   const config = new DocumentBuilder()
     .setTitle('Orasul Meu')
     .setDescription('Orasul Meu Swagger API')

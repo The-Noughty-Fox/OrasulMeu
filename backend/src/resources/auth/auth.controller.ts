@@ -1,5 +1,6 @@
 import {
   Controller,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -8,29 +9,18 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiProperty,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { UserDto } from '../user/dto/user.dto';
-import { GoogleAuthGuard } from './passport/guards/google.guard';
-import { AppleAuthGuard } from './passport/guards/apple.guard';
-
-class token {
-  @ApiProperty()
-  token: string;
-}
-
-class appleToken {
-  @ApiProperty()
-  authorizationCode: string;
-}
+import {
+  AppleAuthGuard,
+  FacebookAuthGuard,
+  GoogleAuthGuard,
+} from './passport/guards';
+import { AuthWithFacebookSwagger } from './swagger/authWithFacebook.decorator';
+import { AuthWithGoogleSwagger } from './swagger/authWithGoogle.decorator';
+import { AuthWithAppleSwagger } from './swagger/authWithApple.decorator';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -49,14 +39,12 @@ export class AuthController {
     type: UserDto,
   })
   async loginTest(
-    @Req() req,
     @Res({ passthrough: true }) res,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserDto> {
-    // Potentially stupid small hack to let us debug easier
     const user = await this.userService.findOne(id);
     if (!user) {
-      throw new UnauthorizedException(`User with id ${id} does not exist`);
+      throw new NotFoundException(`User with id ${id} does not exist`);
     }
 
     const accessToken = await this.authService.signTokens({
@@ -73,14 +61,16 @@ export class AuthController {
 
   @UseGuards(AppleAuthGuard)
   @Post('apple')
-  @ApiBody({ type: appleToken })
-  @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully authenticated.',
-    type: UserDto,
-  })
-  async authenticateApple(@Req() req, @Res() res): Promise<UserDto> {
-    const user = req.user;
+  @AuthWithAppleSwagger()
+  async authenticateWithApple(
+    @Req() req,
+    @Res({ passthrough: true }) res,
+  ): Promise<UserDto> {
+    if (!req.user) {
+      throw new UnauthorizedException('Apple authentication failed');
+    }
+
+    const user = req.user as UserDto;
 
     const accessToken = await this.authService.signTokens({
       id: user.id,
@@ -92,23 +82,20 @@ export class AuthController {
     });
 
     return req.user;
-
-    return Promise.reject('Apple authentication failed');
   }
 
   @UseGuards(GoogleAuthGuard)
   @Post('google')
-  @ApiBody({ type: token })
-  @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully authenticated.',
-    type: UserDto,
-  })
-  async authenticateGoogle(
+  @AuthWithGoogleSwagger()
+  async authenticateWithGoogle(
     @Req() req,
     @Res({ passthrough: true }) res,
   ): Promise<UserDto> {
-    const user = req.user;
+    if (!req.user) {
+      throw new UnauthorizedException('Google authentication failed');
+    }
+
+    const user = req.user as UserDto;
 
     const accessToken = await this.authService.signTokens({
       id: user.id,
@@ -120,22 +107,20 @@ export class AuthController {
     });
 
     return req.user;
-
-    throw new UnauthorizedException('Google authorization failed.');
   }
 
+  @UseGuards(FacebookAuthGuard)
   @Post('facebook')
-  @ApiBody({ type: token })
-  @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully authenticated.',
-    type: UserDto,
-  })
-  async authenticateWithFacebookPo(
+  @AuthWithFacebookSwagger()
+  async authenticateWithFacebook(
     @Req() req,
     @Res({ passthrough: true }) res,
   ): Promise<UserDto> {
-    const user = req.user;
+    if (!req.user) {
+      throw new UnauthorizedException('Facebook authentication failed');
+    }
+
+    const user = req.user as UserDto;
 
     const accessToken = await this.authService.signTokens({
       id: user.id,
@@ -146,8 +131,6 @@ export class AuthController {
       sameSite: 'strict',
     });
 
-    return req.user;
-
-    return Promise.reject('Facebook authentication failed');
+    return user;
   }
 }
