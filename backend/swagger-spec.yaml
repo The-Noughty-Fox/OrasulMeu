@@ -509,8 +509,10 @@ components:
       type: object
       properties:
         files:
-          type: string
-          format: binary
+          type: array
+          items:
+            type: string
+            format: binary
       required:
         - files
     CreateCommentDto:
