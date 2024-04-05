@@ -328,9 +328,10 @@ paths:
       responses:
         "201":
           description: ""
-  /comment:
+  /comments:
     post:
-      operationId: create
+      operationId: create-comment
+      summary: ""
       parameters: []
       requestBody:
         required: true
@@ -341,15 +342,20 @@ paths:
       responses:
         "201":
           description: ""
+      tags: &a4
+        - comments
     get:
-      operationId: findAll
+      operationId: get-comments
+      summary: ""
       parameters: []
       responses:
         "200":
           description: ""
-  /comment/{id}:
+      tags: *a4
+  /comments/{id}:
     get:
-      operationId: findOne
+      operationId: get-comment
+      summary: ""
       parameters:
         - name: id
           required: true
@@ -359,8 +365,10 @@ paths:
       responses:
         "200":
           description: ""
+      tags: *a4
     patch:
-      operationId: update
+      operationId: update-comment
+      summary: ""
       parameters:
         - name: id
           required: true
@@ -376,8 +384,10 @@ paths:
       responses:
         "200":
           description: ""
+      tags: *a4
     delete:
-      operationId: remove
+      operationId: delete-comment
+      summary: ""
       parameters:
         - name: id
           required: true
@@ -387,6 +397,7 @@ paths:
       responses:
         "200":
           description: ""
+      tags: *a4
 info:
   title: Orasul Meu
   description: Orasul Meu Swagger API
