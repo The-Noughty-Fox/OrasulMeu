@@ -508,13 +508,13 @@ components:
     MediaDto:
       type: object
       properties:
-        files:
+        files1:
           type: array
           items:
             type: string
             format: binary
       required:
-        - files
+        - files1
     CreateCommentDto:
       type: object
       properties: {}
