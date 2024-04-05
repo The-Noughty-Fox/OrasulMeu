@@ -107,6 +107,7 @@ dependencies {
     implementation libs.androidx.ui.graphics
     implementation libs.androidx.ui.tooling.preview
     implementation libs.androidx.material3
+    implementation libs.androidx.constraintlayout
 
     //Coroutines
     implementation libs.coroutines.core
@@ -166,6 +167,15 @@ dependencies {
 
     //Cicerone
     implementation libs.cicerone
+
+    //Image
+    implementation libs.coil.compose
+
+    //Camera
+    api libs.cameraview
+
+    //WindowsInset
+    implementation libs.insetter
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

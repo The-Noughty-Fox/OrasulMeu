@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.thenoughtfox.orasulmeu.R
 
 @Composable
-fun EnclavesCircleProgress(
+fun CircleProgress(
     modifier: Modifier = Modifier,
     color: Color = colorResource(id = R.color.black)
 ) {

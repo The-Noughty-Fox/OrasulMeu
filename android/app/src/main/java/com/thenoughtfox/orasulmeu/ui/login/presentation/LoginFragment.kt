@@ -8,11 +8,14 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.noughtyfox.authentication.facebook.FacebookSignIn
 import com.noughtyfox.authentication.google.GoogleSignIn
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.MainActivity
+import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import com.thenoughtfox.orasulmeu.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -51,7 +54,9 @@ class LoginFragment : Fragment() {
     ): View = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            LoginPage(viewModel)
+            OrasulMeuTheme {
+                LoginPage(viewModel)
+            }
         }
     }
 
@@ -62,17 +67,19 @@ class LoginFragment : Fragment() {
     }
 
     private fun subscribeObservables() {
-        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-            viewModel.action.collect { action ->
-                when (action) {
-                    is Action.ShowToast -> context?.showToast(action.msg)
-                    is Action.Auth -> {
-                        when (action.type) {
-                            SingInType.Google -> googleSignIn.signInWithGoogle(
-                                context?.getString(R.string.default_web_client_id)
-                            )
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.action.collect { action ->
+                    when (action) {
+                        is Action.ShowToast -> context?.showToast(action.msg)
+                        is Action.Auth -> {
+                            when (action.type) {
+                                SingInType.Google -> googleSignIn.signInWithGoogle(
+                                    context?.getString(R.string.default_web_client_id)
+                                )
 
-                            SingInType.Facebook -> loginWithFacebook()
+                                SingInType.Facebook -> loginWithFacebook()
+                            }
                         }
                     }
                 }

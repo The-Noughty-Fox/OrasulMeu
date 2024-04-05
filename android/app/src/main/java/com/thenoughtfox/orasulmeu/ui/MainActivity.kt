@@ -13,6 +13,7 @@ import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.databinding.ActivityMainBinding
 import com.thenoughtfox.orasulmeu.navigation.Screens.loginScreen
+import com.thenoughtfox.orasulmeu.navigation.Screens.mediaPostScreen
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -62,7 +63,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun handlePrimaryNavigationScreen() {
         if (supportFragmentManager.fragments.isEmpty()) {
-            val screen = loginScreen()
+            val screen = if (userSharedPrefs.user != null) {
+                loginScreen()
+            } else {
+                mediaPostScreen()
+            }
+
             router.newRootScreen(screen)
         }
     }

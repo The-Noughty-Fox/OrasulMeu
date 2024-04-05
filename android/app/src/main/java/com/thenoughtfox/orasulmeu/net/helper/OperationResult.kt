@@ -2,6 +2,7 @@ package com.thenoughtfox.orasulmeu.net.helper
 
 import org.openapitools.client.infrastructure.getErrorResponse
 import retrofit2.Response
+import java.lang.Exception
 
 sealed class OperationResult<out T> {
 
@@ -24,12 +25,14 @@ fun <T, R> Response<T>.toOperationResult(
 ): OperationResult<R> {
     val body = body()
     val badMsg = "Oops something went wrong please try again"
+    val error = try {
+        getErrorResponse<ErrorResponse>()?.message ?: badMsg
+    } catch (_: Exception) {
+        badMsg
+    }
     return when {
         isSuccessful && body != null -> OperationResult.ResultSuccess(onSuccess(body))
-        errorBody() != null -> OperationResult.ResultError(
-            getErrorResponse<ErrorResponse>()?.message ?: badMsg
-        )
-
+        errorBody() != null -> OperationResult.ResultError(error)
         else -> OperationResult.ResultError(badMsg)
     }
 }

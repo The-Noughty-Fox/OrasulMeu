@@ -28,5 +28,5 @@ enum class SingInType(
     @ColorRes val imageColor: Int,
 ) {
     Google(R.string.sign_in_with_google, R.color.black, R.color.white, R.color.black),
-    Facebook(R.string.sign_in_with_facebook, R.color.white, R.color.facebook_color, R.color.white),
+    Facebook(R.string.sign_in_with_facebook, R.color.white, R.color.dark_blue, R.color.white),
 }

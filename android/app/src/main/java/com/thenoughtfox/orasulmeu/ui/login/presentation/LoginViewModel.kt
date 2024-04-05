@@ -3,6 +3,8 @@ package com.thenoughtfox.orasulmeu.ui.login.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
+import com.thenoughtfox.orasulmeu.net.model.User
+import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,14 +15,13 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.AuthApi
-import org.openapitools.client.apis.EchoApi
-import org.openapitools.client.models.Token
+import org.openapitools.client.models.ApiBodyWithToken
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authApi: AuthApi,
-    private val echoApi: EchoApi
+    private val userSharedPrefs: UserSharedPrefs
 ) : ViewModel() {
 
     val event = Channel<Event>(Channel.UNLIMITED)
@@ -51,10 +52,16 @@ class LoginViewModel @Inject constructor(
                     when (event.type) {
                         SingInType.Google -> {
                             _state.update { it.copy(isLoadingGoogle = false) }
-                            authApi.authenticateGoogle(Token(event.token))
+                            authApi.authWithGoogle(ApiBodyWithToken(event.token))
                                 .toOperationResult { it }
                                 .onSuccess {
-//                                    echoApi.getEcho()
+                                    userSharedPrefs.user =
+                                        User(
+                                            id = it.id,
+                                            email = it.email,
+                                            socialProfilePictureUrl = it.socialProfilePictureUrl,
+                                            lastName = it.lastName
+                                        )
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))
@@ -63,10 +70,16 @@ class LoginViewModel @Inject constructor(
 
                         SingInType.Facebook -> {
                             _state.update { it.copy(isLoadingFacebook = false) }
-                            authApi.authenticateWithFacebookPo(Token(event.token))
+                            authApi.authWithFacebook(ApiBodyWithToken(event.token))
                                 .toOperationResult { it }
                                 .onSuccess {
-//                                    echoApi.getEcho()
+                                    userSharedPrefs.user =
+                                        User(
+                                            id = it.id,
+                                            email = it.email,
+                                            socialProfilePictureUrl = it.socialProfilePictureUrl,
+                                            lastName = it.lastName
+                                        )
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))

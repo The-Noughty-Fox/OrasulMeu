@@ -1,12 +1,15 @@
 [versions]
 agp = "8.3.0"
+cameraview = "2.7.2"
 cicerone = "7.1"
+coilCompose = "2.6.0"
 desugar_jdk_libs = "2.0.4"
 firebaseBom = "32.7.4"
 fragmentKtx = "1.6.2"
 googleServices = "4.3.15"
 gson = "2.10.1"
 hilt = "2.50"
+insetter = "0.6.1"
 jodaTime = "2.12.5"
 kotlin = "1.9.20"
 coreKtx = "1.12.0"
@@ -28,11 +31,15 @@ okhttp3-logging-interceptor = "5.0.0-alpha.2"
 timber = "5.0.1"
 crashlytics = "2.9.9"
 viewbindingpropertydelegate = "1.5.3"
+constraintlayout = "2.1.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+cameraview = { module = "com.otaliastudios:cameraview", version.ref = "cameraview" }
 cicerone = { module = "com.github.terrakok:cicerone", version.ref = "cicerone" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+insetter = { module = "dev.chrisbanes.insetter:insetter", version.ref = "insetter" }
 joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -83,6 +90,7 @@ google-services-gradle = { module = "com.google.gms:google-services", version.re
 
 noughty-authentication-lib-android = { module = "com.github.The-Noughty-Fox:noughty-authentication-lib-android", version.ref = "noughtyAuthenticationLibAndroid" }
 view-binding-property-delegate = { module = "com.github.kirich1409:viewbindingpropertydelegate", version.ref = "viewbindingpropertydelegate" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

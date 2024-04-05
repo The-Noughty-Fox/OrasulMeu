@@ -51,7 +51,7 @@ process_ios() {
 # Function to process Android platform
 process_android() {
     echo "Processing for Android..."
-    openapi-generator generate -g kotlin -i "$input_file" -o "$output_file_android" --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string &
+    openapi-generator generate -g kotlin -i "$input_file" -o "$output_file_android" -t ../shared --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string &
 }
 
 # Function to process all platforms

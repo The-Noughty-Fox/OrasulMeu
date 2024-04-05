@@ -1,19 +1,14 @@
 package com.thenoughtfox.orasulmeu.ui.login.presentation
 
-import androidx.annotation.ColorRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,8 +32,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.theme.bodyModifier
 import com.thenoughtfox.orasulmeu.ui.theme.headlineModified
+import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
-import com.thenoughtfox.orasulmeu.utils.view.EnclavesCircleProgress
+import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,12 +43,7 @@ fun LoginPage(viewModel: LoginViewModel = viewModel()) {
     val uiState by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    Column(
-        modifier = Modifier
-            .background(color = colorResource(id = R.color.background_color))
-            .fillMaxSize()
-            .safeDrawingPadding(),
-    ) {
+    Column(modifier = Modifier.pageModifier()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,7 +150,7 @@ private fun SignInButton(
                     color = colorResource(id = type.textColor)
                 )
             } else {
-                EnclavesCircleProgress(
+                CircleProgress(
                     modifier = Modifier.size(30.dp),
                     color = colorResource(id = type.textColor)
                 )
