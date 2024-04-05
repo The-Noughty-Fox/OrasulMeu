@@ -212,7 +212,7 @@ paths:
           required: true
           in: path
           schema:
-            type: number
+            type: integer
       responses:
         default:
           description: ""
@@ -229,7 +229,7 @@ paths:
           required: true
           in: path
           schema:
-            type: number
+            type: integer
       requestBody:
         required: true
         content:
@@ -252,7 +252,7 @@ paths:
           required: true
           in: path
           schema:
-            type: number
+            type: integer
       responses:
         "200":
           description: ""
@@ -266,7 +266,7 @@ paths:
           required: true
           in: path
           schema:
-            type: number
+            type: integer
       responses:
         "200":
           description: ""
@@ -280,7 +280,7 @@ paths:
           required: true
           in: path
           schema:
-            type: number
+            type: integer
       responses:
         "200":
           description: ""
@@ -294,7 +294,7 @@ paths:
           required: true
           in: path
           schema:
-            type: number
+            type: integer
       requestBody:
         required: true
         content:

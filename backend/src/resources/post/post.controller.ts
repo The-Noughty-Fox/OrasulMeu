@@ -49,7 +49,7 @@ export class PostController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'get-post' })
   @ApiResponse({ type: PostDto })
   findOne(@Param('id') id: string) {
@@ -57,7 +57,7 @@ export class PostController {
   }
 
   @Patch(':id')
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'update-post' })
   @ApiResponse({ type: PostDto })
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
@@ -65,7 +65,7 @@ export class PostController {
   }
 
   @Delete(':id')
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'delete-post' })
   @ApiResponse({ status: 200 })
   remove(@Param('id') id: string) {
@@ -73,7 +73,7 @@ export class PostController {
   }
 
   @Post(':id/like')
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'like-post' })
   @ApiResponse({ status: 200 })
   like(@Param('id') id: string, @Req() req) {
@@ -81,7 +81,7 @@ export class PostController {
   }
 
   @Post(':id/dislike')
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'dislike-post' })
   @ApiResponse({ status: 200 })
   dislike(@Param('id') id: string, @Req() req) {
@@ -89,7 +89,7 @@ export class PostController {
   }
 
   @Post(':id/media')
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiBody({
     type: File,
     isArray: true,
