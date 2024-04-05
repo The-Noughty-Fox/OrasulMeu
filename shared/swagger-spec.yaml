@@ -302,7 +302,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/"
+                $ref: "#/components/schemas/File"
             examples:
               files:
                 value: file
@@ -437,6 +437,9 @@ components:
       type: object
       properties: {}
     UpdatePostDto:
+      type: object
+      properties: {}
+    File:
       type: object
       properties: {}
     CreateCommentDto:

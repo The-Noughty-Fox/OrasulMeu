@@ -25,6 +25,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
+import { File } from '@/shared/types';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -90,7 +91,7 @@ export class PostController {
   @Post(':id/media')
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({
-    type: 'Array of files',
+    type: File,
     isArray: true,
     examples: { files: { value: 'file' } },
   })
