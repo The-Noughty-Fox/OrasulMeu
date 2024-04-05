@@ -137,14 +137,17 @@ fun CreatePostPage(viewModel: CreatePostViewModel = viewModel()) {
 
             Spacer(modifier = Modifier.weight(1f))
 
+            val isTitleEmpty = uiState.title.isEmpty()
             RoundButton(modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = stringResource(id = R.string.create_post_button_submit),
-                backgroundColor = colorResource(id = R.color.dark_blue),
-                textColor = colorResource(id = R.color.white),
+                backgroundColor = colorResource(id = if (isTitleEmpty) R.color.white else R.color.dark_blue),
+                textColor = colorResource(id = if (isTitleEmpty) R.color.black else R.color.white),
                 isLoading = uiState.isLoading,
                 onClick = {
-                    coroutineScope.launch {
-                        viewModel.event.send(Event.Submit)
+                    if (isTitleEmpty) {
+                        coroutineScope.launch {
+                            viewModel.event.send(Event.Submit)
+                        }
                     }
                 })
         }
