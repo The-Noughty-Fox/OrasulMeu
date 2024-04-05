@@ -507,7 +507,40 @@ components:
           type: string
     File:
       type: object
-      properties: {}
+      properties:
+        fieldname:
+          type: string
+        originalname:
+          type: string
+        encoding:
+          type: string
+        mimetype:
+          type: string
+        size:
+          type: integer
+        stream:
+          type: string
+          format: binary
+        destination:
+          type: string
+        filename:
+          type: string
+        path:
+          type: string
+        buffer:
+          type: string
+          format: binary
+      required:
+        - fieldname
+        - originalname
+        - encoding
+        - mimetype
+        - size
+        - stream
+        - destination
+        - filename
+        - path
+        - buffer
     MediaDto:
       type: object
       properties:

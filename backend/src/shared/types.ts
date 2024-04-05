@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum SocialMedia {
   Google = 'google',
@@ -7,31 +8,33 @@ export enum SocialMedia {
 }
 
 export class File {
-  /** Name of the form field associated with this file. */
+  @ApiProperty()
   fieldname: string;
-  /** Name of the file on the uploader's computer. */
+
+  @ApiProperty()
   originalname: string;
-  /**
-   * Value of the `Content-Transfer-Encoding` header for this file.
-   * @deprecated since July 2015
-   * @see RFC 7578, Section 4.7
-   */
+
+  @ApiProperty()
   encoding: string;
-  /** Value of the `Content-Type` header for this file. */
+
+  @ApiProperty()
   mimetype: string;
-  /** Size of the file in bytes. */
+
+  @ApiProperty({ type: 'integer' })
   size: number;
-  /**
-   * A readable stream of this file. Only available to the `_handleFile`
-   * callback for custom `StorageEngine`s.
-   */
+
+  @ApiProperty({ type: 'string', format: 'binary' })
   stream: Readable;
-  /** `DiskStorage` only: Directory to which this file has been uploaded. */
+
+  @ApiProperty()
   destination: string;
-  /** `DiskStorage` only: Name of this file within `destination`. */
+
+  @ApiProperty()
   filename: string;
-  /** `DiskStorage` only: Full path to the uploaded file. */
+
+  @ApiProperty()
   path: string;
-  /** `MemoryStorage` only: A Buffer containing the entire file. */
+
+  @ApiProperty({ type: 'string', format: 'binary' })
   buffer: Buffer;
 }
