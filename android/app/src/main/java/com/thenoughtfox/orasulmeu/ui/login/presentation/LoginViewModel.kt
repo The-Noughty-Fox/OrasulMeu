@@ -2,6 +2,8 @@ package com.thenoughtfox.orasulmeu.ui.login.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
+import com.thenoughtfox.orasulmeu.navigation.Screens
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.net.model.User
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
@@ -21,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authApi: AuthApi,
-    private val userSharedPrefs: UserSharedPrefs
+    private val userSharedPrefs: UserSharedPrefs,
+    private val router: Router
 ) : ViewModel() {
 
     val event = Channel<Event>(Channel.UNLIMITED)
@@ -62,6 +65,8 @@ class LoginViewModel @Inject constructor(
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
                                             lastName = it.lastName
                                         )
+
+                                    router.newRootScreen(Screens.mediaPostScreen())
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))

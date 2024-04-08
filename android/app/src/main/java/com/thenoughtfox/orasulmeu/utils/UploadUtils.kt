@@ -18,6 +18,13 @@ object UploadUtils {
 
         return MultipartBody.Part.createFormData(formData, file.name, reqBody)
     }
+
+    fun toMultiPart(path: String, formData: String, mimeType: String): MultipartBody.Part {
+        val file = File(path)
+        val reqBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
+
+        return MultipartBody.Part.createFormData(formData, file.name, reqBody)
+    }
 }
 
 enum class MimeType(val mimeTypes: List<String>) {

@@ -16,6 +16,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.AuthApi
 import org.openapitools.client.apis.EchoApi
+import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.infrastructure.ApiClient
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
@@ -31,8 +32,7 @@ object NetModule {
     @Singleton
     fun provideOkHttpClientBuilder(
         @ApplicationContext context: Context,
-        userSharedPrefs: UserSharedPrefs,
-//        loginUseCase: LoginUseCase
+        userSharedPrefs: UserSharedPrefs
     ): OkHttpClient.Builder {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -40,7 +40,6 @@ object NetModule {
             .addInterceptor(loggingInterceptor)
             .addInterceptor(HeaderInterceptor())
             .addInterceptor(NetworkConnectionInterceptor(context))
-//            .addInterceptor(LoginInterceptor(loginUseCase))
             .readTimeout(TIME_OUT, TimeUnit.SECONDS)
             .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
             .cookieJar(SessionCookie(userSharedPrefs))
@@ -53,7 +52,7 @@ object NetModule {
         okHttpBuilder: OkHttpClient.Builder,
         @ApplicationContext context: Context
     ): ApiClient {
-        val baseUrl = "https://c16e-178-168-82-61.ngrok-free.app/"
+        val baseUrl = "https://a3aa-178-168-82-61.ngrok-free.app/"
         return ApiClient(okHttpClientBuilder = okHttpBuilder, baseUrl = baseUrl)
     }
 
@@ -67,6 +66,11 @@ object NetModule {
     fun provideAuthApi(apiClient: ApiClient): AuthApi =
         apiClient.createService(AuthApi::class.java)
 
+    @Provides
+    @Singleton
+    fun providePostsApi(apiClient: ApiClient): PostsApi =
+        apiClient.createService(PostsApi::class.java)
+
     private class SessionCookie(private val userSharedPrefs: UserSharedPrefs) : CookieJar {
         private val cookies = mutableListOf<Cookie>()
 
@@ -76,14 +80,14 @@ object NetModule {
                 addAll(cookies)
 
                 if (!isNullOrEmpty()) {
-                    userSharedPrefs.setCookie(cookies)
+                    userSharedPrefs.cookies = cookies
                 }
             }
         }
 
         override fun loadForRequest(url: HttpUrl): List<Cookie> =
             if (cookies.isEmpty()) {
-                userSharedPrefs.getCookie() ?: listOf()
+                userSharedPrefs.cookies ?: listOf()
             } else {
                 cookies
             }

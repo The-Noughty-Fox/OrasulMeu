@@ -144,7 +144,7 @@ fun CreatePostPage(viewModel: CreatePostViewModel = viewModel()) {
                 textColor = colorResource(id = if (isTitleEmpty) R.color.black else R.color.white),
                 isLoading = uiState.isLoading,
                 onClick = {
-                    if (isTitleEmpty) {
+                    if (!isTitleEmpty) {
                         coroutineScope.launch {
                             viewModel.event.send(Event.Submit)
                         }

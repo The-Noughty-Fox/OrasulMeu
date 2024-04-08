@@ -1,5 +1,6 @@
 package com.thenoughtfox.orasulmeu.ui.create_post
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
@@ -9,6 +10,7 @@ import com.thenoughtfox.orasulmeu.navigation.Screens.mediaPostScreen
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.utils.MimeType
 import com.thenoughtfox.orasulmeu.utils.UploadUtils.toMultiPart
+import com.thenoughtfox.orasulmeu.utils.getRealPathFromURI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -26,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val router: Router,
-    private val postsApi: PostsApi
+    private val postsApi: PostsApi,
+    private val application: Application
 ) : ViewModel() {
 
     val event = Channel<Event>(Channel.UNLIMITED)
@@ -78,7 +81,13 @@ class CreatePostViewModel @Inject constructor(
 
     private suspend fun sendPostMedia(id: Int) {
         val parts = state.value.images.map { uri ->
-            toMultiPart(uri, "files", MimeType.IMAGE.mimeTypes.first())
+            val path =
+                getRealPathFromURI(contentUri = uri, context = application.applicationContext)
+            if (path != null) {
+                toMultiPart(path, "files", MimeType.IMAGE.mimeTypes.first())
+            } else {
+                toMultiPart(uri, "files", MimeType.IMAGE.mimeTypes.first())
+            }
         }
 
         postsApi.uploadPostMedia(id = id, parts)
