@@ -1,6 +1,5 @@
 [versions]
 agp = "8.3.0"
-cameraview = "2.7.2"
 cicerone = "7.1"
 coilCompose = "2.6.0"
 desugar_jdk_libs = "2.0.4"
@@ -32,11 +31,11 @@ timber = "5.0.1"
 crashlytics = "2.9.9"
 viewbindingpropertydelegate = "1.5.3"
 constraintlayout = "2.1.4"
+cameraX = "1.3.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
-cameraview = { module = "com.otaliastudios:cameraview", version.ref = "cameraview" }
 cicerone = { module = "com.github.terrakok:cicerone", version.ref = "cicerone" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 insetter = { module = "dev.chrisbanes.insetter:insetter", version.ref = "insetter" }
@@ -91,6 +90,11 @@ google-services-gradle = { module = "com.google.gms:google-services", version.re
 noughty-authentication-lib-android = { module = "com.github.The-Noughty-Fox:noughty-authentication-lib-android", version.ref = "noughtyAuthenticationLibAndroid" }
 view-binding-property-delegate = { module = "com.github.kirich1409:viewbindingpropertydelegate", version.ref = "viewbindingpropertydelegate" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+camerax-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
+camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
