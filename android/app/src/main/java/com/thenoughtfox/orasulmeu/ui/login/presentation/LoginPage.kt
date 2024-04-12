@@ -15,9 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -28,20 +25,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.theme.bodyModifier
 import com.thenoughtfox.orasulmeu.ui.theme.headlineModified
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
-import kotlinx.coroutines.launch
 
 @Composable
-fun LoginPage(viewModel: LoginViewModel = viewModel()) {
-
-    val uiState by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
+fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
 
     Column(modifier = Modifier.pageModifier()) {
         Column(
@@ -72,9 +64,7 @@ fun LoginPage(viewModel: LoginViewModel = viewModel()) {
                 isLoading = uiState.isLoadingGoogle,
                 type = SingInType.Google,
                 onClick = {
-                    coroutineScope.launch {
-                        viewModel.event.send(Event.Auth(it))
-                    }
+                    onSendEvent(Event.Auth(it))
                 }
             )
 
@@ -83,9 +73,7 @@ fun LoginPage(viewModel: LoginViewModel = viewModel()) {
                 isLoading = uiState.isLoadingFacebook,
                 type = SingInType.Facebook,
                 onClick = {
-                    coroutineScope.launch {
-                        viewModel.event.send(Event.Auth(it))
-                    }
+                    onSendEvent(Event.Auth(it))
                 }
             )
         }
@@ -162,5 +150,5 @@ private fun SignInButton(
 @Preview
 @Composable
 private fun LoginPagePreview() {
-    LoginPage()
+    LoginPage(State()) {}
 }

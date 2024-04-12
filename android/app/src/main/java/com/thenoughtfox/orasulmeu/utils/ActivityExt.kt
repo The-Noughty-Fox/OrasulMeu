@@ -10,19 +10,10 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
 import android.view.Window
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.create_post.Event
-import kotlinx.coroutines.launch
-
 
 fun Activity.setTransparentStatusBar(isLightTheme: Boolean = true) = window?.apply {
     WindowCompat.setDecorFitsSystemWindows(this, false)
@@ -67,7 +58,6 @@ fun Vibrator.vibrate() {
         vibrate(100)
     }
 }
-
 
 fun Context.getVibrator(): Vibrator {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

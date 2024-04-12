@@ -1,10 +1,8 @@
 package com.thenoughtfox.orasulmeu.ui.create_post.camera
 
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.VibrationEffect
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,8 +17,8 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.otaliastudios.cameraview.CameraListener
 import com.otaliastudios.cameraview.PictureResult
 import com.thenoughtfox.orasulmeu.databinding.FragmentCameraBinding
+import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
-import com.thenoughtfox.orasulmeu.ui.create_post.Event
 import com.thenoughtfox.orasulmeu.utils.applyBottomInsetMargin
 import com.thenoughtfox.orasulmeu.utils.getVibrator
 import com.thenoughtfox.orasulmeu.utils.vibrate

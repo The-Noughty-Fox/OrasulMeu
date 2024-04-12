@@ -3,6 +3,8 @@
     <string name="fb_login_protocol_scheme">fb769401101788099</string>
     <string name="facebook_client_token">2e7961e9ca2d7dfb7692bb6f7f03f367</string>
 
+    <string name="mapbox_access_token">pk.eyJ1IjoiczJkZW50aWsiLCJhIjoiY2x1d2R3YzZ2MGJuZTJqbndzaHhlMDdhbSJ9.JQkRaYHgjGVi3oiy7CrbfQ</string>
+
     <string name="app_name">OrasulMeu</string>
     <string name="no_network">No network available, please check your WiFi or Data connection</string>
     <string name="sign_in_title">Salut, chisinaunieni!</string>
@@ -20,5 +22,14 @@
     <string name="create_post_field_title">Titlu</string>
     <string name="create_post_field_desc">Descriere</string>
     <string name="create_post_field_media">Media</string>
+    <string name="create_post_field_address">Adresa</string>
     <string name="create_post_button_submit">Submite</string>
+    <string name="search_address">Cauta adresa</string>
+    <string name="map_button_next">Mai departe</string>
+
+    <string name="settings_dialog_message">Give permission manually inside the app\'s settings</string>
+    <string name="settings_dialog_positive_button_text">Go to settings</string>
+    <string name="deny">Deny</string>
+    <string name="grant">Grant</string>
+
 </resources>

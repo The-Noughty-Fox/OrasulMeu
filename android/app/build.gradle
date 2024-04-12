@@ -115,6 +115,8 @@ dependencies {
 
     //Hilt
     implementation libs.hilt.android
+    implementation libs.androidx.recyclerview
+    implementation libs.play.services.maps
     kapt libs.hilt.compiler
 
     //Lifecycle
@@ -176,6 +178,12 @@ dependencies {
 
     //WindowsInset
     implementation libs.insetter
+
+    //Mapbox
+    implementation libs.mapbox
+    implementation libs.mapbox.search
+
+    implementation libs.play.services.location
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
