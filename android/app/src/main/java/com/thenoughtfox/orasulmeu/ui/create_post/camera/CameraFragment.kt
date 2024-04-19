@@ -1,18 +1,23 @@
 package com.thenoughtfox.orasulmeu.ui.create_post.camera
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.databinding.FragmentCameraBinding
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.create_post.Event
@@ -50,10 +55,9 @@ class CameraFragment : Fragment() {
     private val cameraPermissionRequester : PermissionsRequester by lazy {
         constructPermissionsRequest(
             permissions = arrayOf(Manifest.permission.CAMERA),
-            requiresPermission = {
-                startCamera()
-            }
-            // todo play around denied cases
+            requiresPermission = { startCamera() },
+            onNeverAskAgain = { askUserToOpenSettings() },
+            onPermissionDenied = { askUserToOpenSettings() }
         )
     }
 
@@ -64,6 +68,7 @@ class CameraFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bindView()
+        cameraPermissionRequester.launch()
     }
 
     private fun bindView() = binding.apply {
@@ -88,16 +93,28 @@ class CameraFragment : Fragment() {
         }
     }
 
-    // maybe it should be moved to another lifecycle method
-    override fun onResume() {
-        super.onResume()
-        cameraPermissionRequester.launch()
-    }
-
     private fun startCamera() {
         cameraInitializer.initCamera(
             previewView = binding.cameraPreview,
             lifecycleOwner = viewLifecycleOwner
         )
+    }
+
+    private fun askUserToOpenSettings() {
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle(R.string.camera_permission_denied_alert_title)
+            setMessage(R.string.camera_permission_denied_aler_message)
+            setPositiveButton(R.string.camera_permission_denied_go_to_settings_button_text) { _, _ -> startAppSettings() }
+            setNegativeButton(R.string.camera_permission_denied_alert_cancel_button) { dialog, _ -> dialog.dismiss() }
+            create()
+            show()
+        }
+    }
+
+    private fun startAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri: Uri = Uri.fromParts("package", requireContext().packageName, null)
+        intent.data = uri
+        requireContext().startActivity(intent)
     }
 }
