@@ -26,7 +26,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
-import { File } from '@/shared/types';
 import { MediaDto } from '@/resources/media/dto/media.dto';
 
 @UseGuards(JwtAuthGuard)

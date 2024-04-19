@@ -32,4 +32,7 @@ export class PostDto {
 
   @ApiProperty({ type: Media, isArray: true })
   media?: Media[];
+
+  @AutoMap()
+  createDate: Date;
 }
