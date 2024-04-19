@@ -26,4 +26,9 @@
     <string name="camera_permission_denied_aler_message">Mergi la setările Android, apasă pe permisiuni și permite accesul.</string>
     <string name="camera_permission_denied_go_to_settings_button_text">Mergi la setări</string>
     <string name="camera_permission_denied_alert_cancel_button">Înlătură</string>
+    <string name="three_dots_icon_desc">Three dots icon</string>
+    <string name="report_post_button_text">Report post</string>
+    <string name="report_post_icon_desc">Report this post</string>
+    <string name="show_comments_icon_desc">Show comments</string>
+    <string name="open_comments_text">Deschide comentariile</string>
 </resources>
