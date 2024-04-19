@@ -32,4 +32,8 @@
     <string name="deny">Deny</string>
     <string name="grant">Grant</string>
 
+    <string name="camera_permission_denied_alert_title">Este necesar acces la camera.</string>
+    <string name="camera_permission_denied_aler_message">Mergi la setările Android, apasă pe permisiuni și permite accesul.</string>
+    <string name="camera_permission_denied_go_to_settings_button_text">Mergi la setări</string>
+    <string name="camera_permission_denied_alert_cancel_button">Înlătură</string>
 </resources>
