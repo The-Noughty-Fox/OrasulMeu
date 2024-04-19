@@ -69,6 +69,7 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
             }
         )
 
+        //Title
         Text(
             text = stringResource(id = R.string.create_post_field_title),
             style = bodyBoldModifier(),
@@ -91,6 +92,7 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
                 .defaultMinSize(minHeight = 46.dp)
         )
 
+        //Description
         Text(
             text = stringResource(id = R.string.create_post_field_desc),
             style = bodyBoldModifier(),
@@ -113,6 +115,8 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
                 .defaultMinSize(minHeight = 186.dp)
         )
 
+
+        //Address
         Text(
             text = stringResource(id = R.string.create_post_field_address),
             style = bodyBoldModifier(),
