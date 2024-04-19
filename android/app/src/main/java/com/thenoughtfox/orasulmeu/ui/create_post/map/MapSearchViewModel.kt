@@ -83,7 +83,7 @@ class MapSearchViewModel @Inject constructor(private val router: Router) : ViewM
                 is Event.OnSearchSuggestionClicked ->
                     searchEngine.select(event.suggestion, selectCallback)
 
-                Event.TappedNext -> router.navigateTo(Screens.createPostScreen())
+                Event.TappedNext -> router.navigateTo(Screens.createPostScreen)
             }
         }
     }

@@ -59,11 +59,10 @@ class LoginFragment : Fragment() {
         setContent {
             OrasulMeuTheme {
                 val uiState by viewModel.state.collectAsState()
-                LoginPage(uiState) { event ->
-                    lifecycleScope.launch {
-                        viewModel.event.send(event)
-                    }
-                }
+                LoginPage(
+                    uiState = uiState,
+                    onSendEvent = { lifecycleScope.launch { viewModel.event.send(it) } }
+                )
             }
         }
     }

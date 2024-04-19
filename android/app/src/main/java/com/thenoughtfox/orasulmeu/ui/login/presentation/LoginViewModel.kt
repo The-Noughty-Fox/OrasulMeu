@@ -66,7 +66,7 @@ class LoginViewModel @Inject constructor(
                                             lastName = it.lastName
                                         )
 
-                                    router.newRootScreen(Screens.mediaPostScreen())
+                                    router.newRootScreen(Screens.mediaPostScreen)
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))

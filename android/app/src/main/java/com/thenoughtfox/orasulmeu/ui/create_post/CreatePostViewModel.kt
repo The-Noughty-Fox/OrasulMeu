@@ -5,9 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.thenoughtfox.orasulmeu.navigation.Screens
-import com.thenoughtfox.orasulmeu.navigation.Screens.cameraScreen
-import com.thenoughtfox.orasulmeu.navigation.Screens.createPostScreen
-import com.thenoughtfox.orasulmeu.navigation.Screens.mediaPostScreen
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Action
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
@@ -51,9 +48,9 @@ class CreatePostViewModel @Inject constructor(
     private fun handleEvents() = viewModelScope.launch {
         event.consumeAsFlow().collect { event ->
             when (event) {
-                Event.GoToPostPage -> router.navigateTo(createPostScreen())
-                Event.BackToMediaPage -> router.backTo(mediaPostScreen())
-                Event.OnClickCamera -> router.navigateTo(cameraScreen())
+                Event.GoToPostPage -> router.navigateTo(Screens.createPostScreen)
+                Event.BackToMediaPage -> router.backTo(Screens.mediaPostScreen)
+                Event.OnClickCamera -> router.navigateTo(Screens.cameraScreen)
                 Event.OnClickMedia -> _action.emit(Action.OpenPhotoPicker)
                 is Event.SetTitle -> _state.update { it.copy(title = event.title) }
                 is Event.SetDescription -> _state.update { it.copy(description = event.desc) }
@@ -67,7 +64,7 @@ class CreatePostViewModel @Inject constructor(
 
                 is Event.SelectImage -> _state.update { it.copy(image = event.image) }
                 is Event.SetAddress -> _state.update { it.copy(address = event.address) }
-                Event.GoToMapSearch -> router.navigateTo(Screens.mapSearchScreen())
+                Event.GoToMapSearch -> router.navigateTo(Screens.mapSearchScreen)
             }
         }
     }

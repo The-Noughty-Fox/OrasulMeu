@@ -30,11 +30,9 @@ class CreatePostFragment : Fragment() {
         setContent {
             OrasulMeuTheme {
                 val uiState by viewModel.state.collectAsState()
-                CreatePostPage(uiState) { event ->
-                    lifecycleScope.launch {
-                        viewModel.event.send(event)
-                    }
-                }
+                CreatePostPage(
+                    uiState = uiState,
+                    onSendEvent = { lifecycleScope.launch { viewModel.event.send(it) } })
             }
         }
     }

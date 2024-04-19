@@ -47,11 +47,10 @@ class CreatePostMediaFragment : Fragment() {
         setContent {
             OrasulMeuTheme {
                 val uiState by viewModel.state.collectAsState()
-                CreatePostMediaPage(uiState) { event ->
-                    lifecycleScope.launch {
-                        viewModel.event.send(event)
-                    }
-                }
+                CreatePostMediaPage(
+                    uiState = uiState,
+                    onSendEvent = { lifecycleScope.launch { viewModel.event.send(it) } }
+                )
             }
         }
     }

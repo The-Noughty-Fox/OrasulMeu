@@ -28,6 +28,7 @@ class MapboxMapView @JvmOverloads constructor(
 
     companion object {
         private const val ZOOM_LEVEL = 15.0
+        private const val MOVE_CAMERA_DURATION = 3_000L
     }
 
     fun onLoadMap(onLoadMap: () -> Unit) {
@@ -94,7 +95,7 @@ class MapboxMapView @JvmOverloads constructor(
         if (isSmoothing) {
             mapboxMap.flyTo(cameraOptions,
                 mapAnimationOptions {
-                    duration(3_000)
+                    duration(MOVE_CAMERA_DURATION)
                 })
         } else {
             mapboxMap.setCamera(cameraOptions)

@@ -12,12 +12,11 @@ import com.thenoughtfox.orasulmeu.ui.login.presentation.LoginFragment
 
 object Screens {
 
-    fun loginScreen() = FragmentScreen { LoginFragment() }
-    fun mediaPostScreen() = FragmentScreen { CreatePostMediaFragment() }
-    fun createPostScreen() = FragmentScreen { CreatePostFragment() }
-    fun cameraScreen() = FragmentScreen { CameraFragment() }
-    fun mapSearchScreen() = FragmentScreen { MapSearchFragment() }
-
-    fun mainActivity() = ActivityScreen { Intent(it, MainActivity::class.java) }
+    val loginScreen = FragmentScreen { LoginFragment() }
+    val mediaPostScreen = FragmentScreen { CreatePostMediaFragment() }
+    val createPostScreen = FragmentScreen { CreatePostFragment() }
+    val cameraScreen = FragmentScreen { CameraFragment() }
+    val mapSearchScreen = FragmentScreen { MapSearchFragment() }
+    val mainActivity = ActivityScreen { Intent(it, MainActivity::class.java) }
 
 }
