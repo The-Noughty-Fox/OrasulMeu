@@ -23,6 +23,7 @@ object CreatePostContract {
         data object Submit : Event()
         data class PickImages(val uris: List<Uri>) : Event()
         data class SelectImage(val image: Uri) : Event()
+        data class RemoveImage(val image: Uri) : Event()
         data class SetAddress(val address: String) : Event()
         data object GoToMapSearch : Event()
     }

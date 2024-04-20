@@ -1,6 +1,7 @@
 package com.thenoughtfox.orasulmeu.ui.create_post
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
@@ -55,17 +56,30 @@ class CreatePostViewModel @Inject constructor(
                 is Event.SetTitle -> _state.update { it.copy(title = event.title) }
                 is Event.SetDescription -> _state.update { it.copy(description = event.desc) }
                 Event.Submit -> sendPost()
-                is Event.PickImages -> {
-                    val allImages = state.value.images + event.uris
-                    _state.update {
-                        it.copy(images = allImages.distinct(), image = allImages.first())
-                    }
-                }
-
+                is Event.PickImages -> addImages(event.uris)
                 is Event.SelectImage -> _state.update { it.copy(image = event.image) }
                 is Event.SetAddress -> _state.update { it.copy(address = event.address) }
                 Event.GoToMapSearch -> router.navigateTo(Screens.mapSearchScreen)
+                is Event.RemoveImage -> removeImage(event.image)
             }
+        }
+    }
+
+    private fun addImages(images: List<Uri>) {
+        val allImages = state.value.images + images
+        _state.update {
+            it.copy(images = allImages.distinct(), image = allImages.first())
+        }
+    }
+
+    private fun removeImage(image: Uri) {
+        val images = state.value.images.toMutableList()
+        images.remove(image)
+        _state.update {
+            it.copy(
+                images = images,
+                image = if (images.isNotEmpty()) images.first() else null
+            )
         }
     }
 

@@ -13,4 +13,5 @@
     <color name="border_color_grey">#E2E8F0</color>
     <color name="grey_search">#3C3C4399</color>
     <color name="button_next_color">#333E92CC</color>
+    <color name="yellow">#EAB308</color>
 </resources>

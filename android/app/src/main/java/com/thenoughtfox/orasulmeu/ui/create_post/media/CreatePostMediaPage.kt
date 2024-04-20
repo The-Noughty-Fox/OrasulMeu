@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -72,14 +73,26 @@ fun CreatePostMediaPage(uiState: State, onSendEvent: (Event) -> Unit) {
         if (uiState.images.isNotEmpty()) {
             Row(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .horizontalScroll(rememberScrollState()),
             ) {
                 uiState.images.forEach { image ->
-                    val color = if (uiState.image == image) Color.Blue else Color.White
-                    UserImage(image = image, color = color) {
-                        onSendEvent(Event.SelectImage(image))
-                    }
+                    UserImage(
+                        modifier = Modifier
+                            .size(106.dp)
+                            .padding(vertical = 8.dp, horizontal = 6.dp),
+                        image = image,
+                        color = if (uiState.image == image) {
+                            colorResource(id = R.color.yellow)
+                        } else {
+                            Color.White
+                        },
+                        onClick = {
+                            onSendEvent(Event.SelectImage(image))
+                        },
+                        onRemove = {
+                            onSendEvent(Event.RemoveImage(image))
+                        })
                 }
             }
         }
@@ -175,20 +188,36 @@ private fun UploadButton(image: Painter, text: String) {
 @Composable
 fun UserImage(
     image: Uri,
-    modifier: Modifier = Modifier,
     color: Color = Color.White,
-    onClick: ((Uri) -> Unit)? = null
+    modifier: Modifier = Modifier,
+    onClick: ((Uri) -> Unit)? = null,
+    onRemove: ((Uri) -> Unit)? = null
 ) {
-    Surface(
-        color = color,
-        modifier = modifier
-            .size(106.dp)
-            .padding(end = 10.dp)
-            .clip(shape = RoundedCornerShape(8.dp))
-            .clickable { onClick?.invoke(image) },
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        AsyncImage(model = image, contentDescription = "User images")
+    Box {
+        AsyncImage(
+            model = image,
+            contentDescription = "User images",
+            modifier = modifier
+                .clip(shape = RoundedCornerShape(8.dp))
+                .clickable { onClick?.invoke(image) }
+                .border(
+                    width = 2.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    color = color
+                )
+                .background(color = Color.White)
+        )
+
+        onRemove?.let { callback ->
+            Image(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(start = 32.dp)
+                    .clickable { callback(image) },
+                painter = painterResource(id = R.drawable.ic_remove),
+                contentDescription = "RemoveIcon",
+            )
+        }
     }
 }
 
