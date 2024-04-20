@@ -9,6 +9,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
+import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.plugin.animation.MapAnimationOptions.Companion.mapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
@@ -17,14 +18,19 @@ import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
+import com.mapbox.maps.viewannotation.annotationAnchor
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.databinding.FragmentAnnotationItemBinding
 
 class MapboxMapView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : MapView(context, attrs) {
 
     private var onLoadMap: (() -> Unit)? = null
-    private var onMapClicked: (() -> Unit)? = null
     private var onCameraTrackingDismissed: (() -> Unit)? = null
+    private var style: String = Style.LIGHT
 
     companion object {
         private const val ZOOM_LEVEL = 15.0
@@ -35,10 +41,6 @@ class MapboxMapView @JvmOverloads constructor(
         this.onLoadMap = onLoadMap
     }
 
-    fun onMapClicked(onMapClicked: () -> Unit) {
-        this.onMapClicked = onMapClicked
-    }
-
     fun onCameraTrackingDismissed(onCameraTrackingDismissed: () -> Unit) {
         this.onCameraTrackingDismissed = onCameraTrackingDismissed
     }
@@ -47,7 +49,7 @@ class MapboxMapView @JvmOverloads constructor(
         compass.enabled = false
         scalebar.enabled = false
 
-        mapboxMap.loadStyle(Style.LIGHT) {
+        mapboxMap.loadStyle(style) {
             initLocationComponent()
             setupGesturesListener()
             onLoadMap?.invoke()
@@ -99,6 +101,31 @@ class MapboxMapView @JvmOverloads constructor(
                 })
         } else {
             mapboxMap.setCamera(cameraOptions)
+        }
+    }
+
+    fun showAnnotations(centerPoint: Point?) {
+        viewAnnotationManager.removeAllViewAnnotations()
+        if (centerPoint == null) {
+            return
+        }
+
+        // Define the view annotation
+        val viewAnnotation = viewAnnotationManager.addViewAnnotation(
+            // Specify the layout resource id
+            resId = R.layout.fragment_annotation_item,
+            // Set any view annotation options
+            options = viewAnnotationOptions {
+                geometry(centerPoint)
+                allowOverlapWithPuck(true)
+                annotationAnchor {
+                    anchor(ViewAnnotationAnchor.BOTTOM)
+                }
+            }
+        )
+
+        FragmentAnnotationItemBinding.bind(viewAnnotation).apply {
+            imageView.setImageResource(R.drawable.ic_company_logo)
         }
     }
 

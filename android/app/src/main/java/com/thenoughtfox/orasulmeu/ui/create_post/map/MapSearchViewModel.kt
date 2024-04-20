@@ -18,7 +18,7 @@ import com.mapbox.search.common.IsoLanguageCode
 import com.mapbox.search.result.SearchResult
 import com.mapbox.search.result.SearchSuggestion
 import com.thenoughtfox.orasulmeu.navigation.Screens
-import com.thenoughtfox.orasulmeu.utils.getPoint
+import com.thenoughtfox.orasulmeu.utils.toPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -137,9 +137,10 @@ class MapSearchViewModel @Inject constructor(private val router: Router) : ViewM
         _state.update {
             it.copy(
                 address = address.trim(),
-                currentPoint = getPoint(
-                    LatLng(result.coordinate.latitude(), result.coordinate.longitude())
-                )
+                currentPoint = LatLng(
+                    result.coordinate.latitude(),
+                    result.coordinate.longitude()
+                ).toPoint()
             )
         }
     }
