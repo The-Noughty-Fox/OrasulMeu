@@ -6,16 +6,17 @@ import com.github.terrakok.cicerone.androidx.FragmentScreen
 import com.thenoughtfox.orasulmeu.ui.MainActivity
 import com.thenoughtfox.orasulmeu.ui.create_post.camera.CameraFragment
 import com.thenoughtfox.orasulmeu.ui.create_post.create.CreatePostFragment
+import com.thenoughtfox.orasulmeu.ui.create_post.map.MapSearchFragment
 import com.thenoughtfox.orasulmeu.ui.create_post.media.CreatePostMediaFragment
 import com.thenoughtfox.orasulmeu.ui.login.presentation.LoginFragment
 
 object Screens {
 
-    fun loginScreen() = FragmentScreen { LoginFragment() }
-    fun mediaPostScreen() = FragmentScreen { CreatePostMediaFragment() }
-    fun createPostScreen() = FragmentScreen { CreatePostFragment() }
-    fun cameraScreen() = FragmentScreen { CameraFragment() }
-
-    fun mainActivity() = ActivityScreen { Intent(it, MainActivity::class.java) }
+    val loginScreen = FragmentScreen { LoginFragment() }
+    val mediaPostScreen = FragmentScreen { CreatePostMediaFragment() }
+    val createPostScreen = FragmentScreen { CreatePostFragment() }
+    val cameraScreen = FragmentScreen { CameraFragment() }
+    val mapSearchScreen = FragmentScreen { MapSearchFragment() }
+    val mainActivity = ActivityScreen { Intent(it, MainActivity::class.java) }
 
 }

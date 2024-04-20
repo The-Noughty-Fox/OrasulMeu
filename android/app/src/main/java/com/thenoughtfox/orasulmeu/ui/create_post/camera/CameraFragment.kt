@@ -19,8 +19,8 @@ import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.databinding.FragmentCameraBinding
+import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
-import com.thenoughtfox.orasulmeu.ui.create_post.Event
 import com.thenoughtfox.orasulmeu.ui.create_post.camera.utils.CameraInitializer
 import com.thenoughtfox.orasulmeu.ui.create_post.camera.utils.PerformImageCaptureUseCase
 import com.thenoughtfox.orasulmeu.utils.applyBottomInsetMargin

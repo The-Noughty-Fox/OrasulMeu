@@ -4,13 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
+import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CreatePostFragment : Fragment() {
@@ -24,7 +28,12 @@ class CreatePostFragment : Fragment() {
     ): View = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            CreatePostPage(viewModel)
+            OrasulMeuTheme {
+                val uiState by viewModel.state.collectAsState()
+                CreatePostPage(
+                    uiState = uiState,
+                    onSendEvent = { lifecycleScope.launch { viewModel.event.send(it) } })
+            }
         }
     }
 }
