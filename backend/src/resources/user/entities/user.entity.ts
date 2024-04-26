@@ -1,9 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AutoMap } from '@automapper/classes';
 import { Post } from '@/resources/post/entities/post.entity';
-import { PostLike } from '@/resources/post/entities/post-like.entity';
-import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
 import { BaseEntity } from '@/infrastructure/models/entities/base.model';
+import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
@@ -42,9 +41,6 @@ export class User extends BaseEntity {
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
-  @OneToMany(() => PostLike, (post) => post.user)
-  postLikes: PostLike[];
-
-  @OneToMany(() => PostDislike, (post) => post.user)
-  postDislikes: PostDislike[];
+  @OneToMany(() => PostReaction, (postReaction) => postReaction.user)
+  postReactions: PostReaction[];
 }

@@ -1,6 +1,3 @@
-import { Readable } from 'stream';
-import { ApiProperty } from '@nestjs/swagger';
-
 export enum SocialMedia {
   Google = 'google',
   Apple = 'apple',
@@ -8,3 +5,12 @@ export enum SocialMedia {
 }
 
 export type Coordinate = number[];
+
+export enum Reaction {
+  Like = 'like',
+  Dislike = 'dislike',
+}
+
+export const reactions = [Reaction.Like, Reaction.Dislike] as const;
+
+export type ReactionType = (typeof reactions)[number];

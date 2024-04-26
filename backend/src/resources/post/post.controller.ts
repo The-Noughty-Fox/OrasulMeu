@@ -30,6 +30,7 @@ import { PostDto } from '@/resources/post/dto/post.dto';
 import { MediaDto } from '@/resources/media/dto/media.dto';
 import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
 import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
+import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -79,20 +80,15 @@ export class PostController {
     return this.postService.remove(+id);
   }
 
-  @Post(':id/like')
+  @Post(':id/react')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiOperation({ operationId: 'like-post' })
-  @ApiResponse({ status: 200 })
-  like(@Param('id') id: string, @Req() req) {
-    return this.postService.like(+id, req.user.id);
-  }
-
-  @Post(':id/dislike')
-  @ApiParam({ name: 'id', type: 'integer' })
-  @ApiOperation({ operationId: 'dislike-post' })
-  @ApiResponse({ status: 200 })
-  dislike(@Param('id') id: string, @Req() req) {
-    return this.postService.dislike(+id, req.user.id);
+  @ApiOperation({ operationId: 'react-to-post' })
+  @ApiResponse({ type: PostDto })
+  @ApiBody({
+    type: ReactToPostDto,
+  })
+  react(@Param('id') id: string, @Body() body: ReactToPostDto, @Req() req) {
+    return this.postService.react(+id, req.user.id, body.reaction);
   }
 
   @Post(':id/media')

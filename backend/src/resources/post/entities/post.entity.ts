@@ -8,13 +8,12 @@ import {
   Point,
 } from 'typeorm';
 import { User } from '@/resources/user/entities/user.entity';
-import { PostLike } from '@/resources/post/entities/post-like.entity';
-import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
 import { Comment } from '@/resources/comment/entities/comment.entity';
 import { AutoMap } from '@automapper/classes';
 import { Media } from '@/resources/media/entities/media.entity';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
 import { BaseEntity } from '@/infrastructure/models/entities/base.model';
+import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
 
 @Entity({ name: 'posts' })
 export class Post extends BaseEntity {
@@ -30,11 +29,8 @@ export class Post extends BaseEntity {
   @AutoMap()
   content: string;
 
-  @OneToMany(() => PostLike, (postLike) => postLike.post)
-  likes?: PostLike[];
-
-  @OneToMany(() => PostDislike, (postDislike) => postDislike.post)
-  dislikes?: PostDislike[];
+  @OneToMany(() => PostReaction, (postLike) => postLike.post)
+  reactions?: PostReaction[];
 
   @ManyToOne(() => User, (user) => user.posts)
   @AutoMap()
