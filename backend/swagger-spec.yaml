@@ -192,7 +192,19 @@ paths:
     get:
       operationId: get-posts
       summary: ""
-      parameters: []
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
       responses:
         "200":
           description: ""
