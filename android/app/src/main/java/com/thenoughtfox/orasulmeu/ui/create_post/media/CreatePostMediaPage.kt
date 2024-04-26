@@ -43,11 +43,27 @@ import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.State
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
+import com.thenoughtfox.orasulmeu.utils.view.Alert
 import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
 import com.thenoughtfox.orasulmeu.utils.view.Toolbar
 
 @Composable
 fun CreatePostMediaPage(uiState: State, onSendEvent: (Event) -> Unit) {
+
+    if (uiState.removedUri != null) {
+        Alert(
+            onDismissRequest = {
+                onSendEvent(Event.DismissAlert)
+            },
+            onConfirmation = {
+                onSendEvent(Event.RemoveImage(uiState.removedUri))
+            },
+            dialogTitle = stringResource(id = R.string.create_post_remove_image_alert_title),
+            dialogText = stringResource(id = R.string.create_post_remove_image_alert_desc),
+            confirmText = stringResource(id = R.string.create_post_remove_image_alert_confirm),
+            dismissText = stringResource(id = R.string.create_post_remove_image_alert_dismiss)
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -87,11 +103,11 @@ fun CreatePostMediaPage(uiState: State, onSendEvent: (Event) -> Unit) {
                         } else {
                             Color.White
                         },
-                        onClick = {
-                            onSendEvent(Event.SelectImage(image))
+                        onClick = { uri ->
+                            onSendEvent(Event.SelectImage(uri))
                         },
-                        onRemove = {
-                            onSendEvent(Event.RemoveImage(image))
+                        onRemove = { uri ->
+                            onSendEvent(Event.ShowAlert(uri))
                         })
                 }
             }

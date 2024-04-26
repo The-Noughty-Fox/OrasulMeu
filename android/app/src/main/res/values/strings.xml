@@ -24,6 +24,10 @@
     <string name="create_post_field_media">Media</string>
     <string name="create_post_field_address">Adresa</string>
     <string name="create_post_button_submit">Submite</string>
+    <string name="create_post_remove_image_alert_title">Șterge imaginea</string>
+    <string name="create_post_remove_image_alert_desc">Ești sigur că vrei să ștergi această imagine?</string>
+    <string name="create_post_remove_image_alert_confirm">Șterge</string>
+    <string name="create_post_remove_image_alert_dismiss">Anulează</string>
     <string name="search_address">Cauta adresa</string>
     <string name="map_button_next">Mai departe</string>
 
@@ -36,4 +40,7 @@
     <string name="camera_permission_denied_aler_message">Mergi la setările Android, apasă pe permisiuni și permite accesul.</string>
     <string name="camera_permission_denied_go_to_settings_button_text">Mergi la setări</string>
     <string name="camera_permission_denied_alert_cancel_button">Înlătură</string>
+
+    <string name="common.confirm">Confirm</string>
+    <string name="common.dismiss">Dismiss</string>
 </resources>

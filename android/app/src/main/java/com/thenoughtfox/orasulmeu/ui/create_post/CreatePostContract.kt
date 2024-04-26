@@ -10,7 +10,8 @@ object CreatePostContract {
         val title: String = "",
         val description: String = "",
         val image: Uri? = null,
-        val address: String = ""
+        val address: String = "",
+        val removedUri: Uri? = null
     )
 
     sealed class Event {
@@ -26,6 +27,8 @@ object CreatePostContract {
         data class RemoveImage(val image: Uri) : Event()
         data class SetAddress(val address: String) : Event()
         data object GoToMapSearch : Event()
+        data class ShowAlert(val uri: Uri) : Event()
+        data object DismissAlert : Event()
     }
 
     sealed class Action {

@@ -61,6 +61,8 @@ class CreatePostViewModel @Inject constructor(
                 is Event.SetAddress -> _state.update { it.copy(address = event.address) }
                 Event.GoToMapSearch -> router.navigateTo(Screens.mapSearchScreen)
                 is Event.RemoveImage -> removeImage(event.image)
+                is Event.ShowAlert -> _state.update { it.copy(removedUri = event.uri) }
+                Event.DismissAlert -> _state.update { it.copy(removedUri = null) }
             }
         }
     }
@@ -78,7 +80,8 @@ class CreatePostViewModel @Inject constructor(
         _state.update {
             it.copy(
                 images = images,
-                image = if (images.isNotEmpty()) images.first() else null
+                image = if (images.isNotEmpty()) images.first() else null,
+                removedUri = null
             )
         }
     }
