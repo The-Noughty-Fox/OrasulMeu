@@ -1,28 +1,34 @@
 package com.thenoughtfox.orasulmeu.ui.create_post.map.view
 
 import android.content.Context
-import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
-import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.plugin.animation.MapAnimationOptions.Companion.mapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.annotation.AnnotationConfig
+import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
+import com.mapbox.maps.plugin.annotation.ClusterOptions
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
-import com.mapbox.maps.viewannotation.annotationAnchor
-import com.mapbox.maps.viewannotation.geometry
-import com.mapbox.maps.viewannotation.viewAnnotationOptions
-import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.databinding.FragmentAnnotationItemBinding
+import com.thenoughtfox.orasulmeu.utils.generateSmallIcon
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class MapboxMapView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -31,6 +37,7 @@ class MapboxMapView @JvmOverloads constructor(
     private var onLoadMap: (() -> Unit)? = null
     private var onCameraTrackingDismissed: (() -> Unit)? = null
     private var style: String = Style.LIGHT
+    private var pointAnnotationManager: PointAnnotationManager? = null
 
     companion object {
         private const val ZOOM_LEVEL = 15.0
@@ -53,6 +60,19 @@ class MapboxMapView @JvmOverloads constructor(
             initLocationComponent()
             setupGesturesListener()
             onLoadMap?.invoke()
+            pointAnnotationManager = annotations.createPointAnnotationManager(
+                AnnotationConfig(
+                    layerId = "GOVNA",
+                    annotationSourceOptions = AnnotationSourceOptions(
+                        clusterOptions = ClusterOptions(
+                            circleRadius = 15.0,
+                            textColor = Color.BLACK,
+                            clusterRadius = 25,
+                            colorLevels = listOf(Pair(0, Color.YELLOW))
+                        )
+                    )
+                )
+            )
 
             style {
             }
@@ -104,29 +124,21 @@ class MapboxMapView @JvmOverloads constructor(
         }
     }
 
-    fun showAnnotations(centerPoint: Point?) {
-        viewAnnotationManager.removeAllViewAnnotations()
-        if (centerPoint == null) {
-            return
+    data class Place(val point: Point, val bitmap: Bitmap)
+
+    fun addPlaces(places: List<Place>) = CoroutineScope(Dispatchers.IO).launch {
+        val pointAnnotationOptions = places.map { place ->
+            PointAnnotationOptions()
+                .withPoint(place.point)
+                .withIconImage(place.bitmap.generateSmallIcon(context, 50, 64))
         }
 
-        // Define the view annotation
-        val viewAnnotation = viewAnnotationManager.addViewAnnotation(
-            // Specify the layout resource id
-            resId = R.layout.fragment_annotation_item,
-            // Set any view annotation options
-            options = viewAnnotationOptions {
-                geometry(centerPoint)
-                allowOverlapWithPuck(true)
-                annotationAnchor {
-                    anchor(ViewAnnotationAnchor.BOTTOM)
-                }
-            }
-        )
+        pointAnnotationManager?.create(pointAnnotationOptions)
+    }
 
-        FragmentAnnotationItemBinding.bind(viewAnnotation).apply {
-            imageView.setImageResource(R.drawable.ic_company_logo)
-        }
+
+    fun clearPlaces() {
+        pointAnnotationManager?.deleteAll()
     }
 
     override fun onDestroy() {

@@ -11,8 +11,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.gms.maps.model.LatLng
+import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.databinding.FragmentMapBinding
 import com.thenoughtfox.orasulmeu.service.LocationClient
+import com.thenoughtfox.orasulmeu.ui.create_post.map.view.MapboxMapView.Place
+import com.thenoughtfox.orasulmeu.ui.create_post.map.view.PinUtils
 import com.thenoughtfox.orasulmeu.ui.map.MapContract.Action
 import com.thenoughtfox.orasulmeu.ui.map.MapContract.Event
 import com.thenoughtfox.orasulmeu.utils.applyBottomInsetMargin
@@ -32,6 +36,37 @@ class MapFragment : Fragment() {
         LocationClient(requireContext()) { location ->
             lifecycleScope.launch {
                 viewModel.event.send(Event.NavigateToPlayer(location.toPoint()))
+
+                val places = mutableListOf<Place>().apply {
+                    val bitmap1 =
+                        PinUtils.maskDrawableToAnother(
+                            context = requireContext(),
+                            sourceResId = R.drawable.logo,
+                            maskResId = R.drawable.ic_pin_annotation
+                        )
+
+                    val bitmap2 =
+                        PinUtils.maskDrawableToAnother(
+                            context = requireContext(),
+                            sourceResId = R.drawable.ic_company_logo,
+                            maskResId = R.drawable.ic_pin_annotation
+                        )
+
+
+                    val bitmap3 =
+                        PinUtils.maskDrawableToAnother(
+                            context = requireContext(),
+                            sourceResId = R.drawable.image_placeholder,
+                            maskResId = R.drawable.ic_pin_annotation
+                        )
+
+
+                    add(Place(point = LatLng(47.024378, 28.832066).toPoint(), bitmap = bitmap1))
+                    add(Place(point = LatLng(47.025879, 28.835292).toPoint(), bitmap = bitmap2))
+                    add(Place(point = LatLng(47.023647, 28.833826).toPoint(), bitmap = bitmap3))
+                }
+
+                binding.mapView.addPlaces(places)
             }
         }
     }
@@ -93,7 +128,6 @@ class MapFragment : Fragment() {
                     when (action) {
                         is Action.MoveToLocation -> {
                             binding.mapView.redirectToLocation(action.point)
-                            binding.mapView.showAnnotations(action.point)
                         }
 
                         is Action.ShowToast -> context?.showToast(action.msg)
