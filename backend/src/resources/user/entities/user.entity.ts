@@ -3,9 +3,10 @@ import { AutoMap } from '@automapper/classes';
 import { Post } from '@/resources/post/entities/post.entity';
 import { PostLike } from '@/resources/post/entities/post-like.entity';
 import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
+import { BaseEntity } from '@/infrastructure/models/entities/base.model';
 
 @Entity({ name: 'users' })
-export class User {
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   @AutoMap()
   id: number;

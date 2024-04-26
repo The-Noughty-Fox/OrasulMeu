@@ -16,6 +16,8 @@ import { MediaService } from '@/resources/media/media.service';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
 import { PostLike } from '@/resources/post/entities/post-like.entity';
 import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
+import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
+import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-result.dto';
 
 @Injectable()
 export class PostService {
@@ -34,16 +36,30 @@ export class PostService {
   ) {}
 
   async create(createPostDto: CreatePostDto, userId: number) {
-    const postEntity = this.repository.create(createPostDto);
+    const postEntity = this.repository.create({
+      title: createPostDto.title,
+      content: createPostDto.content,
+      locationAddress: createPostDto.locationAddress,
+    });
     postEntity.author = await this.userRepository.findOne({
       where: { id: userId },
     });
+    postEntity.location = {
+      type: 'Point',
+      coordinates: [
+        createPostDto.location.longitude,
+        createPostDto.location.latitude,
+      ],
+    };
     await this.repository.save(postEntity);
     return this.mapper.map(postEntity, Post, PostDto);
   }
 
-  async findAll() {
-    const postEntities = await this.repository.find({
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 25 } = paginationQuery;
+    const [postEntities, total] = await this.repository.findAndCount({
       relations: [
         'author',
         'postMedia',
@@ -51,9 +67,16 @@ export class PostService {
         'likes',
         'dislikes',
       ],
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    return this.mapper.mapArray(postEntities, Post, PostDto);
+    return {
+      page,
+      limit,
+      total,
+      data: this.mapper.mapArray(postEntities, Post, PostDto),
+    };
   }
 
   async findOne(id: number) {

@@ -35,6 +35,17 @@ export class PostProfile extends AutomapperProfile {
           (d) => d.dislikes,
           mapFrom((s) => s.dislikes?.length ?? 0),
         ),
+        forMember(
+          (d) => d.location,
+          mapFrom((s) =>
+            s.location
+              ? {
+                  longitude: s.location.coordinates[0],
+                  latitude: s.location.coordinates[1],
+                }
+              : null,
+          ),
+        ),
       );
     };
   }

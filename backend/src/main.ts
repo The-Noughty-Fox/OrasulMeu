@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as cookieParser from 'cookie-parser';
 import { AppLogger } from './infrastructure/logging/app-logger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,6 +18,14 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   app.useLogger(new AppLogger());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
   const config = new DocumentBuilder()
     .setTitle('Orasul Meu')
     .setDescription('Orasul Meu Swagger API')

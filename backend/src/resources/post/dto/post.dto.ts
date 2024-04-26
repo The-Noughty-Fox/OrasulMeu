@@ -3,6 +3,7 @@ import { CommentDto } from '@/resources/comment/dto/comment.dto';
 import { AutoMap } from '@automapper/classes';
 import { Media } from '@/resources/media/entities/media.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { PointDto } from '@/infrastructure/models/dto/point.dto';
 
 export class PostDto {
   @AutoMap()
@@ -35,4 +36,12 @@ export class PostDto {
 
   @AutoMap()
   createDate: Date;
+
+  @AutoMap()
+  @ApiProperty()
+  locationAddress: string;
+
+  @ApiProperty({ type: PointDto })
+  @AutoMap()
+  location: PointDto;
 }

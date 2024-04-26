@@ -10,6 +10,7 @@ import {
   Req,
   UseInterceptors,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -27,6 +28,8 @@ import {
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
 import { MediaDto } from '@/resources/media/dto/media.dto';
+import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
+import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -44,9 +47,12 @@ export class PostController {
 
   @Get()
   @ApiOperation({ operationId: 'get-posts' })
-  @ApiResponse({ type: PostDto, isArray: true })
-  findAll() {
-    return this.postService.findAll();
+  @ApiResponse({
+    status: 200,
+    schema: getPaginationSchema(PostDto),
+  })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.postService.findAll(paginationQuery);
   }
 
   @Get(':id')

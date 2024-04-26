@@ -194,14 +194,21 @@ paths:
       summary: ""
       parameters: []
       responses:
-        default:
+        "200":
           description: ""
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PostDto"
+                data:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/PostDto"
+                total:
+                  type: number
+                page:
+                  type: number
+                limit:
+                  type: number
       tags: *a3
   /posts/{id}:
     get:
@@ -436,6 +443,18 @@ components:
           type: string
       required:
         - token
+    PointDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      required:
+        - latitude
+        - longitude
     CreatePostDto:
       type: object
       properties:
@@ -443,9 +462,15 @@ components:
           type: string
         content:
           type: string
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
       required:
         - title
         - content
+        - locationAddress
+        - location
     CommentDto:
       type: object
       properties: {}
@@ -489,6 +514,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Media"
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
       required:
         - id
         - title
@@ -498,6 +527,8 @@ components:
         - dislikes
         - comments
         - media
+        - locationAddress
+        - location
     UpdatePostDto:
       type: object
       properties:
@@ -505,6 +536,10 @@ components:
           type: string
         content:
           type: string
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
     MediaDto:
       type: object
       properties:

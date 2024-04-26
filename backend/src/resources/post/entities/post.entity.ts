@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Point,
 } from 'typeorm';
 import { User } from '@/resources/user/entities/user.entity';
 import { PostLike } from '@/resources/post/entities/post-like.entity';
@@ -13,9 +14,10 @@ import { Comment } from '@/resources/comment/entities/comment.entity';
 import { AutoMap } from '@automapper/classes';
 import { Media } from '@/resources/media/entities/media.entity';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
+import { BaseEntity } from '@/infrastructure/models/entities/base.model';
 
 @Entity({ name: 'posts' })
-export class Post {
+export class Post extends BaseEntity {
   @PrimaryGeneratedColumn()
   @AutoMap()
   id: number;
@@ -44,6 +46,18 @@ export class Post {
   @OneToMany(() => PostMedia, (postMedia) => postMedia.post, { cascade: true })
   @JoinTable({ name: 'post_media' })
   postMedia?: PostMedia[];
+
+  @Column({
+    type: 'geography',
+    spatialFeatureType: 'Point',
+    srid: 4326,
+    nullable: true,
+  })
+  location?: Point;
+
+  @Column({ nullable: true })
+  @AutoMap()
+  locationAddress?: string;
 
   media: Media[];
 }
