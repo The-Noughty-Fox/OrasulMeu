@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -11,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.noughtyfox.authentication.facebook.FacebookSignIn
 import com.noughtyfox.authentication.google.GoogleSignIn
 import com.thenoughtfox.orasulmeu.R
@@ -55,7 +58,11 @@ class LoginFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OrasulMeuTheme {
-                LoginPage(viewModel)
+                val uiState by viewModel.state.collectAsState()
+                LoginPage(
+                    uiState = uiState,
+                    onSendEvent = { lifecycleScope.launch { viewModel.event.send(it) } }
+                )
             }
         }
     }

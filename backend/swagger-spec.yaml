@@ -194,14 +194,21 @@ paths:
       summary: ""
       parameters: []
       responses:
-        default:
+        "200":
           description: ""
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PostDto"
+                data:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/PostDto"
+                total:
+                  type: number
+                page:
+                  type: number
+                limit:
+                  type: number
       tags: *a3
   /posts/{id}:
     get:
@@ -257,9 +264,9 @@ paths:
         "200":
           description: ""
       tags: *a3
-  /posts/{id}/like:
+  /posts/{id}/react:
     post:
-      operationId: like-post
+      operationId: react-to-post
       summary: ""
       parameters:
         - name: id
@@ -267,23 +274,19 @@ paths:
           in: path
           schema:
             type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReactToPostDto"
       responses:
-        "200":
+        default:
           description: ""
-      tags: *a3
-  /posts/{id}/dislike:
-    post:
-      operationId: dislike-post
-      summary: ""
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
       tags: *a3
   /posts/{id}/media:
     post:
@@ -436,6 +439,18 @@ components:
           type: string
       required:
         - token
+    PointDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      required:
+        - latitude
+        - longitude
     CreatePostDto:
       type: object
       properties:
@@ -443,9 +458,30 @@ components:
           type: string
         content:
           type: string
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
       required:
         - title
         - content
+        - locationAddress
+        - location
+    PostReactionsDto:
+      type: object
+      properties:
+        dislike:
+          type: integer
+        like:
+          type: integer
+        userReaction:
+          type: string
+          enum:
+            - like
+            - dislike
+      required:
+        - dislike
+        - like
     CommentDto:
       type: object
       properties: {}
@@ -479,25 +515,28 @@ components:
           type: string
         author:
           $ref: "#/components/schemas/UserDto"
-        likes:
-          type: integer
-        dislikes:
-          type: integer
+        reactions:
+          $ref: "#/components/schemas/PostReactionsDto"
         comments:
           $ref: "#/components/schemas/CommentDto"
         media:
           type: array
           items:
             $ref: "#/components/schemas/Media"
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
       required:
         - id
         - title
         - content
         - author
-        - likes
-        - dislikes
+        - reactions
         - comments
         - media
+        - locationAddress
+        - location
     UpdatePostDto:
       type: object
       properties:
@@ -505,6 +544,20 @@ components:
           type: string
         content:
           type: string
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
+    ReactToPostDto:
+      type: object
+      properties:
+        react:
+          type: string
+          enum:
+            - like
+            - dislike
+      required:
+        - react
     MediaDto:
       type: object
       properties:

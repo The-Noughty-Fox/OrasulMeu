@@ -9,12 +9,11 @@ import { User } from '@/resources/user/entities/user.entity';
 import { UserModule } from '@/resources/user/user.module';
 import { MediaModule } from '@/resources/media/media.module';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
-import { PostLike } from '@/resources/post/entities/post-like.entity';
-import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
+import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, User, PostMedia, PostLike, PostDislike]),
+    TypeOrmModule.forFeature([Post, User, PostMedia, PostReaction]),
     UserModule,
     MediaModule,
   ],

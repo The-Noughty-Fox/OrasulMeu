@@ -23,9 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,23 +35,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
-import com.thenoughtfox.orasulmeu.ui.create_post.Event
+import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
+import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.State
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
 import com.thenoughtfox.orasulmeu.utils.view.Toolbar
-import kotlinx.coroutines.launch
 
 @Composable
-fun CreatePostMediaPage(viewModel: CreatePostViewModel = viewModel()) {
-
-    val uiState by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
+fun CreatePostMediaPage(uiState: State, onSendEvent: (Event) -> Unit) {
 
     Column(
         modifier = Modifier
@@ -66,11 +58,7 @@ fun CreatePostMediaPage(viewModel: CreatePostViewModel = viewModel()) {
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        val image = if (uiState.image == null) {
-            R.drawable.image_placeholder
-        } else {
-            uiState.image
-        }
+        val image = uiState.image ?: R.drawable.image_placeholder
 
         AsyncImage(
             model = image, contentDescription = "Image",
@@ -90,24 +78,16 @@ fun CreatePostMediaPage(viewModel: CreatePostViewModel = viewModel()) {
                 uiState.images.forEach { image ->
                     val color = if (uiState.image == image) Color.Blue else Color.White
                     UserImage(image = image, color = color) {
-                        coroutineScope.launch {
-                            viewModel.event.send(Event.SelectImage(image))
-                        }
+                        onSendEvent(Event.SelectImage(image))
                     }
                 }
             }
         }
 
         UploadButtons(
-            onClickMedia = {
-                coroutineScope.launch {
-                    viewModel.event.send(Event.OnClickMedia)
-                }
-            }, onClickCamera = {
-                coroutineScope.launch {
-                    viewModel.event.send(Event.OnClickCamera)
-                }
-            })
+            onClickMedia = { onSendEvent(Event.OnClickMedia) },
+            onClickCamera = { onSendEvent(Event.OnClickCamera) }
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -116,9 +96,7 @@ fun CreatePostMediaPage(viewModel: CreatePostViewModel = viewModel()) {
             .align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.create_post_button_next),
             onClick = {
-                coroutineScope.launch {
-                    viewModel.event.send(Event.GoToPostPage)
-                }
+                onSendEvent(Event.GoToMapSearch)
             })
     }
 }
@@ -173,7 +151,8 @@ private fun UploadButton(image: Painter, text: String) {
     Column(
         modifier = Modifier
             .width(176.dp)
-            .height(44.dp),
+            .height(44.dp)
+            .background(color = Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -251,5 +230,5 @@ fun RoundButton(
 @Preview
 @Composable
 private fun PreviewCreatePostMediaPage() {
-    CreatePostMediaPage()
+    CreatePostMediaPage(State()) {}
 }

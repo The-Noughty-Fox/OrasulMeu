@@ -108,14 +108,13 @@ dependencies {
     implementation libs.androidx.ui.tooling.preview
     implementation libs.androidx.material3
     implementation libs.androidx.constraintlayout
+    implementation libs.androidx.recyclerview
 
     //Coroutines
     implementation libs.coroutines.core
     implementation libs.coroutines.android
 
-    //Hilt
-    implementation libs.hilt.android
-    kapt libs.hilt.compiler
+    implementation libs.play.services.maps
 
     //Lifecycle
     implementation libs.lifecycle.viewmodel
@@ -184,6 +183,12 @@ dependencies {
 
     //WindowsInset
     implementation libs.insetter
+
+    //Mapbox
+    implementation libs.mapbox
+    implementation libs.mapbox.search
+
+    implementation libs.play.services.location
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

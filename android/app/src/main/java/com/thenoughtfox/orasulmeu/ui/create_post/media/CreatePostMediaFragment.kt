@@ -7,17 +7,17 @@ import android.view.ViewGroup
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import com.thenoughtfox.orasulmeu.ui.create_post.Action
+import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Action
+import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
-import com.thenoughtfox.orasulmeu.ui.create_post.Event
+import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import com.thenoughtfox.orasulmeu.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -45,7 +45,13 @@ class CreatePostMediaFragment : Fragment() {
     ): View = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            CreatePostMediaPage(viewModel)
+            OrasulMeuTheme {
+                val uiState by viewModel.state.collectAsState()
+                CreatePostMediaPage(
+                    uiState = uiState,
+                    onSendEvent = { lifecycleScope.launch { viewModel.event.send(it) } }
+                )
+            }
         }
     }
 
@@ -59,7 +65,6 @@ class CreatePostMediaFragment : Fragment() {
             viewModel.action.collect { action ->
                 when (action) {
                     is Action.ShowToast -> context?.showToast(action.msg)
-                    Action.OpenCamera -> TODO()
                     Action.OpenPhotoPicker -> {
                         pickMultipleMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
                     }
