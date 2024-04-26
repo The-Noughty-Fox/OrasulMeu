@@ -10,6 +10,7 @@ import {
   Req,
   UseInterceptors,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -26,8 +27,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
-import { File } from '@/shared/types';
 import { MediaDto } from '@/resources/media/dto/media.dto';
+import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
+import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
+import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -45,9 +48,12 @@ export class PostController {
 
   @Get()
   @ApiOperation({ operationId: 'get-posts' })
-  @ApiResponse({ type: PostDto, isArray: true })
-  findAll() {
-    return this.postService.findAll();
+  @ApiResponse({
+    status: 200,
+    schema: getPaginationSchema(PostDto),
+  })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.postService.findAll(paginationQuery);
   }
 
   @Get(':id')
@@ -74,20 +80,15 @@ export class PostController {
     return this.postService.remove(+id);
   }
 
-  @Post(':id/like')
+  @Post(':id/react')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiOperation({ operationId: 'like-post' })
-  @ApiResponse({ status: 200 })
-  like(@Param('id') id: string, @Req() req) {
-    return this.postService.like(+id, req.user.id);
-  }
-
-  @Post(':id/dislike')
-  @ApiParam({ name: 'id', type: 'integer' })
-  @ApiOperation({ operationId: 'dislike-post' })
-  @ApiResponse({ status: 200 })
-  dislike(@Param('id') id: string, @Req() req) {
-    return this.postService.dislike(+id, req.user.id);
+  @ApiOperation({ operationId: 'react-to-post' })
+  @ApiResponse({ type: PostDto })
+  @ApiBody({
+    type: ReactToPostDto,
+  })
+  react(@Param('id') id: string, @Body() body: ReactToPostDto, @Req() req) {
+    return this.postService.react(+id, req.user.id, body.reaction);
   }
 
   @Post(':id/media')

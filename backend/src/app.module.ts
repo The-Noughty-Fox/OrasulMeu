@@ -14,14 +14,13 @@ import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { LoggingMiddleware } from './infrastructure/middleware/logging.middleware';
 import { PostModule } from './resources/post/post.module';
 import { Post } from '@/resources/post/entities/post.entity';
-import { PostLike } from '@/resources/post/entities/post-like.entity';
-import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
 import { CommentModule } from './resources/comment/comment.module';
 import { Comment } from '@/resources/comment/entities/comment.entity';
 import { MediaModule } from './resources/media/media.module';
 import { Media } from '@/resources/media/entities/media.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
+import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
 
 @Module({
   imports: [
@@ -43,7 +42,7 @@ import { PostMedia } from '@/resources/media/entities/post-media.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User, Post, PostLike, PostDislike, Comment, Media, PostMedia],
+      entities: [User, Post, PostReaction, Comment, Media, PostMedia],
       synchronize: true,
       migrationsTableName: 'migrations',
     }),
