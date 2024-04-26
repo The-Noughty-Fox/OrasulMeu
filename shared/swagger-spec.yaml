@@ -199,16 +199,18 @@ paths:
           content:
             application/json:
               schema:
-                data:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/PostDto"
-                total:
-                  type: number
-                page:
-                  type: number
-                limit:
-                  type: number
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
       tags: *a3
   /posts/{id}:
     get:

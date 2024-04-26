@@ -10,18 +10,21 @@ export const getPaginationSchema = (
   example?: Record<string, string>[],
 ) =>
   ({
-    data: {
-      type: 'array',
-      items: { $ref: getSchemaPath(model) },
-      example,
-    },
-    total: {
-      type: 'number',
-    },
-    page: {
-      type: 'number',
-    },
-    limit: {
-      type: 'number',
+    type: 'object',
+    properties: {
+      data: {
+        type: 'array',
+        items: { $ref: getSchemaPath(model) },
+        example,
+      },
+      total: {
+        type: 'number',
+      },
+      page: {
+        type: 'number',
+      },
+      limit: {
+        type: 'number',
+      },
     },
   }) as SchemaObject & Partial<ReferenceObject>;

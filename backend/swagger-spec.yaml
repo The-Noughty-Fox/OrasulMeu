@@ -192,23 +192,37 @@ paths:
     get:
       operationId: get-posts
       summary: ""
-      parameters: []
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
       responses:
         "200":
           description: ""
           content:
             application/json:
               schema:
-                data:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/PostDto"
-                total:
-                  type: number
-                page:
-                  type: number
-                limit:
-                  type: number
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
       tags: *a3
   /posts/{id}:
     get:
