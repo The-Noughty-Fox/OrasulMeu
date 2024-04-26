@@ -45,25 +45,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.ui.post.elements.MediaView
 import com.thenoughtfox.orasulmeu.ui.post.elements.ReactionButton
+import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
-import org.openapitools.client.models.Media
 
 @Composable
 fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Unit) {
-    Column(modifier = Modifier.wrapContentSize()) {
+    Column(
+        modifier = Modifier
+            .wrapContentSize()
+            .background(color = colorResource(R.color.background_color))
+    ) {
         val pagerState = rememberPagerState(0, pageCount = { state.media.count() })
 
         HorizontalPager(modifier = Modifier.fillMaxWidth(), state = pagerState, pageContent = {
-            // todo replace it with media
-            Box(
+            MediaView(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(2.dp)
-                    .aspectRatio(1f)
-                    .background(
-                        color = colorResource(R.color.black), shape = RoundedCornerShape(16.dp)
-                    )
+                    .aspectRatio(1f), mediaItem = state.media[it]
             )
         })
 
@@ -76,7 +76,6 @@ fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Uni
             verticalAlignment = Alignment.CenterVertically
         ) {
             ReactionButton(reaction = state.reaction,
-                isLoading = state.isReactionLoading,
                 onLike = { onSendEvent(PostContract.Event.Like) },
                 onDislike = { onSendEvent(PostContract.Event.Dislike) },
                 onRevokeReaction = { onSendEvent(PostContract.Event.RevokeReaction) })
@@ -91,17 +90,30 @@ fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Uni
             )
         }
 
+        Text(
+            text = state.address,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = colorResource(R.color.primary)
+            )
+        )
+
         // author + time ago || date
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = state.author,
-                style = TextStyle(color = colorResource(R.color.primary), fontSize = 16.sp)
+                text = state.author, style = TextStyle(
+                    color = colorResource(R.color.black),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             )
 
             Text(
@@ -109,14 +121,6 @@ fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Uni
                 style = TextStyle(fontSize = 14.sp, color = colorResource(R.color.grey))
             )
         }
-
-        Text(
-            text = state.address,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-            style = TextStyle(
-                fontSize = 14.sp, color = colorResource(R.color.black)
-            )
-        )
 
         CombinedTitleWithBody(title = state.title, body = state.textContent)
 
@@ -204,7 +208,8 @@ private fun CombinedTitleWithBody(title: String, body: String) {
     }
     Text(
         text = text,
-        style = TextStyle(fontSize = 14.sp), modifier = Modifier.padding(horizontal = 16.dp),
+        style = TextStyle(fontSize = 14.sp),
+        modifier = Modifier.padding(horizontal = 16.dp),
         maxLines = 2,
         overflow = TextOverflow.Ellipsis
     )
@@ -213,20 +218,5 @@ private fun CombinedTitleWithBody(title: String, body: String) {
 @Preview(showBackground = true, backgroundColor = 0xffffff)
 @Composable
 private fun Preview() = OrasulMeuTheme {
-    val postState = PostContract.State().copy(
-        author = "John Doe",
-        time = "6 min ago",
-        address = "Ulitsa Pushkina dom Kolotushkina",
-        title = "Hello Luke",
-        textContent = "Have you heard the story about lord Darth Plegas the Wise blah blah blah blah blah blah blah blah blah blah blah blah",
-        media = listOf(
-            Media(id = 0, type = Media.Type.image, url = "gay", fileName = "gay.jpg"),
-            Media(id = 0, type = Media.Type.image, url = "gay", fileName = "gay.jpg"),
-            Media(id = 0, type = Media.Type.image, url = "gay", fileName = "gay.jpg")
-        ),
-        reaction = PostContract.Reaction(
-            selectedReaction = PostContract.Reactions.LIKE, count = 214
-        )
-    )
-    PostView(state = postState, onSendEvent = {})
+    PostView(state = PostPreviewPlaceholders.postState, onSendEvent = {})
 }

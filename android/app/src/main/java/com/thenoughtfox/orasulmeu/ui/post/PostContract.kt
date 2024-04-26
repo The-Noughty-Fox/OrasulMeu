@@ -10,7 +10,6 @@ interface PostContract {
         val textContent: String = "",
         val media: List<Media> = emptyList(),
         val reaction: Reaction = Reaction(Reactions.NOTHING),
-        val isReactionLoading: Boolean = false,
         val address: String = "",
         val time: String = ""
     )
@@ -25,7 +24,8 @@ interface PostContract {
 
     sealed interface Action {
         data object RequestReportConfirmation : Action
-        data class UpdateReaction(val newValue: Reaction) : Action
+        data object ShowReportSubmitted : Action
+        data object ShowReportSendingFailed : Action
     }
 
     enum class Reactions {

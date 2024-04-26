@@ -134,6 +134,7 @@ dependencies {
 
     //Hilt
     implementation libs.hilt.android
+    implementation libs.androidx.hilt.navigation.compose
     kapt libs.hilt.compiler
 
     //Joda time
@@ -170,6 +171,10 @@ dependencies {
 
     //Image
     implementation libs.coil.compose
+    // compose images
+    implementation libs.landscapist.coil
+    // to preview video thumbnail
+    implementation libs.coil.video
 
     //Camera
     implementation libs.camerax.core

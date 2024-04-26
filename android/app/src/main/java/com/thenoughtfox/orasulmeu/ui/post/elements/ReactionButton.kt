@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ReactionButton(
     reaction: PostContract.Reaction,
-    isLoading: Boolean,
     onLike: () -> Unit,
     onDislike: () -> Unit,
     onRevokeReaction: () -> Unit,
@@ -52,54 +51,44 @@ fun ReactionButton(
             )
             .clip(RoundedCornerShape(8.dp))
             .clickable(
-                enabled = !isLoading && (reaction.selectedReaction != PostContract.Reactions.NOTHING),
+                enabled = reaction.selectedReaction != PostContract.Reactions.NOTHING,
                 onClick = onRevokeReaction
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 24.dp)
-                    .size(24.dp),
-                color = colorResource(id = R.color.purple_700),
-                strokeWidth = 2.dp
-            )
-        } else {
-            when (reaction.selectedReaction) {
-                PostContract.Reactions.LIKE -> {
-                    Text(text = Emojis.LIKE, modifier = emojiTextModifier, style = emojiTextStyle)
-                    Text(
-                        text = reaction.count.toString(),
-                        modifier = Modifier.padding(8.dp),
-                        style = reactionCountStyle
-                    )
-                }
+        when (reaction.selectedReaction) {
+            PostContract.Reactions.LIKE -> {
+                Text(text = Emojis.LIKE, modifier = emojiTextModifier, style = emojiTextStyle)
+                Text(
+                    text = reaction.count.toString(),
+                    modifier = Modifier.padding(8.dp),
+                    style = reactionCountStyle
+                )
+            }
 
-                PostContract.Reactions.DISLIKE -> {
-                    Text(
-                        text = Emojis.DISLIKE,
-                        modifier = emojiTextModifier,
-                        style = emojiTextStyle
-                    )
-                    Text(
-                        text = reaction.count.toString(),
-                        modifier = Modifier.padding(8.dp),
-                        style = reactionCountStyle
-                    )
-                }
+            PostContract.Reactions.DISLIKE -> {
+                Text(
+                    text = Emojis.DISLIKE,
+                    modifier = emojiTextModifier,
+                    style = emojiTextStyle
+                )
+                Text(
+                    text = reaction.count.toString(),
+                    modifier = Modifier.padding(8.dp),
+                    style = reactionCountStyle
+                )
+            }
 
-                PostContract.Reactions.NOTHING -> {
-                    Text(
-                        text = Emojis.DISLIKE,
-                        style = emojiTextStyle,
-                        modifier = emojiTextModifier.clickable { onDislike() }
-                    )
-                    Text(
-                        text = Emojis.LIKE,
-                        style = emojiTextStyle,
-                        modifier = emojiTextModifier.clickable { onLike() })
-                }
+            PostContract.Reactions.NOTHING -> {
+                Text(
+                    text = Emojis.DISLIKE,
+                    style = emojiTextStyle,
+                    modifier = emojiTextModifier.clickable { onDislike() }
+                )
+                Text(
+                    text = Emojis.LIKE,
+                    style = emojiTextStyle,
+                    modifier = emojiTextModifier.clickable { onLike() })
             }
         }
     }
@@ -107,7 +96,7 @@ fun ReactionButton(
 
 private object Emojis {
     const val LIKE = "😍"
-    const val DISLIKE = "\uD83E\uDD22"
+    const val DISLIKE = "🤢"
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
@@ -132,12 +121,11 @@ private fun Preview() = OrasulMeuTheme {
     Box(
         modifier = Modifier
             .size(120.dp)
-            .background(color = colorResource(id = R.color.white))
+            .background(color = colorResource(id = R.color.black))
     ) {
         ReactionButton(
             modifier = Modifier.align(Alignment.Center),
             reaction = currentReaction,
-            isLoading = isLoading,
             onLike = {
                 delay2sec()
                 currentReaction =
