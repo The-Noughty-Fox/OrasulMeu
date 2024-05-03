@@ -2,11 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { SocialMedia } from '../../shared/types';
+import { SocialMedia } from '@/shared/types';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
+import { UserProfileDto } from '@/resources/user/dto/user-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -91,5 +92,34 @@ export class UserService {
     });
 
     return this.mapper.map(user, User, UserDto);
+  }
+
+  async profile(userId: number): Promise<UserProfileDto> {
+    const result = await this.userRepository
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.posts', 'posts')
+      .leftJoinAndSelect('users.postReactions', 'postReactions')
+      .select([
+        'users.id',
+        'users.email',
+        'users.firstName',
+        'users.lastName',
+        'users.socialProfilePictureUrl',
+        'COUNT(DISTINCT posts.id) AS posts_count',
+        'COUNT(DISTINCT postReactions.id) AS posts_reactions_count',
+      ])
+      .where('users.id = :userId', { userId })
+      .groupBy('users.id')
+      .getRawOne();
+
+    return {
+      id: result.users_id,
+      email: result.users_email,
+      firstName: result.users_firstName,
+      lastName: result.users_lastName,
+      socialProfilePictureUrl: result.users_socialProfilePictureUrl,
+      publicationsCount: parseInt(result.posts_count),
+      reactionsCount: parseInt(result.posts_reactions_count),
+    };
   }
 }
