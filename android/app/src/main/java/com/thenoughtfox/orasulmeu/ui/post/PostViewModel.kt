@@ -15,11 +15,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.models.PostDto
+import org.openapitools.client.models.ReactToPostDto
 
 @HiltViewModel(assistedFactory = PostViewModel.PostViewModelFactory::class)
 class PostViewModel @AssistedInject constructor(
     private val api: PostsApi,
-    @Assisted private val postModel: PostDto,
+    @Assisted private val postDto: PostDto,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -27,7 +28,7 @@ class PostViewModel @AssistedInject constructor(
         fun create(dto: PostDto): PostViewModel
     }
 
-    private val _state = MutableStateFlow(postModel.toState())
+    private val _state = MutableStateFlow(postDto.toState())
     val state = _state.asStateFlow()
 
     private val eventFlow: MutableStateFlow<PostContract.Event?> = MutableStateFlow(null)
@@ -48,33 +49,29 @@ class PostViewModel @AssistedInject constructor(
                         }
 
                         PostContract.Event.Dislike -> {
-                            api.dislikePost(postModel.id).toOperationResult {}.onSuccess {
-                                // todo soon should be converted to updated status from backend
-                                val updatedReaction = PostContract.Reaction(
-                                    selectedReaction = PostContract.Reactions.DISLIKE,
-                                    count = postModel.dislikes + 1
-                                )
-                                _state.update {
-                                    it.copy(
-                                        reaction = updatedReaction
-                                    )
-                                }
+                            val updatedReaction = PostContract.Reaction(
+                                selectedReaction = PostContract.Reactions.DISLIKE,
+                                count = postDto.reactions.dislike + 1
+                            )
+                            _state.update {
+                                it.copy(reaction = updatedReaction)
                             }
+
+                            sendReaction(ReactToPostDto.React.dislike)
                         }
 
                         PostContract.Event.Like -> {
-                            api.likePost(postModel.id).toOperationResult {}.onSuccess {
-                                // todo soon should be converted to updated status from backend
-                                val updatedReaction = PostContract.Reaction(
-                                    selectedReaction = PostContract.Reactions.DISLIKE,
-                                    count = postModel.likes + 1
+                            val updatedReaction = PostContract.Reaction(
+                                selectedReaction = PostContract.Reactions.DISLIKE,
+                                count = postDto.reactions.like + 1
+                            )
+                            _state.update {
+                                it.copy(
+                                    reaction = updatedReaction
                                 )
-                                _state.update {
-                                    it.copy(
-                                        reaction = updatedReaction
-                                    )
-                                }
                             }
+
+                            sendReaction(ReactToPostDto.React.like)
                         }
 
                         PostContract.Event.Report -> {
@@ -82,22 +79,33 @@ class PostViewModel @AssistedInject constructor(
                         }
 
                         PostContract.Event.RevokeReaction -> {
-                            // todo remove fake delay and uncomment bottom lines
-                            // val updated = postApi.revokeReaction()
-//                            _state.update { it.copy(isReactionLoading = false, reaction = updated) }
+                            val updatedReaction = PostContract.Reaction(
+                                selectedReaction = PostContract.Reactions.NOTHING,
+                                count = 0
+                            )
                             _state.update {
                                 it.copy(
-                                    reaction = PostContract.Reaction(
-                                        selectedReaction = PostContract.Reactions.NOTHING,
-                                        count = 0
-                                    )
+                                    reaction = updatedReaction
                                 )
                             }
+
+                            when (_state.value.reaction.selectedReaction) {
+                                PostContract.Reactions.LIKE -> ReactToPostDto.React.dislike
+                                PostContract.Reactions.DISLIKE -> ReactToPostDto.React.like
+                                PostContract.Reactions.NOTHING -> null
+                            }?.let { sendReaction(it) }
                         }
                     }
                 }
             }
         }
+    }
+
+    private suspend fun sendReaction(reaction: ReactToPostDto.React) {
+        api.reactToPost(postDto.id, ReactToPostDto(react = reaction))
+            .toOperationResult { it }.onSuccess { dto ->
+                _state.update { dto.toState() }
+            }
     }
 
     private val _actions: MutableStateFlow<PostContract.Action?> = MutableStateFlow(null)

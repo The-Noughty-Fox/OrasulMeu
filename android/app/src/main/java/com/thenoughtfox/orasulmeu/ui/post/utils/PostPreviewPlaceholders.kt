@@ -2,7 +2,9 @@ package com.thenoughtfox.orasulmeu.ui.post.utils
 
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import org.openapitools.client.models.Media
+import org.openapitools.client.models.PointDto
 import org.openapitools.client.models.PostDto
+import org.openapitools.client.models.PostReactionsDto
 import org.openapitools.client.models.UserDto
 
 /**
@@ -20,8 +22,13 @@ object PostPreviewPlaceholders {
             id = 4
         ),
         comments = 4,
-        likes = 24,
-        dislikes = 25,
+        location = PointDto(0.0, 0.0),
+        locationAddress = "31 August str",
+        reactions = PostReactionsDto(
+            dislike = 35,
+            like = 401,
+            userReaction = null
+        ),
         media = listOf(
             Media(
                 id = 1,
