@@ -8,9 +8,10 @@ import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.*
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel @Inject constructor () : ViewModel() {
     private val _state: MutableStateFlow<State> = MutableStateFlow(State())
     private val _events: MutableStateFlow<Event?> = MutableStateFlow(null)
 
