@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.media
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.media
 
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
@@ -37,8 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
-import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier

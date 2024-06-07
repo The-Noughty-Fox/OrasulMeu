@@ -1,6 +1,5 @@
 [versions]
 agp = "8.3.0"
-cicerone = "7.1"
 coilCompose = "2.6.0"
 desugar_jdk_libs = "2.0.4"
 firebaseBom = "32.7.4"
@@ -8,6 +7,7 @@ fragmentKtx = "1.6.2"
 googleServices = "4.3.15"
 gson = "2.10.1"
 hilt = "2.50"
+hiltNavigationCompose = "1.2.0"
 insetter = "0.6.1"
 jodaTime = "2.12.5"
 kotlin = "1.9.20"
@@ -31,6 +31,7 @@ retrofit = "2.9.0"
 okhttp3-logging-interceptor = "5.0.0-alpha.2"
 timber = "5.0.1"
 crashlytics = "2.9.9"
+uiViewbinding = "1.6.7"
 viewbindingpropertydelegate = "1.5.3"
 constraintlayout = "2.1.4"
 mapbox = "11.3.0"
@@ -38,11 +39,14 @@ mapboxSearch = "2.0.0-beta.4"
 recyclerview = "1.3.2"
 playServicesMaps = "18.2.0"
 cameraX = "1.3.2"
+composeNavigation = "2.8.0-alpha08"
+serialization = "1.6.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
-cicerone = { module = "com.github.terrakok:cicerone", version.ref = "cicerone" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding", version.ref = "uiViewbinding" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 insetter = { module = "dev.chrisbanes.insetter:insetter", version.ref = "insetter" }
 joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
@@ -109,8 +113,13 @@ camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", vers
 camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 
+
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

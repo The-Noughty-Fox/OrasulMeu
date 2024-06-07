@@ -1,9 +1,11 @@
 package com.thenoughtfox.orasulmeu.utils
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.drawable.Drawable
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
 
 fun Context.getCompatDrawable(drawable: Int): Drawable? =
@@ -23,4 +25,10 @@ fun Context.showKeyboard() {
         getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
     inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+}
+
+fun Context.getActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.getActivity()
+    else -> null
 }

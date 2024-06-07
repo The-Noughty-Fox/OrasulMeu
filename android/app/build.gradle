@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.crashlytics)
+    alias(libs.plugins.kotlin.serialization)
+
     id 'kotlin-parcelize'
     id 'com.google.gms.google-services'
     id 'kotlin-kapt'
@@ -133,6 +135,7 @@ dependencies {
 
     //Hilt
     implementation libs.hilt.android
+    implementation libs.androidx.hilt.navigation.compose
     kapt libs.hilt.compiler
 
     //Joda time
@@ -160,12 +163,17 @@ dependencies {
 
     //ViewBinding
     implementation libs.view.binding.property.delegate
+    implementation libs.androidx.ui.viewbinding
+
 
     //Fragment
     implementation libs.androidx.fragment.ktx
 
-    //Cicerone
-    implementation libs.cicerone
+    // navigation
+    implementation(libs.navigation.compose)
+
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
 
     //Image
     implementation libs.coil.compose

@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.create_post
+package com.thenoughtfox.orasulmeu.ui.screens.create_post
 
 import android.net.Uri
 
@@ -30,5 +30,6 @@ object CreatePostContract {
     sealed class Action {
         data object OpenPhotoPicker : Action()
         data class ShowToast(val msg: String) : Action()
+        data object Initial: Action()
     }
 }

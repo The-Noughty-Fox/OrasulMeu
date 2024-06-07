@@ -1,9 +1,7 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.map.view
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.map.view
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions

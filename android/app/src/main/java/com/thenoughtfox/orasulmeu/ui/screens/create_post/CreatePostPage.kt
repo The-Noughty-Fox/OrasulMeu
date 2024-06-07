@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.create
+package com.thenoughtfox.orasulmeu.ui.screens.create_post
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -40,10 +40,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
-import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.State
-import com.thenoughtfox.orasulmeu.ui.create_post.media.RoundButton
-import com.thenoughtfox.orasulmeu.ui.create_post.media.UserImage
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.RoundButton
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.UserImage
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.bodyModifier
 import com.thenoughtfox.orasulmeu.ui.theme.outlinedTextFieldModifier

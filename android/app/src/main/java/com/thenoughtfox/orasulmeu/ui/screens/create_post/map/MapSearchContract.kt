@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.map
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.map
 
 import android.location.Location
 import com.mapbox.geojson.Point
@@ -25,4 +25,5 @@ sealed class Event {
 sealed class Action {
     data class MoveToLocation(val point: Point) : Action()
     data class ShowToast(val msg: String) : Action()
+    data object Initial: Action()
 }

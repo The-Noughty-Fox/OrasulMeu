@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.login.presentation
+package com.thenoughtfox.orasulmeu.ui.screens.login
 
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes

@@ -1,12 +1,15 @@
-package com.thenoughtfox.orasulmeu.ui.login.presentation
+package com.thenoughtfox.orasulmeu.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
-import com.thenoughtfox.orasulmeu.navigation.Screens
+import androidx.navigation.NavHostController
+import com.thenoughtfox.orasulmeu.navigation.NavDestinations
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.net.model.User
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,14 +21,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.AuthApi
 import org.openapitools.client.models.ApiBodyWithToken
-import javax.inject.Inject
 
-@HiltViewModel
-class LoginViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = LoginViewModel.Factory::class)
+class LoginViewModel @AssistedInject constructor(
     private val authApi: AuthApi,
     private val userSharedPrefs: UserSharedPrefs,
-    private val router: Router
+    @Assisted private val navigator: NavHostController
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navController: NavHostController): LoginViewModel
+    }
 
     val event = Channel<Event>(Channel.UNLIMITED)
 
@@ -65,8 +72,7 @@ class LoginViewModel @Inject constructor(
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
                                             lastName = it.lastName
                                         )
-
-                                    router.newRootScreen(Screens.mediaPostScreen)
+                                    navigator.navigate(NavDestinations.Home)
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))

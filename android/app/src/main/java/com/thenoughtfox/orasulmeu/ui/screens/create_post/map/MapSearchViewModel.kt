@@ -1,8 +1,8 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.map
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
+import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.LatLng
 import com.mapbox.geojson.Point
 import com.mapbox.search.ResponseInfo
@@ -17,8 +17,11 @@ import com.mapbox.search.common.IsoCountryCode
 import com.mapbox.search.common.IsoLanguageCode
 import com.mapbox.search.result.SearchResult
 import com.mapbox.search.result.SearchSuggestion
-import com.thenoughtfox.orasulmeu.navigation.Screens
+import com.thenoughtfox.orasulmeu.navigation.NavDestinations
 import com.thenoughtfox.orasulmeu.utils.getPoint
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,10 +31,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class MapSearchViewModel @Inject constructor(private val router: Router) : ViewModel() {
+@HiltViewModel(assistedFactory = MapSearchViewModel.Factory::class)
+class MapSearchViewModel @AssistedInject constructor(
+    @Assisted private val navigator: NavHostController
+) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navController: NavHostController): MapSearchViewModel
+    }
 
     val event = Channel<Event>(Channel.UNLIMITED)
     private val _state = MutableStateFlow(State())
@@ -83,7 +92,7 @@ class MapSearchViewModel @Inject constructor(private val router: Router) : ViewM
                 is Event.OnSearchSuggestionClicked ->
                     searchEngine.select(event.suggestion, selectCallback)
 
-                Event.TappedNext -> router.navigateTo(Screens.createPostScreen)
+                Event.TappedNext -> navigator.navigate(NavDestinations.CreatePostScreen)
             }
         }
     }

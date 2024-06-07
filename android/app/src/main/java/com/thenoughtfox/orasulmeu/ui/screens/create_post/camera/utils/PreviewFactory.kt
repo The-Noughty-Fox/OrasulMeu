@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.camera.utils
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.utils
 
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView

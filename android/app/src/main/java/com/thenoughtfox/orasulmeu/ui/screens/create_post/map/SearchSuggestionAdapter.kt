@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.create_post.map
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.map
 
 
 import android.view.LayoutInflater
