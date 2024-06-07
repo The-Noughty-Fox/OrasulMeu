@@ -17,7 +17,6 @@ fun Alert(
     dialogText: String,
     confirmText: String = stringResource(id = R.string.common_confirm),
     dismissText: String = stringResource(id = R.string.common_dismiss),
-
     icon: ImageVector? = null,
 ) {
     AlertDialog(
