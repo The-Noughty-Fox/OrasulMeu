@@ -28,86 +28,42 @@ class PostListViewModel @Inject constructor(
         MutableStateFlow(PostListContract.State())
     val state = _state.asStateFlow()
 
-    private val _action: MutableStateFlow<PostListContract.Action?> = MutableStateFlow(null)
-    fun sendAction(a: PostListContract.Action) {
-        viewModelScope.launch(Dispatchers.IO) { _action.emit(a) }
+    private val _event: MutableStateFlow<PostListContract.Event?> = MutableStateFlow(null)
+    suspend fun sendEvent(a: PostListContract.Event) {
+        _event.emit(a)
     }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            _action.collect { action ->
+
+            _state.update { it.copy(isLoading = true) }
+            api.getPosts().toOperationResult { it }.onSuccess { response ->
+                _state.update {
+                    it.copy(isLoading = false,
+                        list = response.data?.map { item -> item.toState() }
+                            ?: emptyList())
+                }
+            }
+
+            _event.collect { action ->
                 when (action) {
-                    PostListContract.Action.Refresh -> {
-                        _state.update { it.copy(isLoading = true) }
-                        api.getPosts().toOperationResult { it }.onSuccess { response ->
-                            _state.update {
-                                it.copy(isLoading = false,
-                                    list = response.data?.map { item -> item.toState() }
-                                        ?: emptyList())
-                            }
-                        }
+                    is PostListContract.Event.DislikePost -> {
+                        dislikePost(action.postId)
                     }
 
-                    is PostListContract.Action.DislikePost -> {
-                        updateListItem(action.postId) {
-                            it.copy(
-                                reaction = it.reaction.copy(
-                                    selectedReaction = PostContract.Reactions.DISLIKE,
-                                    dislikes = it.reaction.dislikes + 1
-                                )
-                            )
-                        }
-                        api.reactToPost(action.postId, ReactToPostDto(ReactToPostDto.React.dislike))
+                    is PostListContract.Event.LikePost -> {
+                        likePost(action.postId)
                     }
 
-                    is PostListContract.Action.LikePost -> {
-                        updateListItem(action.postId) {
-                            it.copy(
-                                reaction = it.reaction.copy(
-                                    selectedReaction = PostContract.Reactions.LIKE,
-                                    likes = it.reaction.likes + 1
-                                )
-                            )
-                        }
-                        api.reactToPost(action.postId, ReactToPostDto(ReactToPostDto.React.like))
+                    is PostListContract.Event.RevokeReaction -> {
+                        revokeReaction(action.postId)
                     }
 
-                    is PostListContract.Action.RevokeReaction -> {
-                        val post =
-                            _state.value.list.find { it.id == action.postId } ?: return@collect
-
-                        val reactionToSend = when (post.reaction.selectedReaction) {
-                            PostContract.Reactions.LIKE -> ReactToPostDto.React.dislike
-                            PostContract.Reactions.DISLIKE -> ReactToPostDto.React.like
-                            PostContract.Reactions.NOTHING -> null
-                        } ?: return@collect
-
-                        var likes = post.reaction.likes
-                        if (post.reaction.selectedReaction == PostContract.Reactions.LIKE) likes -= 1
-
-                        var dislikes = post.reaction.dislikes
-                        if (post.reaction.selectedReaction == PostContract.Reactions.DISLIKE) dislikes -= 1
-
-                        updateListItem(
-                            action.postId
-                        ) {
-                            it.copy(
-                                reaction = PostContract.Reaction(
-                                    selectedReaction = PostContract.Reactions.NOTHING,
-                                    likes = likes,
-                                    dislikes = dislikes
-                                )
-                            )
-                        }
-
-                        api.reactToPost(action.postId, ReactToPostDto(reactionToSend))
-                    }
-
-                    is PostListContract.Action.SendReport -> {
+                    is PostListContract.Event.SendReport -> {
                         _state.update { it.copy(messageToShow = "Feature will be implemented soon") }
                     }
 
-                    PostListContract.Action.CloseMessage -> {
+                    PostListContract.Event.CloseMessage -> {
                         _state.update { it.copy(messageToShow = null) }
                     }
 
@@ -115,6 +71,58 @@ class PostListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun likePost(postId: Int) {
+        updateListItem(postId) {
+            it.copy(
+                reaction = it.reaction.copy(
+                    selectedReaction = PostContract.Reactions.LIKE,
+                    likes = it.reaction.likes + 1
+                )
+            )
+        }
+        api.reactToPost(postId, ReactToPostDto(ReactToPostDto.React.like))
+    }
+
+    private suspend fun dislikePost(postId: Int) {
+        updateListItem(postId) {
+            it.copy(
+                reaction = it.reaction.copy(
+                    selectedReaction = PostContract.Reactions.DISLIKE,
+                    dislikes = it.reaction.dislikes + 1
+                )
+            )
+        }
+        api.reactToPost(postId, ReactToPostDto(ReactToPostDto.React.dislike))
+    }
+
+    private suspend fun revokeReaction(postId: Int) {
+        val post = _state.value.list.find { it.id == postId } ?: return
+
+        val reactionToSend = when (post.reaction.selectedReaction) {
+            PostContract.Reactions.LIKE -> ReactToPostDto.React.dislike
+            PostContract.Reactions.DISLIKE -> ReactToPostDto.React.like
+            PostContract.Reactions.NOTHING -> null
+        } ?: return
+
+        var likes = post.reaction.likes
+        if (post.reaction.selectedReaction == PostContract.Reactions.LIKE) likes -= 1
+
+        var dislikes = post.reaction.dislikes
+        if (post.reaction.selectedReaction == PostContract.Reactions.DISLIKE) dislikes -= 1
+
+        updateListItem(postId) {
+            it.copy(
+                reaction = PostContract.Reaction(
+                    selectedReaction = PostContract.Reactions.NOTHING,
+                    likes = likes,
+                    dislikes = dislikes
+                )
+            )
+        }
+
+        api.reactToPost(postId, ReactToPostDto(reactionToSend))
     }
 
     private fun updateListItem(id: Int, morph: (PostContract.State) -> PostContract.State) {

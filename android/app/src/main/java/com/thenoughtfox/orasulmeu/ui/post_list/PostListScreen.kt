@@ -26,7 +26,7 @@ import com.thenoughtfox.orasulmeu.ui.post.PostView
 @Composable
 fun PostListScreen(
     state: PostListContract.State,
-    sendAction: (PostListContract.Action) -> Unit
+    sendEvent: (PostListContract.Event) -> Unit
 ) {
     if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -49,19 +49,19 @@ fun PostListScreen(
                 PostView(state = it) { e ->
                     when (e) {
                         PostContract.Action.ConfirmReport -> {
-                            sendAction(PostListContract.Action.SendReport(it.id))
+                            sendEvent(PostListContract.Event.SendReport(it.id))
                         }
 
                         PostContract.Action.Dislike -> {
-                            sendAction(PostListContract.Action.DislikePost(it.id))
+                            sendEvent(PostListContract.Event.DislikePost(it.id))
                         }
 
                         PostContract.Action.Like -> {
-                            sendAction(PostListContract.Action.LikePost(it.id))
+                            sendEvent(PostListContract.Event.LikePost(it.id))
                         }
 
                         PostContract.Action.RevokeReaction -> {
-                            sendAction(PostListContract.Action.RevokeReaction(it.id))
+                            sendEvent(PostListContract.Event.RevokeReaction(it.id))
                         }
                     }
                 }
@@ -71,11 +71,11 @@ fun PostListScreen(
         if (state.messageToShow != null) {
             AlertDialog(
                 onDismissRequest = {
-                    sendAction(PostListContract.Action.CloseMessage)
+                    sendEvent(PostListContract.Event.CloseMessage)
                 },
                 confirmButton = {
                     Button(onClick = {
-                        sendAction(PostListContract.Action.CloseMessage)
+                        sendEvent(PostListContract.Event.CloseMessage)
                     }) {
                         Text(text = "Okay")
                     }

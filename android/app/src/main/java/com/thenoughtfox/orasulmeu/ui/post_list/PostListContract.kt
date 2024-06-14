@@ -12,12 +12,11 @@ interface PostListContract {
         val messageToShow: String? = null
     )
 
-    sealed interface Action {
-        data object Refresh : Action
-        data class LikePost(val postId: Int) : Action
-        data class DislikePost(val postId: Int) : Action
-        data class RevokeReaction(val postId: Int) : Action
-        data class SendReport(val postId: Int) : Action
-        data object CloseMessage : Action
+    sealed interface Event {
+        data class LikePost(val postId: Int) : Event
+        data class DislikePost(val postId: Int) : Event
+        data class RevokeReaction(val postId: Int) : Event
+        data class SendReport(val postId: Int) : Event
+        data object CloseMessage : Event
     }
 }
