@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.IntentSender
 import android.location.Location
 import android.os.Looper
-import android.util.Log
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
@@ -82,7 +81,6 @@ class LocationClient(
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val lastLocation = locationResult.lastLocation ?: return
-                Log.e("LocationClient", "Last location: $lastLocation")
                 locationClient.removeLocationUpdates(locationCallback!!)
                 onSendLocation(lastLocation)
             }
