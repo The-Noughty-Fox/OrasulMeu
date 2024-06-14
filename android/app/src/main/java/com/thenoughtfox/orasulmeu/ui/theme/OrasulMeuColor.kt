@@ -7,12 +7,12 @@ import androidx.compose.ui.res.colorResource
 import com.thenoughtfox.orasulmeu.R
 
 class OrasulMeuColor {
-    val menuSelected: Color
+    val primary: Color
         @Composable
         @ReadOnlyComposable
         get() = colorResource(R.color.indigo600)
 
-    val menuUnselected: Color
+    val onBackground: Color
         @Composable
         @ReadOnlyComposable
         get() = colorResource(R.color.black)

@@ -83,7 +83,8 @@ private fun NavItem(
     Icon(
         painter = painterResource(getIconResId(tab)),
         modifier = Modifier.size(24.dp),
-        contentDescription = null
+        contentDescription = null,
+        tint = if (isSelected) OrasulMeuTheme.colors.primary else OrasulMeuTheme.colors.onBackground
     )
 
     Text(
@@ -92,7 +93,7 @@ private fun NavItem(
         style = TextStyle(
             fontSize = 10.sp,
             fontWeight = FontWeight(500),
-            color = if (isSelected) OrasulMeuTheme.colors.menuSelected else OrasulMeuTheme.colors.menuUnselected
+            color = if (isSelected) OrasulMeuTheme.colors.primary else OrasulMeuTheme.colors.onBackground
         )
     )
 
