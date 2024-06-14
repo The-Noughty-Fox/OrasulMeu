@@ -36,4 +36,7 @@
     <string name="camera_permission_denied_aler_message">Mergi la setările Android, apasă pe permisiuni și permite accesul.</string>
     <string name="camera_permission_denied_go_to_settings_button_text">Mergi la setări</string>
     <string name="camera_permission_denied_alert_cancel_button">Înlătură</string>
+    <string name="menu_map">Harta</string>
+    <string name="menu_create">Creaza</string>
+    <string name="menu_profile">Profil</string>
 </resources>

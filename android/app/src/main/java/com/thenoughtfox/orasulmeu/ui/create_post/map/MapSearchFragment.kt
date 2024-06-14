@@ -31,6 +31,7 @@ import com.thenoughtfox.orasulmeu.service.LocationClient
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.create_post.media.RoundButton
+import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import com.thenoughtfox.orasulmeu.utils.applyBottomInsetMargin
 import com.thenoughtfox.orasulmeu.utils.applyTopStatusInsetMargin
 import com.thenoughtfox.orasulmeu.utils.hideKeyboard
@@ -52,8 +53,10 @@ class MapSearchFragment : Fragment() {
     private val adapter: SearchSuggestionAdapter by lazy { SearchSuggestionAdapter() }
     private val locationClient: LocationClient by lazy {
         LocationClient(requireContext()) { location ->
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.event.send(Event.NavigateToPlayer(location))
+            if (view != null) {
+                lifecycleScope.launch {
+                    viewModel.event.send(Event.NavigateToPlayer(location))
+                }
             }
         }
     }
@@ -152,7 +155,7 @@ class MapSearchFragment : Fragment() {
             RoundButton(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 text = stringResource(id = R.string.map_button_next),
-                backgroundColor = colorResource(id = R.color.button_next_color),
+                backgroundColor = OrasulMeuTheme.colors.buttonNextBackground,
                 textColor = colorResource(id = R.color.black),
                 onClick = {
                     lifecycleScope.launch {
