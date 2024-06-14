@@ -1,9 +1,13 @@
 package com.thenoughtfox.orasulmeu.ui.create_post.map
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -27,6 +31,7 @@ import com.thenoughtfox.orasulmeu.service.LocationClient
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.create_post.media.RoundButton
+import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import com.thenoughtfox.orasulmeu.utils.applyBottomInsetMargin
 import com.thenoughtfox.orasulmeu.utils.applyTopStatusInsetMargin
 import com.thenoughtfox.orasulmeu.utils.hideKeyboard
@@ -48,14 +53,36 @@ class MapSearchFragment : Fragment() {
     private val adapter: SearchSuggestionAdapter by lazy { SearchSuggestionAdapter() }
     private val locationClient: LocationClient by lazy {
         LocationClient(requireContext()) { location ->
-            lifecycleScope.launch {
-                viewModel.event.send(Event.NavigateToPlayer(location))
+            if (view != null) {
+                lifecycleScope.launch {
+                    viewModel.event.send(Event.NavigateToPlayer(location))
+                }
             }
         }
     }
 
-    private val locationRequester: PermissionsRequester by lazy {
-        constructLocationPermissionRequest(
+    private var locationResult: ActivityResultLauncher<IntentSenderRequest>? = null
+    private var locationRequester: PermissionsRequester? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = binding.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        constructLocationPermissionRequest()
+        initLocationResultLauncher()
+        setupComposeButtonNext()
+        bindView()
+        setupMap()
+        setupRecyclerView()
+        subscribeObservables()
+    }
+
+    private fun constructLocationPermissionRequest() {
+        locationRequester = constructLocationPermissionRequest(
             LocationPermission.FINE,
             LocationPermission.COARSE,
             onShowRationale = {},
@@ -65,42 +92,34 @@ class MapSearchFragment : Fragment() {
             onNeverAskAgain = { activity?.let { showSettingsDialog(it) } },
             requiresPermission = {
                 lifecycleScope.launch {
-                    binding.layoutPin.isVisible = true
-                    locationClient.getLastLocation()
+                    if (view != null) {
+                        binding.layoutPin.isVisible = true
+                        locationClient.startLocationRequest(
+                            onSuccess = { locationClient.getLastLocation() },
+                            onFailure = { e ->
+                                val intentSenderRequest =
+                                    IntentSenderRequest.Builder(e.resolution).build()
+                                locationResult?.launch(intentSenderRequest)
+                            }
+                        )
+                    }
                 }
             })
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding.buttonNext.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                RoundButton(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    text = stringResource(id = R.string.map_button_next),
-                    backgroundColor = colorResource(id = R.color.button_next_color),
-                    textColor = colorResource(id = R.color.black),
-                    onClick = {
-                        lifecycleScope.launch {
-                            viewModel.event.send(Event.TappedNext)
-                        }
-                    })
+    private fun initLocationResultLauncher() {
+        locationResult =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    if (locationClient.isLocationPermissionGranted()) {
+                        locationClient.getLastLocation()
+                    } else {
+                        locationRequester?.launch()
+                    }
+                } else {
+                    context?.showToast("Please enable location")
+                }
             }
-        }
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        bindView()
-        setupMap()
-        setupRecyclerView()
-        subscribeObservables()
     }
 
     private fun bindView() = binding.apply {
@@ -114,7 +133,6 @@ class MapSearchFragment : Fragment() {
 
             lifecycleScope.launch { viewModel.event.send(Event.OnSearchSuggestionClicked(it)) }
         }
-
 
         editTextSearch.doOnTextChanged { text, _, _, _ ->
             lifecycleScope.launch {
@@ -131,10 +149,32 @@ class MapSearchFragment : Fragment() {
         }
     }
 
+    private fun setupComposeButtonNext() = binding.buttonNext.apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            RoundButton(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                text = stringResource(id = R.string.map_button_next),
+                backgroundColor = OrasulMeuTheme.colors.buttonNextBackground,
+                textColor = colorResource(id = R.color.black),
+                onClick = {
+                    lifecycleScope.launch {
+                        viewModel.event.send(Event.TappedNext)
+                    }
+                })
+        }
+    }
+
     private fun setupMap() = binding.apply {
         mapView.apply {
             onLoadMap {
-                locationRequester.launch()
+                locationClient.startLocationRequest(
+                    onSuccess = { locationRequester?.launch() },
+                    onFailure = { e ->
+                        val intentSenderRequest = IntentSenderRequest.Builder(e.resolution).build()
+                        locationResult?.launch(intentSenderRequest)
+                    }
+                )
             }
 
             onCameraTrackingDismissed {

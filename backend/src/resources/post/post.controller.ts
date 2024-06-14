@@ -56,6 +56,16 @@ export class PostController {
     return this.postService.findAll(paginationQuery);
   }
 
+  @Get('my')
+  @ApiOperation({ operationId: 'get-my-posts' })
+  @ApiResponse({
+    status: 200,
+    schema: getPaginationSchema(PostDto),
+  })
+  getMyPosts(@Req() req) {
+    return this.postService.getMyPosts(req.user.id);
+  }
+
   @Get(':id')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'get-post' })

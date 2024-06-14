@@ -10,18 +10,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 
 @Module
 @InstallIn(SingletonComponent::class)
 object CameraModule {
-
-    @Provides
-    @Singleton
-    fun provideExecutorService(): ExecutorService = Executors.newSingleThreadExecutor()
 
     @Provides
     @Singleton
@@ -41,11 +35,9 @@ object CameraModule {
     @Singleton
     fun providePerformImageCaptureUseCase(
         imageCapture: ImageCapture,
-        cameraExecutor: ExecutorService,
         @ApplicationContext context: Context
     ) : PerformImageCaptureUseCase = PerformImageCaptureUseCase(
         context = context,
-        imageCapture = imageCapture,
-        cameraExecutor = cameraExecutor
+        imageCapture = imageCapture
     )
 }

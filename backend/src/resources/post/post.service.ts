@@ -184,4 +184,13 @@ export class PostService {
     ];
     return this.mapper.map(await this.repository.save(post), Post, PostDto);
   }
+
+  async getMyPosts(userId: number) {
+    const posts = await this.repository.find({
+      where: { author: { id: userId } },
+      relations: fullPostRelations,
+    });
+
+    return this.mapper.mapArray(posts, Post, PostDto);
+  }
 }

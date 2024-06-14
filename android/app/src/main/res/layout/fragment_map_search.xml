@@ -69,7 +69,6 @@
         tools:itemCount="4"
         tools:listitem="@layout/item_search_suggestion" />
 
-
     <LinearLayout
         android:id="@+id/layout_pin"
         android:layout_width="wrap_content"

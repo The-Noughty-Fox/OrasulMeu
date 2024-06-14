@@ -6,11 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '@/resources/auth/passport/guards';
+import { UserProfileDto } from '@/resources/user/dto/user-profile.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 @ApiTags('users')
 export class UserController {
@@ -24,6 +29,13 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Get('profile')
+  @ApiOperation({ operationId: 'get-user-profile' })
+  @ApiResponse({ type: UserProfileDto })
+  getProfile(@Req() req) {
+    return this.userService.profile(req.user.id);
   }
 
   @Get(':id')

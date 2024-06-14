@@ -31,7 +31,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MapSearchViewModel @Inject constructor(private val router: Router) : ViewModel() {
+class MapSearchViewModel @Inject constructor(
+    private val router: Router
+) : ViewModel() {
 
     val event = Channel<Event>(Channel.UNLIMITED)
     private val _state = MutableStateFlow(State())

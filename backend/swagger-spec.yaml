@@ -36,6 +36,19 @@ paths:
         "200":
           description: ""
       tags: *a1
+  /users/profile:
+    get:
+      operationId: get-user-profile
+      summary: ""
+      parameters: []
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileDto"
+      tags: *a1
   /users/{id}:
     get:
       operationId: findOne
@@ -192,6 +205,42 @@ paths:
     get:
       operationId: get-posts
       summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
+      tags: *a3
+  /posts/my:
+    get:
+      operationId: get-my-posts
+      summary: ""
       parameters: []
       responses:
         "200":
@@ -199,16 +248,18 @@ paths:
           content:
             application/json:
               schema:
-                data:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/PostDto"
-                total:
-                  type: number
-                page:
-                  type: number
-                limit:
-                  type: number
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
       tags: *a3
   /posts/{id}:
     get:
@@ -425,6 +476,30 @@ components:
         - email
         - firstName
         - lastName
+    UserProfileDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        socialProfilePictureUrl:
+          type: string
+        reactionsCount:
+          type: integer
+        publicationsCount:
+          type: integer
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - reactionsCount
+        - publicationsCount
     AppleApiBody:
       type: object
       properties:
