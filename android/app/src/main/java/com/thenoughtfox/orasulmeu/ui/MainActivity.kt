@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handlePrimaryNavigationScreen() {
         if (supportFragmentManager.fragments.isEmpty()) {
-            val screen = if (userSharedPrefs.user != null) {
+            val screen = if (userSharedPrefs.user == null) {
                 loginScreen
             } else {
                 mediaPostScreen
