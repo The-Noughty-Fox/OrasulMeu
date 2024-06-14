@@ -43,4 +43,8 @@
 
     <string name="common.confirm">Confirm</string>
     <string name="common.dismiss">Dismiss</string>
+
+    <string name="menu_map">Harta</string>
+    <string name="menu_create">Creaza</string>
+    <string name="menu_profile">Profil</string>
 </resources>
