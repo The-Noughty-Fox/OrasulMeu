@@ -58,12 +58,12 @@ object PostPreviewPlaceholders {
         title = "Hello Luke",
         textContent = "Have you heard the story about lord Darth Plegas the Wise blah blah blah blah blah blah blah blah blah blah blah blah",
         media = listOf(
-            Media(id = 0, type = Media.Type.image, url = "gay", fileName = "gay.jpg"),
-            Media(id = 0, type = Media.Type.image, url = "gay", fileName = "gay.jpg"),
-            Media(id = 0, type = Media.Type.image, url = "gay", fileName = "gay.jpg")
+            Media(id = 0, type = Media.Type.image, url = "test", fileName = "test.jpg"),
+            Media(id = 0, type = Media.Type.image, url = "test", fileName = "test.jpg"),
+            Media(id = 0, type = Media.Type.image, url = "test", fileName = "test.jpg")
         ),
         reaction = PostContract.Reaction(
-            selectedReaction = PostContract.Reactions.LIKE, count = 214
+            selectedReaction = PostContract.Reactions.LIKE, likes = 214, dislikes = 63
         )
     )
 }

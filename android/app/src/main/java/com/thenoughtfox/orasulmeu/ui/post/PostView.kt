@@ -20,6 +20,8 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -44,6 +46,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.elements.MediaView
 import com.thenoughtfox.orasulmeu.ui.post.elements.ReactionButton
@@ -51,11 +54,17 @@ import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
 @Composable
-fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Unit) {
+fun PostView(
+    state: PostContract.State,
+    onSendEvent: (PostContract.Action) -> Unit
+) {
+
+    var shouldShowReportAlert by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .wrapContentSize()
-            .background(color = colorResource(R.color.background_color))
+            .background(color = colorResource(R.color.white))
     ) {
         val pagerState = rememberPagerState(0, pageCount = { state.media.count() })
 
@@ -68,23 +77,33 @@ fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Uni
         })
 
         // reaction, pager indicator & three dots
-        Row(
+        ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
+            val (reaction, pagerIndication, threeDots) = createRefs()
             ReactionButton(reaction = state.reaction,
-                onLike = { onSendEvent(PostContract.Event.Like) },
-                onDislike = { onSendEvent(PostContract.Event.Dislike) },
-                onRevokeReaction = { onSendEvent(PostContract.Event.RevokeReaction) })
+                onLike = { onSendEvent(PostContract.Action.Like) },
+                onDislike = { onSendEvent(PostContract.Action.Dislike) },
+                onRevokeReaction = { onSendEvent(PostContract.Action.RevokeReaction) },
+                modifier = Modifier.constrainAs(reaction) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top, 8.dp)
+                    bottom.linkTo(parent.bottom, 8.dp)
+                }
+            )
 
-            PagerIndicator(pagerState = pagerState)
+            PagerIndicator(pagerState = pagerState, modifier = Modifier.constrainAs(pagerIndication) {
+                centerTo(parent)
+            })
 
             ThreeDotsIcon(
-                onReportClick = { onSendEvent(PostContract.Event.Report) },
-                modifier = Modifier
+                onReportClick = { shouldShowReportAlert = true },
+                modifier = Modifier.constrainAs(threeDots) {
+                    end.linkTo(parent.end)
+                    centerVerticallyTo(parent)
+                }
                     .size(24.dp)
                     .clip(RoundedCornerShape(16.dp))
             )
@@ -143,12 +162,31 @@ fun PostView(state: PostContract.State, onSendEvent: (PostContract.Event) -> Uni
                 style = TextStyle(fontSize = 14.sp, color = colorResource(R.color.comment_area))
             )
         }
+
+        if (shouldShowReportAlert) {
+            AlertDialog(
+                onDismissRequest = { shouldShowReportAlert = false },
+                confirmButton = {
+                    Button(onClick = {
+                        onSendEvent(PostContract.Action.ConfirmReport)
+                        shouldShowReportAlert = false
+                    }) {
+                        Text(text = "Raport")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { shouldShowReportAlert = false }) { Text(text = "Anulare") }
+                },
+                title = { Text(text = "Raportați postarea") },
+                text = { Text(text = "Sigur vrei să raportezi postarea?") }
+            )
+        }
     }
 }
 
 @Composable
-private fun PagerIndicator(pagerState: PagerState) = Row(
-    Modifier.wrapContentHeight(), horizontalArrangement = Arrangement.Center
+private fun PagerIndicator(pagerState: PagerState, modifier: Modifier = Modifier) = Row(
+    modifier.wrapContentHeight(), horizontalArrangement = Arrangement.Center
 ) {
     repeat(pagerState.pageCount) { iteration ->
         val isCurrent = pagerState.currentPage == iteration
@@ -215,7 +253,7 @@ private fun CombinedTitleWithBody(title: String, body: String) {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xffffff)
+@Preview(showBackground = true, backgroundColor = 0xffffff, showSystemUi = true)
 @Composable
 private fun Preview() = OrasulMeuTheme {
     PostView(state = PostPreviewPlaceholders.postState, onSendEvent = {})

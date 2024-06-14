@@ -109,6 +109,7 @@ dependencies {
     implementation libs.androidx.material3
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.recyclerview
+    implementation libs.androidx.constraintlayout.compose
 
     //Coroutines
     implementation libs.coroutines.core

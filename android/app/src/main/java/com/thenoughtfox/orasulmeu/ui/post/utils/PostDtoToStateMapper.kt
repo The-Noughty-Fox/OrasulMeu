@@ -6,6 +6,7 @@ import org.openapitools.client.models.PostReactionsDto
 
 object PostDtoToStateMapper {
     fun PostDto.toState(): PostContract.State = PostContract.State(
+        id = this.id,
         author = "${this.author.firstName} ${this.author.lastName}",
         title = this.title,
         textContent = this.content,
@@ -16,18 +17,16 @@ object PostDtoToStateMapper {
     )
 
     private fun PostReactionsDto.mapReaction(): PostContract.Reaction {
-        return when (this.userReaction) {
-            PostReactionsDto.UserReaction.like -> PostContract.Reaction(
-                selectedReaction = PostContract.Reactions.LIKE,
-                count = this.like
-            )
-
-            PostReactionsDto.UserReaction.dislike -> PostContract.Reaction(
-                selectedReaction = PostContract.Reactions.DISLIKE,
-                count = this.dislike
-            )
-
-            null -> PostContract.Reaction(PostContract.Reactions.NOTHING, 0)
+        val selectedReaction = when (this.userReaction) {
+            PostReactionsDto.UserReaction.like -> PostContract.Reactions.LIKE
+            PostReactionsDto.UserReaction.dislike -> PostContract.Reactions.DISLIKE
+            null -> PostContract.Reactions.NOTHING
         }
+
+        return PostContract.Reaction(
+            selectedReaction = selectedReaction,
+            likes = this.like,
+            dislikes = this.dislike
+        )
     }
 }

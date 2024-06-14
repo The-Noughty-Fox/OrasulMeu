@@ -9,6 +9,7 @@ import com.thenoughtfox.orasulmeu.ui.create_post.create.CreatePostFragment
 import com.thenoughtfox.orasulmeu.ui.create_post.map.MapSearchFragment
 import com.thenoughtfox.orasulmeu.ui.create_post.media.CreatePostMediaFragment
 import com.thenoughtfox.orasulmeu.ui.login.presentation.LoginFragment
+import com.thenoughtfox.orasulmeu.ui.post_list.PostListFragment
 
 object Screens {
 
@@ -18,5 +19,5 @@ object Screens {
     val cameraScreen = FragmentScreen { CameraFragment() }
     val mapSearchScreen = FragmentScreen { MapSearchFragment() }
     val mainActivity = ActivityScreen { Intent(it, MainActivity::class.java) }
-
+    val postListScreen = FragmentScreen { PostListFragment() }
 }

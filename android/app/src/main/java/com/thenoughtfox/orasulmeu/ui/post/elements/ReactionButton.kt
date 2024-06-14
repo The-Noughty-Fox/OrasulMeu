@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,7 +59,7 @@ fun ReactionButton(
             PostContract.Reactions.LIKE -> {
                 Text(text = Emojis.LIKE, modifier = emojiTextModifier, style = emojiTextStyle)
                 Text(
-                    text = reaction.count.toString(),
+                    text = reaction.likes.toString(),
                     modifier = Modifier.padding(8.dp),
                     style = reactionCountStyle
                 )
@@ -73,7 +72,7 @@ fun ReactionButton(
                     style = emojiTextStyle
                 )
                 Text(
-                    text = reaction.count.toString(),
+                    text = reaction.dislikes.toString(),
                     modifier = Modifier.padding(8.dp),
                     style = reactionCountStyle
                 )
@@ -106,7 +105,8 @@ private fun Preview() = OrasulMeuTheme {
         mutableStateOf(
             PostContract.Reaction(
                 selectedReaction = PostContract.Reactions.NOTHING,
-                count = 24
+                likes = 24,
+                dislikes = 6
             )
         )
     }
