@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -200,9 +201,13 @@ private fun MediaList(images: List<Uri>, outState: ScrollState) {
         items(images) { uri ->
             Box(
                 modifier = Modifier.aspectRatio(1f),
-                contentAlignment = Alignment.Center
             ) {
-                UserImage(uri)
+                UserImage(
+                    image = uri,
+                    modifier = Modifier
+                        .size(106.dp)
+                        .padding(vertical = 8.dp)
+                )
             }
         }
 
