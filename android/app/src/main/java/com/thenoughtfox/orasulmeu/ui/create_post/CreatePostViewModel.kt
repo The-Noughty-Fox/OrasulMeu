@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.models.CreatePostDto
+import org.openapitools.client.models.PointDto
 import javax.inject.Inject
 
 @HiltViewModel
@@ -88,7 +89,13 @@ class CreatePostViewModel @Inject constructor(
 
     private fun sendPost() = viewModelScope.launch(Dispatchers.IO) {
         _state.update { it.copy(isLoading = true) }
-        val post = CreatePostDto(title = state.value.title, content = state.value.description)
+        val post = CreatePostDto(
+            title = state.value.title,
+            content = state.value.description,
+            locationAddress = state.value.address,
+            location = PointDto(latitude = 0.0, longitude = 0.0)
+        )
+
         postsApi.createPost(post)
             .toOperationResult { it }
             .onSuccess { postDto -> sendPostMedia(postDto.id) }
@@ -113,7 +120,6 @@ class CreatePostViewModel @Inject constructor(
             .toOperationResult { it }
             .onSuccess {
                 _state.update { it.copy(isLoading = false) }
-                _action.emit(Action.ShowToast("NICEE"))
             }
             .onError {
                 _state.update { it.copy(isLoading = false) }
