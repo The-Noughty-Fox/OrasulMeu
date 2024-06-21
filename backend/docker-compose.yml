@@ -25,6 +25,7 @@ services:
       /usr/app
     volumes:
       - .:/usr/app/
+      - /usr/app/node_modules
     ports:
       - $PORT:$PORT
       - 9229:9229 # debug
