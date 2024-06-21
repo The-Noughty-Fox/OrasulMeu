@@ -10,7 +10,7 @@ class OrasulMeuColor {
     val primary: Color
         @Composable
         @ReadOnlyComposable
-        get() = colorResource(R.color.indigo600)
+        get() = colorResource(R.color.indigo_600)
 
     val onBackground: Color
         @Composable
@@ -21,4 +21,7 @@ class OrasulMeuColor {
         @Composable
         @ReadOnlyComposable
         get() = colorResource(R.color.button_next_color)
+
+    val backgroundWhite: Color
+        get() = Color.White
 }

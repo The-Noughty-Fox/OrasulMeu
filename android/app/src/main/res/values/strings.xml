@@ -53,4 +53,7 @@
     <string name="menu_map">Harta</string>
     <string name="menu_create">Creaza</string>
     <string name="menu_profile">Profil</string>
+
+    <string name="my_profile_screen_title">Profilul meu</string>
+    <string name="save">Salveaza</string>
 </resources>

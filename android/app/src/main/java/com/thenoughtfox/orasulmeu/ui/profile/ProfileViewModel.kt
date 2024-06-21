@@ -2,16 +2,22 @@ package com.thenoughtfox.orasulmeu.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
+import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
+import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.Event
+import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.*
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor () : ViewModel() {
+class ProfileViewModel @Inject constructor(
+    private val router: Router,
+    userSharedPrefs: UserSharedPrefs
+) : ViewModel() {
     private val _state: MutableStateFlow<State> = MutableStateFlow(State())
     private val _events: MutableStateFlow<Event?> = MutableStateFlow(null)
 
@@ -24,13 +30,53 @@ class ProfileViewModel @Inject constructor () : ViewModel() {
         viewModelScope.launch {
             _events.collect { e -> e?.let { handleEvent(it) } }
         }
+
+        userSharedPrefs.user?.let { user ->
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    name = user.lastName ?: "empty name",
+                    imageUrl = user.socialProfilePictureUrl,
+                )
+            }
+        }
     }
 
     private fun handleEvent(e: Event) {
         when (e) {
-            Event.OnNavigationBackPressed -> TODO()
-            Event.OnProfileEditClicked -> TODO()
-            Event.OnSettingsPressed -> TODO()
+            Event.EditProfile -> {
+                _state.update {
+                    it.copy(
+                        isEditing = true,
+                        initialName = it.name,
+                        initialImageUrl = it.imageUrl
+                    )
+                }
+            }
+
+            Event.GoToSettings -> Unit // todo router.goToSettings
+
+            is Event.ChangeName -> {
+                _state.update { it.copy(name = e.newName) }
+            }
+
+            is Event.ChangePicture -> {
+                _state.update { it.copy(imageUrl = e.image.toString()) }
+            }
+
+            Event.SaveChanges -> {
+                _state.update { it.copy(isEditing = false) }
+            }
+
+            Event.DiscardChanges -> {
+                _state.update {
+                    it.copy(
+                        isEditing = false,
+                        name = it.initialName,
+                        imageUrl = it.initialImageUrl
+                    )
+                }
+            }
         }
     }
 }
