@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,18 +10,28 @@ import { InjectMapper } from '@automapper/nestjs';
 import { User } from '@/resources/user/entities/user.entity';
 import { MediaService } from '@/resources/media/media.service';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
-import { PostLike } from '@/resources/post/entities/post-like.entity';
-import { PostDislike } from '@/resources/post/entities/post-dislike.entity';
+import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
+import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-result.dto';
+import { POST_NOT_FOUND } from '@/infrastructure/messages';
+import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
+import { ReactionType } from '@/shared/types';
+
+const fullPostRelations = [
+  'author',
+  'postMedia',
+  'postMedia.media',
+  'reactions',
+  'reactions.post',
+  'reactions.user',
+];
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private readonly repository: Repository<Post>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(PostLike)
-    private readonly postLikeRepository: Repository<PostLike>,
-    @InjectRepository(PostDislike)
-    private readonly postDislikeRepository: Repository<PostDislike>,
+    @InjectRepository(PostReaction)
+    private readonly postReactionRepository: Repository<PostReaction>,
     @InjectRepository(PostMedia)
     private readonly postMediaRepository: Repository<PostMedia>,
     @InjectMapper()
@@ -34,42 +40,51 @@ export class PostService {
   ) {}
 
   async create(createPostDto: CreatePostDto, userId: number) {
-    const postEntity = this.repository.create(createPostDto);
+    const postEntity = this.repository.create({
+      title: createPostDto.title,
+      content: createPostDto.content,
+      locationAddress: createPostDto.locationAddress,
+    });
     postEntity.author = await this.userRepository.findOne({
       where: { id: userId },
     });
+    postEntity.location = {
+      type: 'Point',
+      coordinates: [
+        createPostDto.location.longitude,
+        createPostDto.location.latitude,
+      ],
+    };
     await this.repository.save(postEntity);
     return this.mapper.map(postEntity, Post, PostDto);
   }
 
-  async findAll() {
-    const postEntities = await this.repository.find({
-      relations: [
-        'author',
-        'postMedia',
-        'postMedia.media',
-        'likes',
-        'dislikes',
-      ],
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 25 } = paginationQuery;
+    const [postEntities, total] = await this.repository.findAndCount({
+      relations: fullPostRelations,
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    return this.mapper.mapArray(postEntities, Post, PostDto);
+    return {
+      page,
+      limit,
+      total,
+      data: this.mapper.mapArray(postEntities, Post, PostDto),
+    };
   }
 
   async findOne(id: number) {
     const post = await this.repository.findOne({
       where: { id },
-      relations: [
-        'author',
-        'postMedia',
-        'postMedia.media',
-        'likes',
-        'dislikes',
-      ],
+      relations: fullPostRelations,
     });
 
     if (!post) {
-      throw new NotFoundException(`Post with id ${id} not found`);
+      throw new NotFoundException(POST_NOT_FOUND(id));
     }
 
     return this.mapper.map(post, Post, PostDto);
@@ -78,11 +93,11 @@ export class PostService {
   async update(id: number, updatePostDto: UpdatePostDto) {
     const post = await this.repository.findOne({
       where: { id },
-      relations: ['author', 'postMedia', 'postMedia.media'],
+      relations: fullPostRelations,
     });
 
     if (!post) {
-      throw new NotFoundException(`Post with id ${id} not found`);
+      throw new NotFoundException(POST_NOT_FOUND(id));
     }
 
     const updatedPost = await this.repository.save(
@@ -96,62 +111,65 @@ export class PostService {
     const deletionResult = await this.repository.delete(id);
 
     if (deletionResult.affected === 0) {
-      throw new NotFoundException(`Post with id ${id} not found`);
+      throw new NotFoundException(POST_NOT_FOUND(id));
     }
 
     return true;
   }
 
-  async like(id: number, userId: number) {
-    const post = await this.repository.findOne({
-      where: { id },
+  async react(
+    postId: number,
+    userId: number,
+    reaction: ReactionType,
+  ): Promise<PostDto> {
+    let post = await this.repository.findOne({
+      where: { id: postId },
+      relations: fullPostRelations,
     });
 
     if (!post) {
-      throw new NotFoundException(`Post with id ${id} not found`);
+      throw new NotFoundException(POST_NOT_FOUND(postId));
     }
 
-    const existingPostLike = await this.postLikeRepository.findOne({
-      where: { post: { id } },
+    const existingPostReaction = await this.postReactionRepository.findOne({
+      where: { post: { id: postId }, user: { id: userId } },
     });
 
-    if (existingPostLike) {
-      throw new BadRequestException('You have already liked this post');
+    if (existingPostReaction) {
+      await this.postReactionRepository.delete(existingPostReaction.id);
+      post = {
+        ...post,
+        reactions: post.reactions.filter(
+          (r) => r.user.id !== userId && r.post.id !== postId,
+        ),
+      };
     }
 
-    const postLike = this.postLikeRepository.create({
-      post,
-      user: { id: userId },
-    });
-    await this.postLikeRepository.save(postLike);
-
-    return true;
-  }
-
-  async dislike(id: number, userId: number) {
-    const post = await this.repository.findOne({
-      where: { id },
-    });
-
-    if (!post) {
-      throw new NotFoundException(`Post with id ${id} not found`);
+    if (
+      (existingPostReaction && existingPostReaction.reaction !== reaction) ||
+      !existingPostReaction
+    ) {
+      const postReaction = this.postReactionRepository.create({
+        post,
+        user: { id: userId },
+        reaction,
+      });
+      await this.postReactionRepository.save(postReaction);
+      post = {
+        ...post,
+        reactions: [...(post.reactions || []), postReaction],
+      };
     }
 
-    const existingPostLike = await this.postDislikeRepository.findOne({
-      where: { post: { id } },
-    });
-
-    if (existingPostLike) {
-      throw new BadRequestException('You have already disliked this post');
-    }
-
-    const postDislike = this.postDislikeRepository.create({
-      post,
-      user: { id: userId },
-    });
-    await this.postDislikeRepository.save(postDislike);
-
-    return true;
+    const postDto = this.mapper.map(post, Post, PostDto);
+    return {
+      ...postDto,
+      reactions: {
+        ...postDto.reactions,
+        userReaction:
+          existingPostReaction?.reaction === reaction ? null : reaction,
+      },
+    };
   }
 
   async addMedia(postId: number, files: Express.Multer.File[]) {
@@ -165,5 +183,14 @@ export class PostService {
       ...media.map((m) => this.postMediaRepository.create({ media: m, post })),
     ];
     return this.mapper.map(await this.repository.save(post), Post, PostDto);
+  }
+
+  async getMyPosts(userId: number) {
+    const posts = await this.repository.find({
+      where: { author: { id: userId } },
+      relations: fullPostRelations,
+    });
+
+    return this.mapper.mapArray(posts, Post, PostDto);
   }
 }

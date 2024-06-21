@@ -10,6 +10,7 @@ import { MediaService } from './media.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ApiConsumes } from '@nestjs/swagger';
+import { mbToBytes } from '@/helpers/other';
 
 @Controller('media')
 export class MediaController {
@@ -22,7 +23,7 @@ export class MediaController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
-      limits: { fileSize: 1024 * 1024 * 50 }, // 50MB
+      limits: { fileSize: mbToBytes(50) },
       storage: MediaService.getStorage(),
     }),
   )
@@ -37,7 +38,7 @@ export class MediaController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
-      limits: { fileSize: 1024 * 1024 * 50 }, // 50MB
+      limits: { fileSize: mbToBytes(50) },
       storage: MediaService.getStorage(),
     }),
   )

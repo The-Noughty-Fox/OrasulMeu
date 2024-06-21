@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMediaDto } from './dto/create-media.dto';
-import { UpdateMediaDto } from './dto/update-media.dto';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
@@ -27,6 +25,7 @@ export class MediaService {
       },
     });
   }
+
   getUploadPath(filename: string) {
     return `${this.configService.get<string>('API_BASE')}/uploads/${filename}`;
   }
@@ -37,23 +36,7 @@ export class MediaService {
       type: MediaType.Image,
       url: this.getUploadPath(file.filename),
     }));
-    this.repository.create(media);
-    return this.repository.save(media);
-  }
 
-  findAll() {
-    return `This action returns all media`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} media`;
-  }
-
-  update(id: number, updateMediaDto: UpdateMediaDto) {
-    return `This action updates a #${id} media`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} media`;
+    return this.repository.save(this.repository.create(media));
   }
 }
