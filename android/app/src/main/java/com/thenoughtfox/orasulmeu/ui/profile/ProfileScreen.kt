@@ -24,6 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.ui.post.PostContract
+import com.thenoughtfox.orasulmeu.ui.post.PostView
+import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.*
 import com.thenoughtfox.orasulmeu.ui.profile.components.ClickableIcon
 import com.thenoughtfox.orasulmeu.ui.profile.components.TopBar
@@ -77,39 +80,41 @@ fun ProfileScreen(
             )
         },
         content = { padding ->
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = colorResource(R.color.background_color))
                     .padding(padding)
             ) {
-                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    ProfileView(
-                        name = state.name,
-                        avatarImageUrl = state.imageUrl,
-                        postCount = state.postsCount,
-                        reactionsCount = state.reactionsCount,
-                        isEditionModeEnabled = state.isEditing,
-                        onEditPress = { onSendEvent(Event.EditProfile) },
-                        onNameTextChange = { onSendEvent(Event.ChangeName(it)) },
-                        onChangeImagePress = { pickImage() }
+                item {
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        ProfileView(
+                            name = state.name,
+                            avatarImageUrl = state.imageUrl,
+                            postCount = state.postsCount,
+                            reactionsCount = state.reactionsCount,
+                            isEditionModeEnabled = state.isEditing,
+                            onEditPress = { onSendEvent(Event.EditProfile) },
+                            onNameTextChange = { onSendEvent(Event.ChangeName(it)) },
+                            onChangeImagePress = { pickImage() }
+                        )
+                    }
+                }
+
+                item {
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp),
+                        text = "Postările mele",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight(600),
+                            color = colorResource(R.color.black),
+                        )
                     )
                 }
 
-                Text(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp),
-                    text = "Postările mele",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight(600),
-                        color = colorResource(R.color.black),
-                    )
-                )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.ownedPost) {
-                        // todo change it to post when branch is merged
-                        Text(text = "there will be some post")
-                    }
+                items(state.ownedPost) {
+                    PostView(state = it) { }
                 }
             }
         }
@@ -120,41 +125,8 @@ fun ProfileScreen(
 @Composable
 private fun Preview() = OrasulMeuTheme {
     val state = State(
-        name = "John Doe", ownedPost = listOf(
-            PostDto(
-                0,
-                "",
-                "",
-                UserDto(0, "", "", ""),
-                comments = "",
-                media = emptyList(),
-                locationAddress = "test address",
-                location = PointDto(0.0, 0.0),
-                reactions = PostReactionsDto(dislike = 4, like = 13, userReaction = null)
-            ),
-            PostDto(
-                0,
-                "",
-                "",
-                UserDto(0, "", "", ""),
-                comments = "",
-                media = emptyList(),
-                locationAddress = "test address",
-                location = PointDto(0.0, 0.0),
-                reactions = PostReactionsDto(dislike = 4, like = 13, userReaction = null)
-            ),
-            PostDto(
-                0,
-                "",
-                "",
-                UserDto(0, "", "", ""),
-                comments = "",
-                media = emptyList(),
-                locationAddress = "test address",
-                location = PointDto(0.0, 0.0),
-                reactions = PostReactionsDto(dislike = 4, like = 13, userReaction = null)
-            ),
-        )
+        name = "John Doe",
+        ownedPost = List(3) { PostPreviewPlaceholders.postState }
     )
     ProfileScreen(state = state, onSendEvent = {}, pickImage = {})
 }

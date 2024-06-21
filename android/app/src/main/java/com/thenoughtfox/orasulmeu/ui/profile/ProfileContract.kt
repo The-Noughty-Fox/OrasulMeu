@@ -1,6 +1,7 @@
 package com.thenoughtfox.orasulmeu.ui.profile
 
 import android.net.Uri
+import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import org.openapitools.client.models.PostDto
 
 interface ProfileContract {
@@ -11,7 +12,7 @@ interface ProfileContract {
         val imageUrl: String? = null,
         val postsCount: Int = 0,
         val reactionsCount: Int = 0,
-        val ownedPost: List<PostDto> = emptyList(),
+        val ownedPost: List<PostContract.State> = emptyList(),
         val isEditing: Boolean = false,
         val initialName: String = "",
         val initialImageUrl: String? = null,
