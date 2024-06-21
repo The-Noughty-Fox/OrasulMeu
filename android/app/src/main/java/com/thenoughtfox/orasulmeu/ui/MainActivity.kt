@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                 mediaPostScreen
             }
 
-            router.newRootScreen(Screens.profileSettingsScreen)
+            router.newRootScreen(screen)
         }
     }
 
