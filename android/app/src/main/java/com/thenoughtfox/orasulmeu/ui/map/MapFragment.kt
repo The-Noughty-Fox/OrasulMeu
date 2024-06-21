@@ -23,7 +23,9 @@ import com.thenoughtfox.orasulmeu.utils.applyBottomInsetMargin
 import com.thenoughtfox.orasulmeu.utils.showSettingsDialog
 import com.thenoughtfox.orasulmeu.utils.showToast
 import com.thenoughtfox.orasulmeu.utils.toPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import permissions.dispatcher.ktx.LocationPermission
 import permissions.dispatcher.ktx.PermissionsRequester
 import permissions.dispatcher.ktx.constructLocationPermissionRequest
@@ -34,9 +36,10 @@ class MapFragment : Fragment() {
     private val viewModel: MapViewModel by viewModels()
     private val locationClient: LocationClient by lazy {
         LocationClient(requireContext()) { location ->
-            lifecycleScope.launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 viewModel.event.send(Event.NavigateToPlayer(location.toPoint()))
 
+                // Demo
                 val places = mutableListOf<Place>().apply {
                     val bitmap1 =
                         PinUtils.maskDrawableToAnother(
@@ -66,7 +69,9 @@ class MapFragment : Fragment() {
                     add(Place(point = LatLng(47.023647, 28.833826).toPoint(), bitmap = bitmap3))
                 }
 
-                binding.mapView.addPlaces(places)
+                withContext(Dispatchers.Main) {
+                    binding.mapView.addPlaces(places)
+                }
             }
         }
     }

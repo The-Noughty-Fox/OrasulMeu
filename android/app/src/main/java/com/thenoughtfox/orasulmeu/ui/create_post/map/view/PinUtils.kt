@@ -12,7 +12,7 @@ import androidx.core.graphics.drawable.toBitmap
 
 object PinUtils {
 
-    private const val INSET: Int = 20
+    private const val INSET: Int = 4
 
     fun maskDrawableToAnother(context: Context, sourceResId: Int, maskResId: Int): Bitmap {
         // Get the drawables

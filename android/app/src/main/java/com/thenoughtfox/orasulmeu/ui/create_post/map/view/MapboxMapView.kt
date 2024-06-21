@@ -42,6 +42,7 @@ class MapboxMapView @JvmOverloads constructor(
     companion object {
         private const val ZOOM_LEVEL = 15.0
         private const val MOVE_CAMERA_DURATION = 3_000L
+        private const val LAYER_ID_PIN = "LayerIdPin"
     }
 
     fun onLoadMap(onLoadMap: () -> Unit) {
@@ -62,20 +63,17 @@ class MapboxMapView @JvmOverloads constructor(
             onLoadMap?.invoke()
             pointAnnotationManager = annotations.createPointAnnotationManager(
                 AnnotationConfig(
-                    layerId = "GOVNA",
+                    layerId = LAYER_ID_PIN,
                     annotationSourceOptions = AnnotationSourceOptions(
                         clusterOptions = ClusterOptions(
                             circleRadius = 15.0,
                             textColor = Color.BLACK,
                             clusterRadius = 25,
-                            colorLevels = listOf(Pair(0, Color.YELLOW))
+                            colorLevels = listOf(Pair(0, Color.WHITE))
                         )
                     )
                 )
             )
-
-            style {
-            }
         }
     }
 
@@ -130,7 +128,7 @@ class MapboxMapView @JvmOverloads constructor(
         val pointAnnotationOptions = places.map { place ->
             PointAnnotationOptions()
                 .withPoint(place.point)
-                .withIconImage(place.bitmap.generateSmallIcon(context, 50, 64))
+                .withIconImage(place.bitmap.generateSmallIcon(context, 30, 36))
         }
 
         pointAnnotationManager?.create(pointAnnotationOptions)
