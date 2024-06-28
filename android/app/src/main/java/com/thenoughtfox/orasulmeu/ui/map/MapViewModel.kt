@@ -28,7 +28,6 @@ class MapViewModel @Inject constructor() : ViewModel() {
     private val _action = MutableSharedFlow<Action>()
     val action: SharedFlow<Action> = _action
 
-
     init {
         handleEvents()
     }
