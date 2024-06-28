@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.login.presentation
+package com.thenoughtfox.orasulmeu.ui.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
