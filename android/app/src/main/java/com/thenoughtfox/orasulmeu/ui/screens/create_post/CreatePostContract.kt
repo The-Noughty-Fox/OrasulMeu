@@ -34,6 +34,5 @@ object CreatePostContract {
     sealed class Action {
         data object OpenPhotoPicker : Action()
         data class ShowToast(val msg: String) : Action()
-        data object Initial: Action()
     }
 }

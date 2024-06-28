@@ -15,6 +15,7 @@ import com.mapbox.search.SearchSelectionCallback
 import com.mapbox.search.SearchSuggestionsCallback
 import com.mapbox.search.common.IsoCountryCode
 import com.mapbox.search.common.IsoLanguageCode
+import com.mapbox.search.result.SearchAddress
 import com.mapbox.search.result.SearchResult
 import com.mapbox.search.result.SearchSuggestion
 import com.thenoughtfox.orasulmeu.navigation.NavDestinations
@@ -83,16 +84,23 @@ class MapSearchViewModel @AssistedInject constructor(
                 }
 
                 is Event.MoveToLocation -> moveToLocation(event.point, event.address)
-                is Event.DoOnTextLocationChanged ->
+                is Event.DoOnTextLocationChanged -> {
+                    _state.update { it.copy(searchText = event.text) }
                     searchEngine.search(event.text, searchOptions, searchCallback)
+                }
 
                 is Event.OnCameraTrackingDismissed ->
                     searchEngine.search(event.geo, reverseSearchCallback)
 
-                is Event.OnSearchSuggestionClicked ->
+                is Event.OnSearchSuggestionClicked -> {
+                    val shortAddress =
+                        event.suggestion.address?.formattedAddress(SearchAddress.FormatStyle.Short)
+                    _state.update { it.copy(searchText = shortAddress.toString()) }
                     searchEngine.select(event.suggestion, selectCallback)
+                }
 
                 Event.TappedNext -> navigator.navigate(NavDestinations.CreatePostScreen)
+                Event.ClearSearchText -> _state.update { it.copy(searchText = "") }
             }
         }
     }

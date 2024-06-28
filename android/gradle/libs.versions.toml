@@ -1,7 +1,6 @@
 [versions]
 agp = "8.3.0"
 coilCompose = "2.6.0"
-coilVideo = "2.4.0"
 constraintlayoutCompose = "1.0.1"
 desugar_jdk_libs = "2.0.4"
 firebaseBom = "32.7.4"
@@ -50,7 +49,6 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 cicerone = { module = "com.github.terrakok:cicerone", version.ref = "cicerone" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding", version.ref = "uiViewbinding" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-video = { module = "io.coil-kt:coil-video", version.ref = "coilVideo" }
