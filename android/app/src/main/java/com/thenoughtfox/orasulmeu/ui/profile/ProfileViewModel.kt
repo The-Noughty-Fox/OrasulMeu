@@ -3,6 +3,7 @@ package com.thenoughtfox.orasulmeu.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
+import com.thenoughtfox.orasulmeu.navigation.Screens
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.Event
 import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.State
@@ -54,7 +55,9 @@ class ProfileViewModel @Inject constructor(
                 }
             }
 
-            Event.GoToSettings -> Unit // todo router.goToSettings
+            Event.GoToSettings -> {
+                router.navigateTo(Screens.profileSettingsScreen)
+            }
 
             is Event.ChangeName -> {
                 _state.update { it.copy(name = e.newName) }
