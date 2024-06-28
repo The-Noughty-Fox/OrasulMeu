@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.login.presentation
+package com.thenoughtfox.orasulmeu.ui.login
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,7 +13,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.noughtyfox.authentication.facebook.FacebookSignIn
 import com.noughtyfox.authentication.google.GoogleSignIn
 import com.thenoughtfox.orasulmeu.R
