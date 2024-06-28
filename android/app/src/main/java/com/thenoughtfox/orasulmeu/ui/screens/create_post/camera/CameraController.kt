@@ -38,6 +38,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.utils.CameraUtils.getCameraProvider
@@ -51,6 +52,8 @@ fun CameraController(viewModel: CreatePostViewModel) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
+
+    val createPostNavigator = LocalCreatePostNavigator.current
 
     val pickMultipleMedia = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(),
@@ -88,13 +91,11 @@ fun CameraController(viewModel: CreatePostViewModel) {
             scope.launch {
                 takePicture(imageCapture, context)?.let { successUri ->
                     viewModel.event.send(Event.PickImages(listOf(successUri)))
-                    viewModel.event.send(Event.BackToMediaPage)
+                    createPostNavigator.navigateUp()
                 }
             }
         }, onNext = {
-            scope.launch {
-                viewModel.event.send(Event.BackToMediaPage)
-            }
+            createPostNavigator.navigateUp()
         })
 }
 

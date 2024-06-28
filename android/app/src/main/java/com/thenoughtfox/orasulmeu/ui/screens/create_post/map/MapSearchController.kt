@@ -11,17 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -53,7 +52,7 @@ import com.mapbox.search.ReverseGeoOptions
 import com.mapbox.search.result.SearchAddress
 import com.mapbox.search.result.SearchSuggestion
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.navigation.LocalNavigator
+import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.service.LocationClient
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
@@ -64,11 +63,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MapSearchController(createPostViewModel: CreatePostViewModel) {
-    val navigator = LocalNavigator.current
-    val viewModel: MapSearchViewModel =
-        hiltViewModel<MapSearchViewModel, MapSearchViewModel.Factory> {
-            it.create(navigator)
-        }
+    val navigator = LocalCreatePostNavigator.current
+    val viewModel: MapSearchViewModel = hiltViewModel()
 
     val scope = rememberCoroutineScope()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -121,7 +117,7 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
-            .safeDrawingPadding()
+//            .safeDrawingPadding()
             .background(color = colorResource(R.color.background_color))
     ) {
         val (map, search, suggestion, pin, buttonNext) = createRefs()
@@ -156,7 +152,8 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
                         }
                     }
                 }
-            })
+            }
+        )
 
         SearchBarView(
             searchText = state.searchText,
@@ -182,6 +179,8 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
                 end.linkTo(parent.end)
                 top.linkTo(search.bottom)
                 bottom.linkTo(buttonNext.top)
+                width = Dimension.fillToConstraints
+                height = Dimension.fillToConstraints
             }, suggestions = state.suggestions) {
                 scope.launch {
                     focusManager.clearFocus()
@@ -213,7 +212,7 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
             textColor = colorResource(id = R.color.black),
             onClick = {
                 scope.launch {
-                    viewModel.event.send(Event.TappedNext)
+                    navigator.navigateUp()
                 }
             })
     }
@@ -273,7 +272,6 @@ private fun SuggestionListView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBarView(
     modifier: Modifier,
@@ -320,7 +318,7 @@ private fun SearchBarView(
                     fontSize = 14.sp
                 )
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
             ),

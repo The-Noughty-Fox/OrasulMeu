@@ -41,8 +41,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
-import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.*
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.RoundButton
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.UserImage
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
@@ -53,7 +52,11 @@ import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 import com.thenoughtfox.orasulmeu.utils.view.Toolbar
 
 @Composable
-fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
+fun CreatePostPage(
+    uiState: State,
+    onSendEvent: (Event) -> Unit = {},
+    sendNavEvent: (NavEvent) -> Unit = {}
+) {
 
     val outState = rememberScrollState()
 
@@ -66,7 +69,7 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
         Toolbar(
             title = stringResource(id = R.string.create_post_toolbar_title),
             onBackClickListener = {
-                onSendEvent(Event.BackToMediaPage)
+                sendNavEvent(NavEvent.GoBack)
             }
         )
 
@@ -137,7 +140,7 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
                 .clip(shape = RoundedCornerShape(8.dp))
                 .defaultMinSize(minHeight = 46.dp)
                 .clickable {
-                    onSendEvent(Event.GoToMapSearch)
+                    sendNavEvent(NavEvent.GoToMapSearch)
                 }, verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -160,7 +163,9 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
                 modifier = Modifier.padding(top = 36.dp)
             )
 
-            MediaList(images = uiState.images, outState)
+            MediaList(images = uiState.images, outState, onItemClick = {
+                sendNavEvent(NavEvent.GoToMedia)
+            })
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -180,7 +185,7 @@ fun CreatePostPage(uiState: State, onSendEvent: (Event) -> Unit) {
 }
 
 @Composable
-private fun MediaList(images: List<Uri>, outState: ScrollState) {
+private fun MediaList(images: List<Uri>, outState: ScrollState, onItemClick: () -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = Modifier
@@ -206,7 +211,8 @@ private fun MediaList(images: List<Uri>, outState: ScrollState) {
                     image = uri,
                     modifier = Modifier
                         .size(106.dp)
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    onClick = { onItemClick() }
                 )
             }
         }
@@ -217,5 +223,5 @@ private fun MediaList(images: List<Uri>, outState: ScrollState) {
 @Preview
 @Composable
 private fun PreviewCreatePostPage() {
-    CreatePostPage(State()) {}
+    CreatePostPage(State().copy(images = List(3) { Uri.EMPTY })) {}
 }

@@ -2,14 +2,9 @@ package com.thenoughtfox.orasulmeu.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
-import com.thenoughtfox.orasulmeu.navigation.NavDestinations
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.net.model.User
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,18 +16,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.AuthApi
 import org.openapitools.client.models.ApiBodyWithToken
+import javax.inject.Inject
 
-@HiltViewModel(assistedFactory = LoginViewModel.Factory::class)
-class LoginViewModel @AssistedInject constructor(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val authApi: AuthApi,
     private val userSharedPrefs: UserSharedPrefs,
-    @Assisted private val navigator: NavHostController
 ) : ViewModel() {
-
-    @AssistedFactory
-    interface Factory {
-        fun create(navController: NavHostController): LoginViewModel
-    }
 
     val event = Channel<Event>(Channel.UNLIMITED)
 
@@ -43,6 +33,10 @@ class LoginViewModel @AssistedInject constructor(
     val action: SharedFlow<Action> = _action
 
     init {
+        if (userSharedPrefs.user != null) {
+            _state.update { it.copy(isSuccess = true) }
+        }
+
         handleEvents()
     }
 
@@ -55,6 +49,7 @@ class LoginViewModel @AssistedInject constructor(
                         SingInType.Facebook -> _state.update { it.copy(isLoadingFacebook = true) }
                     }
 
+                    _state.update { it.copy(isSuccess = true) }
                     _action.emit(Action.Auth(event.type))
                 }
 
@@ -72,7 +67,7 @@ class LoginViewModel @AssistedInject constructor(
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
                                             lastName = it.lastName
                                         )
-                                    navigator.navigate(NavDestinations.Home)
+                                    _state.update { s -> s.copy(isSuccess = true) }
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))
@@ -91,6 +86,7 @@ class LoginViewModel @AssistedInject constructor(
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
                                             lastName = it.lastName
                                         )
+                                    _state.update { s -> s.copy(isSuccess = true) }
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))

@@ -48,7 +48,13 @@ import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
 import com.thenoughtfox.orasulmeu.utils.view.Toolbar
 
 @Composable
-fun CreatePostMediaPage(uiState: State, onSendEvent: (Event) -> Unit) {
+fun CreatePostMediaPage(
+    uiState: State,
+    onSendEvent: (Event) -> Unit,
+    onCameraClick: () -> Unit = {},
+    onGalleryClick: () -> Unit = {},
+    onNextClick: () -> Unit = {}
+) {
 
     if (uiState.removedUri != null) {
         Alert(
@@ -114,19 +120,19 @@ fun CreatePostMediaPage(uiState: State, onSendEvent: (Event) -> Unit) {
         }
 
         UploadButtons(
-            onClickMedia = { onSendEvent(Event.OnClickMedia) },
-            onClickCamera = { onSendEvent(Event.OnClickCamera) }
+            onClickMedia = onGalleryClick,
+            onClickCamera = onCameraClick
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        RoundButton(modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .align(Alignment.CenterHorizontally),
+        RoundButton(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.create_post_button_next),
-            onClick = {
-                onSendEvent(Event.GoToMapSearch)
-            })
+            onClick = onNextClick
+        )
     }
 }
 
@@ -204,8 +210,8 @@ private fun UploadButton(image: Painter, text: String) {
 @Composable
 fun UserImage(
     image: Uri,
-    color: Color = Color.White,
     modifier: Modifier = Modifier,
+    color: Color = Color.White,
     onClick: ((Uri) -> Unit)? = null,
     onRemove: ((Uri) -> Unit)? = null
 ) {
@@ -275,5 +281,5 @@ fun RoundButton(
 @Preview
 @Composable
 private fun PreviewCreatePostMediaPage() {
-    CreatePostMediaPage(State()) {}
+    CreatePostMediaPage(State(), onSendEvent = {})
 }

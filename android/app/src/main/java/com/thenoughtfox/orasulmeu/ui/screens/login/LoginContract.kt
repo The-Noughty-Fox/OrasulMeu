@@ -7,7 +7,8 @@ import com.thenoughtfox.orasulmeu.R
 data class State(
     val isLoadingGoogle: Boolean = false,
     val isLoadingFacebook: Boolean = false,
-    val isError: Boolean = false
+    val isError: Boolean = false,
+    val isSuccess: Boolean = false
 )
 
 sealed class Event {
@@ -19,6 +20,7 @@ sealed class Event {
 sealed class Action {
     data class Auth(val type: SingInType) : Action()
     data class ShowToast(val msg: String) : Action()
+    data object Proceed : Action()
 }
 
 enum class SingInType(

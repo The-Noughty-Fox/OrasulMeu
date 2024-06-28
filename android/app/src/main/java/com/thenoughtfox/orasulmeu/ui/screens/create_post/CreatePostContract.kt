@@ -2,7 +2,7 @@ package com.thenoughtfox.orasulmeu.ui.screens.create_post
 
 import android.net.Uri
 
-object CreatePostContract {
+interface CreatePostContract {
     data class State(
         val isLoading: Boolean = false,
         val isError: Boolean = false,
@@ -15,10 +15,6 @@ object CreatePostContract {
     )
 
     sealed class Event {
-        data object GoToPostPage : Event()
-        data object BackToMediaPage : Event()
-        data object OnClickMedia : Event()
-        data object OnClickCamera : Event()
         data class SetTitle(val title: String) : Event()
         data class SetDescription(val desc: String) : Event()
         data object Submit : Event()
@@ -26,13 +22,17 @@ object CreatePostContract {
         data class SelectImage(val image: Uri) : Event()
         data class RemoveImage(val image: Uri) : Event()
         data class SetAddress(val address: String) : Event()
-        data object GoToMapSearch : Event()
         data class ShowAlert(val uri: Uri) : Event()
         data object DismissAlert : Event()
     }
 
+    sealed interface NavEvent {
+        data object GoBack : NavEvent
+        data object GoToMedia : NavEvent
+        data object GoToMapSearch : NavEvent
+    }
+
     sealed class Action {
-        data object OpenPhotoPicker : Action()
         data class ShowToast(val msg: String) : Action()
     }
 }

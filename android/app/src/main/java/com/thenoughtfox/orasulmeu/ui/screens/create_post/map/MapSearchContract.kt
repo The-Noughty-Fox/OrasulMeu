@@ -20,7 +20,6 @@ sealed class Event {
     data class DoOnTextLocationChanged(val text: String) : Event()
     data class OnCameraTrackingDismissed(val geo: ReverseGeoOptions) : Event()
     data class OnSearchSuggestionClicked(val suggestion: SearchSuggestion) : Event()
-    data object TappedNext: Event()
     data object ClearSearchText: Event()
 }
 

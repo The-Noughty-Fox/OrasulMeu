@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Task
 import com.noughtyfox.authentication.facebook.FacebookSignIn
 import com.noughtyfox.authentication.facebook.FacebookSignInAccountData
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.navigation.GlobalNavDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalNavigator
 import com.thenoughtfox.orasulmeu.ui.MainActivity
 import com.thenoughtfox.orasulmeu.utils.getActivity
@@ -34,9 +35,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginController() {
     val navigator = LocalNavigator.current
-    val viewModel: LoginViewModel = hiltViewModel<LoginViewModel, LoginViewModel.Factory> {
-        it.create(navigator)
-    }
+    val viewModel: LoginViewModel = hiltViewModel()
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -94,6 +93,8 @@ fun LoginController() {
                             }
                         }
                     }
+
+                    Action.Proceed -> navigator.navigate(GlobalNavDestinations.MapScreen)
                 }
             }
         }
