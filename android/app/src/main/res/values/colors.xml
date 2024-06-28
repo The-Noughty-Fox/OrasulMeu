@@ -18,5 +18,6 @@
     <color name="grey_search">#3C3C4399</color>
     <color name="button_next_color">#333E92CC</color>
     <color name="yellow">#EAB308</color>
-    <color name="indigo600">#4F46E5</color>
+
+    <color name="icons_dark_grey">#414141</color>
 </resources>

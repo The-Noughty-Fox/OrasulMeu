@@ -11,6 +11,7 @@ import com.thenoughtfox.orasulmeu.ui.create_post.media.CreatePostMediaFragment
 import com.thenoughtfox.orasulmeu.ui.login.LoginFragment
 import com.thenoughtfox.orasulmeu.ui.post_list.PostListFragment
 import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsFragment
+import com.thenoughtfox.orasulmeu.ui.profile.ProfileFragment
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
 
 object Screens {
@@ -20,7 +21,7 @@ object Screens {
     val createPostScreen = FragmentScreen(key = BottomNavTabs.Create.name) { CreatePostFragment() }
     val cameraScreen = FragmentScreen { CameraFragment() }
     val mapSearchScreen = FragmentScreen(key = BottomNavTabs.Map.name) { MapSearchFragment() }
-    val profileScreen = FragmentScreen(key = BottomNavTabs.Profile.name) { MapSearchFragment() }
+    val profileScreen = FragmentScreen(key = BottomNavTabs.Profile.name) { ProfileFragment() }
     val mainActivity = ActivityScreen { Intent(it, MainActivity::class.java) }
     val postListScreen = FragmentScreen { PostListFragment() }
     val profileSettingsScreen = FragmentScreen { ProfileSettingsFragment() }
