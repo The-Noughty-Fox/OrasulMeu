@@ -18,4 +18,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun setupBottomBar() = binding.bottomNavigationView.apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            OrasulMeuTheme {
+                BottomNavBar(
+                    selected = currentNavItem,
+                    onSelectTab = { navTabs ->
+                        if (navTabs == currentNavItem) return@BottomNavBar
+                        when (navTabs.name) {
+                            BottomNavTabs.Map.name -> router.replaceScreen(Screens.mapSearchScreen)
+                            BottomNavTabs.Create.name -> router.replaceScreen(Screens.createPostScreen)
+                            BottomNavTabs.Profile.name -> router.replaceScreen(Screens.profileScreen)
+                        }
+                    },
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        }
+    }
 }

@@ -111,6 +111,7 @@ dependencies {
     implementation libs.androidx.material3
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.recyclerview
+    implementation libs.androidx.constraintlayout.compose
 
     //Coroutines
     implementation libs.coroutines.core
@@ -177,6 +178,10 @@ dependencies {
 
     //Image
     implementation libs.coil.compose
+    // compose images
+    implementation libs.landscapist.coil
+    // to preview video thumbnail
+    implementation libs.coil.video
 
     //Camera
     implementation libs.camerax.core

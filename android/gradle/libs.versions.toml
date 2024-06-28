@@ -1,6 +1,8 @@
 [versions]
 agp = "8.3.0"
 coilCompose = "2.6.0"
+coilVideo = "2.4.0"
+constraintlayoutCompose = "1.0.1"
 desugar_jdk_libs = "2.0.4"
 firebaseBom = "32.7.4"
 fragmentKtx = "1.6.2"
@@ -15,6 +17,7 @@ coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+landscapistCoil = "2.2.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
 composeBom = "2024.02.02"
@@ -31,8 +34,7 @@ retrofit = "2.9.0"
 okhttp3-logging-interceptor = "5.0.0-alpha.2"
 timber = "5.0.1"
 crashlytics = "2.9.9"
-uiViewbinding = "1.6.7"
-viewbindingpropertydelegate = "1.5.3"
+viewbindingpropertydelegate = "1.5.9"
 constraintlayout = "2.1.4"
 mapbox = "11.3.0"
 mapboxSearch = "2.0.0-beta.4"
@@ -43,11 +45,15 @@ composeNavigation = "2.8.0-alpha08"
 serialization = "1.6.3"
 
 [libraries]
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+cicerone = { module = "com.github.terrakok:cicerone", version.ref = "cicerone" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding", version.ref = "uiViewbinding" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-video = { module = "io.coil-kt:coil-video", version.ref = "coilVideo" }
 insetter = { module = "dev.chrisbanes.insetter:insetter", version.ref = "insetter" }
 joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -69,6 +75,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
+landscapist-coil = { module = "com.github.skydoves:landscapist-coil", version.ref = "landscapistCoil" }
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
