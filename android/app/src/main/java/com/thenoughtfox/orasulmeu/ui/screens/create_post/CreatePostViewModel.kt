@@ -31,7 +31,7 @@ import org.openapitools.client.apis.PostsApi
 class CreatePostViewModel @AssistedInject constructor(
     private val postsApi: PostsApi,
     private val application: Application,
-    @Assisted private val router: NavHostController
+    @Assisted private val router: NavHostController,
 ) : ViewModel() {
 
     @AssistedFactory

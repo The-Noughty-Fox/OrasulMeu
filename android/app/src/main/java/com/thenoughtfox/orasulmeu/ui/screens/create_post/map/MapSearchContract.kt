@@ -25,5 +25,4 @@ sealed class Event {
 sealed class Action {
     data class MoveToLocation(val point: Point) : Action()
     data class ShowToast(val msg: String) : Action()
-    data object Initial: Action()
 }

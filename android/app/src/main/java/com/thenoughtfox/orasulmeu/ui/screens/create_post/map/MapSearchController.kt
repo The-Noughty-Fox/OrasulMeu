@@ -25,6 +25,9 @@ import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.search.ReverseGeoOptions
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.databinding.FragmentMapSearchBinding
@@ -54,9 +57,8 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
 
     val adapter: SearchSuggestionAdapter = remember { SearchSuggestionAdapter() }
     val scope = rememberCoroutineScope()
-
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val context = LocalContext.current
-
 
     val locationClient: LocationClient = remember {
         LocationClient(context) { location ->
@@ -67,7 +69,6 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
     }
 
     var isPinVisible: Boolean by remember { mutableStateOf(false) }
-
     val locationRequester = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
@@ -79,25 +80,21 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         }
     }
 
-    val mapSearchState = viewModel.state.collectAsState().value
-    val action = viewModel.action.collectAsState(Action.Initial).value
-
+    val state by viewModel.state.collectAsState()
     var moveToLocation: Action.MoveToLocation? by remember {
         mutableStateOf(null)
     }
 
-    LaunchedEffect(action) {
-
-        when (action) {
-            is Action.MoveToLocation -> {
-                moveToLocation = action
+    LaunchedEffect(Unit) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.action.collect { action ->
+                when (action) {
+                    is Action.MoveToLocation -> moveToLocation = action
+                    is Action.ShowToast -> context.showToast(action.msg)
+                }
             }
-
-            is Action.ShowToast -> context.showToast(action.msg)
-            Action.Initial -> Unit
         }
     }
-
 
     AndroidViewBinding(
         modifier = Modifier
@@ -130,9 +127,8 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
 
                     scope.launch { viewModel.event.send(Event.OnSearchSuggestionClicked(it)) }
                 }
+
                 recyclerViewLocation.adapter = adapter
-
-
                 editTextSearch.doOnTextChanged { text, _, _, _ ->
                     scope.launch {
                         viewModel.event.send(Event.DoOnTextLocationChanged(text.toString()))
@@ -170,18 +166,16 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
                 }
 
                 // state part
-                adapter.submitList(mapSearchState.suggestions)
-                recyclerViewLocation.isVisible = mapSearchState.isSuggestionListShow
-                layoutPin.isVisible = !mapSearchState.isSuggestionListShow
-                textViewStreetName.text = mapSearchState.address
+                adapter.submitList(state.suggestions)
+                recyclerViewLocation.isVisible = state.isSuggestionListShow
+                layoutPin.isVisible = !state.isSuggestionListShow
+                textViewStreetName.text = state.address
                 containerPinStreetName.visibility =
-                    if (mapSearchState.address.isNotEmpty()) View.VISIBLE else View.INVISIBLE
+                    if (state.address.isNotEmpty()) View.VISIBLE else View.INVISIBLE
 
                 scope.launch(Dispatchers.IO) {
                     createPostViewModel.event.send(
-                        CreatePostContract.Event.SetAddress(
-                            mapSearchState.address
-                        )
+                        CreatePostContract.Event.SetAddress(state.address)
                     )
                 }
             }
