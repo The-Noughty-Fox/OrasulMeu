@@ -23,11 +23,10 @@ import com.github.terrakok.cicerone.Router
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.databinding.ActivityMainBinding
-import com.thenoughtfox.orasulmeu.navigation.Screens
+import com.thenoughtfox.orasulmeu.navigation.Screens.createPostScreen
 import com.thenoughtfox.orasulmeu.navigation.Screens.loginScreen
 import com.thenoughtfox.orasulmeu.navigation.Screens.mapScreen
-import com.thenoughtfox.orasulmeu.navigation.Screens.mapSearchScreen
-import com.thenoughtfox.orasulmeu.navigation.Screens.mediaPostScreen
+import com.thenoughtfox.orasulmeu.navigation.Screens.profileScreen
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavBar
@@ -64,9 +63,9 @@ class MainActivity : AppCompatActivity() {
 
                 currentNavItem = BottomNavTabs.entries.find { it.name == key } ?: currentNavItem
                 binding.bottomNavigationView.isVisible = when (key) {
-                    Screens.mapSearchScreen.screenKey,
-                    Screens.createPostScreen.screenKey,
-                    Screens.profileScreen.screenKey -> true
+                    mapScreen.screenKey,
+                    createPostScreen.screenKey,
+                    profileScreen.screenKey -> true
 
                     else -> false
                 }
@@ -100,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             val screen = if (userSharedPrefs.user == null) {
                 loginScreen
             } else {
-                mediaPostScreen
+                mapScreen
             }
 
             router.newRootScreen(screen)
@@ -116,9 +115,9 @@ class MainActivity : AppCompatActivity() {
                     onSelectTab = { navTabs ->
                         if (navTabs == currentNavItem) return@BottomNavBar
                         when (navTabs.name) {
-                            BottomNavTabs.Map.name -> router.replaceScreen(Screens.mapSearchScreen)
-                            BottomNavTabs.Create.name -> router.replaceScreen(Screens.createPostScreen)
-                            BottomNavTabs.Profile.name -> router.replaceScreen(Screens.profileScreen)
+                            BottomNavTabs.Map.name -> router.replaceScreen(mapScreen)
+                            BottomNavTabs.Create.name -> router.replaceScreen(createPostScreen)
+                            BottomNavTabs.Profile.name -> router.replaceScreen(profileScreen)
                         }
                     },
                     modifier = Modifier

@@ -43,7 +43,7 @@ class ProfileSettingsViewModel @Inject constructor(
     private fun handleEvents() = viewModelScope.launch {
         event.consumeAsFlow().collect { event ->
             when (event) {
-                Event.Back -> router.backTo(null)
+                Event.Back -> router.backTo(Screens.profileScreen)
                 Event.DeleteAccount -> deleteAccount()
                 Event.Logout -> logout()
             }
