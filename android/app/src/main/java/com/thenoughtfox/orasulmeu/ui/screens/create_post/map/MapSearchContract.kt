@@ -10,7 +10,8 @@ data class State(
     val suggestions: List<SearchSuggestion> = listOf(),
     val isSuggestionListShow: Boolean = false,
     val address: String = "",
-    val currentPoint: Point = Point.fromLngLat(0.0, 0.0)
+    val currentPoint: Point = Point.fromLngLat(0.0, 0.0),
+    val searchText: String = ""
 )
 
 sealed class Event {
@@ -20,6 +21,7 @@ sealed class Event {
     data class OnCameraTrackingDismissed(val geo: ReverseGeoOptions) : Event()
     data class OnSearchSuggestionClicked(val suggestion: SearchSuggestion) : Event()
     data object TappedNext: Event()
+    data object ClearSearchText: Event()
 }
 
 sealed class Action {
