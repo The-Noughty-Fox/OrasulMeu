@@ -117,7 +117,6 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
-//            .safeDrawingPadding()
             .background(color = colorResource(R.color.background_color))
     ) {
         val (map, search, suggestion, pin, buttonNext) = createRefs()
