@@ -1,11 +1,12 @@
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.hilt.android)
     alias(libs.plugins.crashlytics)
-    id 'kotlin-parcelize'
-    id 'com.google.gms.google-services'
-    id 'kotlin-kapt'
+    alias(libs.plugins.google.services)
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -27,6 +28,11 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY")}\"")
+        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL")}\"")
     }
 
     signingConfigs {
@@ -77,6 +83,7 @@ android {
     buildFeatures {
         viewBinding true
         compose true
+        buildConfig true
     }
 
     composeOptions {
@@ -88,12 +95,6 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
-
-//    sourceSets {
-//        main {
-//            java.srcDirs = ['build/generated/api/src/main/java']
-//        }
-//    }
 }
 
 dependencies {
@@ -190,6 +191,11 @@ dependencies {
     implementation libs.mapbox.search
 
     implementation libs.play.services.location
+
+    //Supabase
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.gotrue)
+    implementation(libs.ktor.client.android)
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

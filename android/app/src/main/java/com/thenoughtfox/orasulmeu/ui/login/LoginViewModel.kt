@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.thenoughtfox.orasulmeu.navigation.Screens
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
-import com.thenoughtfox.orasulmeu.net.model.User
+import com.thenoughtfox.orasulmeu.net.model.user.User
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

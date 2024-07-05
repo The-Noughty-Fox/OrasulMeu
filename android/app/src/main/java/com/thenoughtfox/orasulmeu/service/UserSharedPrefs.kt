@@ -3,7 +3,7 @@ package com.thenoughtfox.orasulmeu.service
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.thenoughtfox.orasulmeu.net.model.User
+import com.thenoughtfox.orasulmeu.net.model.user.User
 import okhttp3.Cookie
 import javax.inject.Inject
 

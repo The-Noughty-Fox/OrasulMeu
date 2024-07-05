@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.net.model
+package com.thenoughtfox.orasulmeu.net.model.user
 
 data class User(
     val id: Int? = null,

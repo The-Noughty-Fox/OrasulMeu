@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.thenoughtfox.orasulmeu.navigation.Screens
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
+import com.thenoughtfox.orasulmeu.net.model.post.CreatePostDto
+import com.thenoughtfox.orasulmeu.net.model.PointDto
+import com.thenoughtfox.orasulmeu.net.model.post.PostDto
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Action
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.create_post.CreatePostContract.State
@@ -14,6 +17,7 @@ import com.thenoughtfox.orasulmeu.utils.MimeType
 import com.thenoughtfox.orasulmeu.utils.UploadUtils.toMultiPart
 import com.thenoughtfox.orasulmeu.utils.getRealPathFromURI
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,16 +27,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openapitools.client.apis.PostsApi
-import org.openapitools.client.models.CreatePostDto
-import org.openapitools.client.models.PointDto
 import javax.inject.Inject
 
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val router: Router,
-    private val postsApi: PostsApi,
-    private val application: Application
+    private val application: Application,
+    private val postgrest: Postgrest
 ) : ViewModel() {
 
     val event = Channel<Event>(Channel.UNLIMITED)
@@ -96,13 +97,18 @@ class CreatePostViewModel @Inject constructor(
             location = PointDto(latitude = 0.0, longitude = 0.0)
         )
 
-        postsApi.createPost(post)
-            .toOperationResult { it }
-            .onSuccess { postDto -> sendPostMedia(postDto.id) }
-            .onError {
-                _state.update { it.copy(isLoading = false) }
-                _action.emit(Action.ShowToast(it))
-            }
+        postgrest.from("posts").insert(post)
+        postgrest.from("posts").select {
+            filter { eq("title", state.value.title) }
+        }.decodeSingle<PostDto>()
+
+//        postsApi.createPost(post)
+//            .toOperationResult { it }
+//            .onSuccess { postDto -> sendPostMedia(postDto.id) }
+//            .onError {
+//                _state.update { it.copy(isLoading = false) }
+//                _action.emit(Action.ShowToast(it))
+//            }
     }
 
     private suspend fun sendPostMedia(id: Int) {
