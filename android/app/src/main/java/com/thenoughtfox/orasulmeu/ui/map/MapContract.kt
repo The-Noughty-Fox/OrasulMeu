@@ -7,7 +7,7 @@ object MapContract {
     data class State(val isLoading: Boolean = false)
 
     sealed interface Event {
-        data class NavigateToPlayer(val point: Point) : Event
+        data class NavigateToUser(val point: Point) : Event
     }
 
     sealed interface Action {

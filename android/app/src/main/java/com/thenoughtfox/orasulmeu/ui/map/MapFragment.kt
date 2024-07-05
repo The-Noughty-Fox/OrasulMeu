@@ -32,7 +32,7 @@ class MapFragment : Fragment() {
     private val locationClient: LocationClient by lazy {
         LocationClient(requireContext()) { location ->
             lifecycleScope.launch(Dispatchers.IO) {
-                viewModel.event.send(Event.NavigateToPlayer(location.toPoint()))
+                viewModel.event.send(Event.NavigateToUser(location.toPoint()))
             }
         }
     }

@@ -66,7 +66,7 @@ class MapSearchViewModel @Inject constructor(
     private fun handleEvents() = viewModelScope.launch {
         event.consumeAsFlow().collect { event ->
             when (event) {
-                is Event.NavigateToPlayer -> {
+                is Event.NavigateToUser -> {
                     val point = Point.fromLngLat(event.location.longitude, event.location.latitude)
                     searchEngine.search(
                         ReverseGeoOptions(center = point), reverseSearchCallback

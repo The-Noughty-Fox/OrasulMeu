@@ -2,7 +2,6 @@ package com.thenoughtfox.orasulmeu.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mapbox.geojson.Point
 import com.thenoughtfox.orasulmeu.ui.map.MapContract.Action
 import com.thenoughtfox.orasulmeu.ui.map.MapContract.Event
 import com.thenoughtfox.orasulmeu.ui.map.MapContract.State
@@ -35,7 +34,7 @@ class MapViewModel @Inject constructor() : ViewModel() {
     private fun handleEvents() = viewModelScope.launch {
         event.consumeAsFlow().collect { event ->
             when (event) {
-                is Event.NavigateToPlayer -> {
+                is Event.NavigateToUser -> {
                     _action.emit(Action.MoveToLocation(event.point))
                 }
             }
