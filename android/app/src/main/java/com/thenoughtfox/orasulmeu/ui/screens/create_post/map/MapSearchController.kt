@@ -74,7 +74,7 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
     val locationClient: LocationClient = remember {
         LocationClient(context) { location ->
             scope.launch {
-                viewModel.event.send(Event.NavigateToPlayer(location))
+                viewModel.event.send(Event.NavigateToUser(location))
             }
         }
     }

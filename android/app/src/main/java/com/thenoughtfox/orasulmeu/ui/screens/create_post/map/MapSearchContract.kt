@@ -15,7 +15,7 @@ data class State(
 )
 
 sealed class Event {
-    data class NavigateToPlayer(val location: Location) : Event()
+    data class NavigateToUser(val location: Location) : Event()
     data class MoveToLocation(val point: Point, val address: String) : Event()
     data class DoOnTextLocationChanged(val text: String) : Event()
     data class OnCameraTrackingDismissed(val geo: ReverseGeoOptions) : Event()

@@ -53,4 +53,16 @@
     <string name="menu_map">Harta</string>
     <string name="menu_create">Creaza</string>
     <string name="menu_profile">Profil</string>
+
+    <string name="my_profile_screen_title">Profilul meu</string>
+    <string name="save">Salveaza</string>
+
+    <string name="profile_settings_toolbar_title">Profilul meu</string>
+    <string name="profile_settings_contact_us_title">Contacteaza-ne</string>
+    <string name="profile_settings_logout_title">Deconecteaza contul</string>
+    <string name="profile_settings_delete_account_title">Sterge profilul</string>
+    <string name="profile_settings_delete_dialog_title">Sterge profilul</string>
+    <string name="profile_settings_delete_dialog_desc">Sigur doriți să vă ștergeți profilul definitiv? Această acțiune nu poate fi anulată</string>
+    <string name="profile_settings_delete_dialog_ok">Sterge</string>
+    <string name="profile_settings_delete_dialog_cancel">Anuleaza</string>
 </resources>

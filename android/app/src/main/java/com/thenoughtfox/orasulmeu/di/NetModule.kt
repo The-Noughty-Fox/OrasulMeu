@@ -17,8 +17,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.AuthApi
 import org.openapitools.client.apis.EchoApi
 import org.openapitools.client.apis.PostsApi
+import org.openapitools.client.apis.UsersApi
 import org.openapitools.client.infrastructure.ApiClient
-import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -70,6 +70,11 @@ object NetModule {
     @Singleton
     fun providePostsApi(apiClient: ApiClient): PostsApi =
         apiClient.createService(PostsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUsersApi(apiClient: ApiClient): UsersApi =
+        apiClient.createService(UsersApi::class.java)
 
     private class SessionCookie(private val userSharedPrefs: UserSharedPrefs) : CookieJar {
         private val cookies = mutableListOf<Cookie>()
