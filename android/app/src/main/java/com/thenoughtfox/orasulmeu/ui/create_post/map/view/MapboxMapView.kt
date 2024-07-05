@@ -1,9 +1,9 @@
 package com.thenoughtfox.orasulmeu.ui.create_post.map.view
 
 import android.content.Context
-import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -12,31 +12,41 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.plugin.animation.MapAnimationOptions.Companion.mapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.annotation.AnnotationConfig
+import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
+import com.mapbox.maps.plugin.annotation.ClusterOptions
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
+import com.thenoughtfox.orasulmeu.utils.generateSmallIcon
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class MapboxMapView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : MapView(context, attrs) {
 
     private var onLoadMap: (() -> Unit)? = null
-    private var onMapClicked: (() -> Unit)? = null
     private var onCameraTrackingDismissed: (() -> Unit)? = null
+    private var style: String = Style.LIGHT
+    private var pointAnnotationManager: PointAnnotationManager? = null
 
     companion object {
         private const val ZOOM_LEVEL = 15.0
         private const val MOVE_CAMERA_DURATION = 3_000L
+        private const val LAYER_ID_PIN = "LayerIdPin"
     }
 
     fun onLoadMap(onLoadMap: () -> Unit) {
         this.onLoadMap = onLoadMap
-    }
-
-    fun onMapClicked(onMapClicked: () -> Unit) {
-        this.onMapClicked = onMapClicked
     }
 
     fun onCameraTrackingDismissed(onCameraTrackingDismissed: () -> Unit) {
@@ -47,13 +57,23 @@ class MapboxMapView @JvmOverloads constructor(
         compass.enabled = false
         scalebar.enabled = false
 
-        mapboxMap.loadStyle(Style.LIGHT) {
+        mapboxMap.loadStyle(style) {
             initLocationComponent()
             setupGesturesListener()
             onLoadMap?.invoke()
-
-            style {
-            }
+            pointAnnotationManager = annotations.createPointAnnotationManager(
+                AnnotationConfig(
+                    layerId = LAYER_ID_PIN,
+                    annotationSourceOptions = AnnotationSourceOptions(
+                        clusterOptions = ClusterOptions(
+                            circleRadius = 15.0,
+                            textColor = Color.BLACK,
+                            clusterRadius = 25,
+                            colorLevels = listOf(Pair(0, Color.WHITE))
+                        )
+                    )
+                )
+            )
         }
     }
 
@@ -100,6 +120,23 @@ class MapboxMapView @JvmOverloads constructor(
         } else {
             mapboxMap.setCamera(cameraOptions)
         }
+    }
+
+    data class Place(val point: Point, val bitmap: Bitmap)
+
+    fun addPlaces(places: List<Place>) = CoroutineScope(Dispatchers.IO).launch {
+        val pointAnnotationOptions = places.map { place ->
+            PointAnnotationOptions()
+                .withPoint(place.point)
+                .withIconImage(place.bitmap.generateSmallIcon(context, 30, 36))
+        }
+
+        pointAnnotationManager?.create(pointAnnotationOptions)
+    }
+
+
+    fun clearPlaces() {
+        pointAnnotationManager?.deleteAll()
     }
 
     override fun onDestroy() {

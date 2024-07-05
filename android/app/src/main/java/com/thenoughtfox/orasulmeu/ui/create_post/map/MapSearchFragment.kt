@@ -55,7 +55,7 @@ class MapSearchFragment : Fragment() {
         LocationClient(requireContext()) { location ->
             if (view != null) {
                 lifecycleScope.launch {
-                    viewModel.event.send(Event.NavigateToPlayer(location))
+                    viewModel.event.send(Event.NavigateToUser(location))
                 }
             }
         }

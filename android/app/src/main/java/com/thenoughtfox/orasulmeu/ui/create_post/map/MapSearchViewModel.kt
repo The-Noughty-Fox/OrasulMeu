@@ -18,7 +18,7 @@ import com.mapbox.search.common.IsoLanguageCode
 import com.mapbox.search.result.SearchResult
 import com.mapbox.search.result.SearchSuggestion
 import com.thenoughtfox.orasulmeu.navigation.Screens
-import com.thenoughtfox.orasulmeu.utils.getPoint
+import com.thenoughtfox.orasulmeu.utils.toPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,7 +66,7 @@ class MapSearchViewModel @Inject constructor(
     private fun handleEvents() = viewModelScope.launch {
         event.consumeAsFlow().collect { event ->
             when (event) {
-                is Event.NavigateToPlayer -> {
+                is Event.NavigateToUser -> {
                     val point = Point.fromLngLat(event.location.longitude, event.location.latitude)
                     searchEngine.search(
                         ReverseGeoOptions(center = point), reverseSearchCallback
@@ -139,9 +139,10 @@ class MapSearchViewModel @Inject constructor(
         _state.update {
             it.copy(
                 address = address.trim(),
-                currentPoint = getPoint(
-                    LatLng(result.coordinate.latitude(), result.coordinate.longitude())
-                )
+                currentPoint = LatLng(
+                    result.coordinate.latitude(),
+                    result.coordinate.longitude()
+                ).toPoint()
             )
         }
     }
