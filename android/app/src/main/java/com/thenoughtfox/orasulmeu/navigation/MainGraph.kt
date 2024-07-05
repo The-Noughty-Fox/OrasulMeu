@@ -1,5 +1,7 @@
 package com.thenoughtfox.orasulmeu.navigation
 
+import androidx.compose.animation.SizeTransform
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -14,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,7 +46,7 @@ fun MainGraph() {
         var isBottomNavBarVisible by remember { mutableStateOf(true) }
 
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            topBar = {},
             bottomBar = {
                 if (isBottomNavBarVisible) {
                     BottomNavBar(
@@ -77,7 +80,7 @@ fun MainGraph() {
                     startDestination = MainGraphDestinations.HomeScreen,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
+                        .padding(bottom = padding.calculateBottomPadding())
                 ) {
                     composable<MainGraphDestinations.HomeScreen> {
                         HomeController()

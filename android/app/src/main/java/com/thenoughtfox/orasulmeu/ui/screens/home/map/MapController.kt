@@ -3,6 +3,7 @@ package com.thenoughtfox.orasulmeu.ui.screens.home.map
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,7 +63,10 @@ fun MapController() {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             vm.action.collect { action ->
                 when (action) {
-                    is MapContract.Action.MoveToLocation -> { locationToGo = action.point }
+                    is MapContract.Action.MoveToLocation -> {
+                        locationToGo = action.point
+                    }
+
                     is MapContract.Action.ShowToast -> context.showToast(action.msg)
                 }
             }
@@ -83,7 +88,7 @@ fun MapController() {
             }
         },
         modifier = Modifier.fillMaxSize()
-    ) {map ->
+    ) { map ->
         locationToGo?.let {
             map.redirectToLocation(it)
             locationToGo = null

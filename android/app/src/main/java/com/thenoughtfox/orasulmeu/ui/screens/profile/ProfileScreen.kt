@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -40,6 +41,10 @@ fun ProfileScreen(
     pickImage: () -> Unit,
 ) {
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = colorResource(R.color.background_color))
+            .statusBarsPadding(),
         topBar = {
             TopBar(
                 rightItem = {

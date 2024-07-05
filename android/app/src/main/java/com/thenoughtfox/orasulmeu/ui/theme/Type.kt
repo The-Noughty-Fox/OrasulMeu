@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
@@ -83,5 +84,5 @@ fun Modifier.pageModifier(): Modifier = composed {
     this then Modifier
         .background(color = colorResource(id = R.color.background_color))
         .fillMaxSize()
-        .safeDrawingPadding()
+        .statusBarsPadding()
 }
