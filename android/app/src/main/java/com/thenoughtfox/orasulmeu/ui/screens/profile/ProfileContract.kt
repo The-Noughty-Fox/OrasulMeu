@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.profile
+package com.thenoughtfox.orasulmeu.ui.screens.profile
 
 import android.net.Uri
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
@@ -18,11 +18,14 @@ interface ProfileContract {
     )
 
     sealed interface Event {
-        data object GoToSettings : Event
         data object EditProfile : Event
         data object DiscardChanges : Event
         data object SaveChanges: Event
         data class ChangeName(val newName: String) : Event
         data class ChangePicture(val image: Uri) : Event
+    }
+
+    sealed interface NavAction {
+        data object GoToSettings : NavAction
     }
 }

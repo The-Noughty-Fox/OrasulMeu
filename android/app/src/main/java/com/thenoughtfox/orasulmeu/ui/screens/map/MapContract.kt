@@ -1,8 +1,8 @@
-package com.thenoughtfox.orasulmeu.ui.map
+package com.thenoughtfox.orasulmeu.ui.screens.map
 
 import com.mapbox.geojson.Point
 
-object MapContract {
+interface MapContract {
 
     data class State(val isLoading: Boolean = false)
 

@@ -1,11 +1,10 @@
-package com.thenoughtfox.orasulmeu.ui.profile
+package com.thenoughtfox.orasulmeu.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -25,21 +24,22 @@ import androidx.compose.ui.unit.sp
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
-import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.Event
-import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.State
-import com.thenoughtfox.orasulmeu.ui.profile.components.ClickableIcon
-import com.thenoughtfox.orasulmeu.ui.profile.components.ProfileView
-import com.thenoughtfox.orasulmeu.ui.profile.components.TopBar
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.NavAction
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ProfileView
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.TopBar
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
 @Composable
 fun ProfileScreen(
     state: State,
-    onSendEvent: (Event) -> Unit,
-    pickImage: () -> Unit
+    onSendEvent: (Event) -> Unit = {},
+    sendNavAction: (NavAction) -> Unit = {},
+    pickImage: () -> Unit,
 ) {
     Scaffold(
-        modifier = Modifier.statusBarsPadding(),
         topBar = {
             TopBar(
                 rightItem = {
@@ -56,7 +56,7 @@ fun ProfileScreen(
                         ClickableIcon(
                             painter = painterResource(R.drawable.ic_settings),
                             color = colorResource(R.color.icons_dark_grey),
-                            onClick = { onSendEvent(Event.GoToSettings) }
+                            onClick = { sendNavAction(NavAction.GoToSettings) }
                         )
                     }
                 },

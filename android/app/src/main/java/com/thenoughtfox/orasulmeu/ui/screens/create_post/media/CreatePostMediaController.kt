@@ -14,6 +14,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
+import com.thenoughtfox.orasulmeu.navigation.LocalMainNavigator
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.utils.showToast
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 fun CreatePostMediaController(viewModel: CreatePostViewModel) {
 
     val navigator = LocalCreatePostNavigator.current
+    val mainNavigator = LocalMainNavigator.current
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -67,6 +69,9 @@ fun CreatePostMediaController(viewModel: CreatePostViewModel) {
         },
         onNextClick = {
             navigator.navigate(CreatePostDestinations.CreatePostScreen)
+        },
+        onBackPressed = {
+            mainNavigator.navigateUp()
         }
     )
 }

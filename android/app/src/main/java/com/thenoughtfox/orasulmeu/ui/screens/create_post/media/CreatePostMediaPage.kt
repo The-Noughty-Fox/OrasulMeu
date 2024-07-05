@@ -53,7 +53,8 @@ fun CreatePostMediaPage(
     onSendEvent: (Event) -> Unit,
     onCameraClick: () -> Unit = {},
     onGalleryClick: () -> Unit = {},
-    onNextClick: () -> Unit = {}
+    onNextClick: () -> Unit = {},
+    onBackPressed: () -> Unit = {}
 ) {
 
     if (uiState.removedUri != null) {
@@ -78,7 +79,8 @@ fun CreatePostMediaPage(
     ) {
         Toolbar(
             title = stringResource(id = R.string.create_post_toolbar_title),
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
+            onBackClickListener = onBackPressed
         )
 
         val image = uiState.image ?: R.drawable.image_placeholder

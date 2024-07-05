@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.post_list
+package com.thenoughtfox.orasulmeu.ui.screens.post_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

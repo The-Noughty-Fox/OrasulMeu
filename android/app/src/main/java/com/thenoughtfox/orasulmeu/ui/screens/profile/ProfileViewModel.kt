@@ -1,10 +1,10 @@
-package com.thenoughtfox.orasulmeu.ui.profile
+package com.thenoughtfox.orasulmeu.ui.screens.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
-import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.Event
-import com.thenoughtfox.orasulmeu.ui.profile.ProfileContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,10 +48,6 @@ class ProfileViewModel @Inject constructor(userSharedPrefs: UserSharedPrefs) : V
                         initialImageUrl = it.imageUrl
                     )
                 }
-            }
-
-            Event.GoToSettings -> {
-//                router.navigateTo(Screens.profileSettingsScreen)
             }
 
             is Event.ChangeName -> {

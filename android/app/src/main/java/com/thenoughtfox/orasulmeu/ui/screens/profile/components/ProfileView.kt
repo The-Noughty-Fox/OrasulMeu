@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.profile.components
+package com.thenoughtfox.orasulmeu.ui.screens.profile.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

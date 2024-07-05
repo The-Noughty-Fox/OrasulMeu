@@ -1,10 +1,10 @@
-package com.thenoughtfox.orasulmeu.ui.map
+package com.thenoughtfox.orasulmeu.ui.screens.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.thenoughtfox.orasulmeu.ui.map.MapContract.Action
-import com.thenoughtfox.orasulmeu.ui.map.MapContract.Event
-import com.thenoughtfox.orasulmeu.ui.map.MapContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.map.MapContract.Action
+import com.thenoughtfox.orasulmeu.ui.screens.map.MapContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.map.MapContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,8 +21,6 @@ class MapViewModel @Inject constructor() : ViewModel() {
     val event = Channel<Event>(Channel.UNLIMITED)
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
-    private val viewState
-        get() = state.value
 
     private val _action = MutableSharedFlow<Action>()
     val action: SharedFlow<Action> = _action

@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.post_list
+package com.thenoughtfox.orasulmeu.ui.screens.post_list
 
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 

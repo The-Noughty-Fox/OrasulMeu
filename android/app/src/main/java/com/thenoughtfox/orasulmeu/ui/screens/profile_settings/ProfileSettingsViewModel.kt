@@ -1,12 +1,12 @@
-package com.thenoughtfox.orasulmeu.ui.profile_settings
+package com.thenoughtfox.orasulmeu.ui.screens.profile_settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
-import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsContract.Action
-import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsContract.Event
-import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.Action
+import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,33 +40,32 @@ class ProfileSettingsViewModel @Inject constructor(
     private fun handleEvents() = viewModelScope.launch {
         event.consumeAsFlow().collect { event ->
             when (event) {
-                Event.Back -> Unit// router.backTo(Screens.profileScreen)
                 Event.DeleteAccount -> deleteAccount()
                 Event.Logout -> logout()
             }
         }
     }
 
-    private fun logout() {
+    private suspend fun logout() {
         userSharedPrefs.apply {
             cookies = null
             user = null
         }
 
-//        router.newRootScreen(Screens.loginScreen)
+        _action.emit(Action.Logout)
     }
 
-    private fun deleteAccount() = viewModelScope.launch {
+    private suspend fun deleteAccount() = viewModelScope.launch {
         val id = userSharedPrefs.user?.id ?: return@launch
         usersApi.remove(id = id.toString())
-            .toOperationResult { it }
+            .toOperationResult { }
             .onSuccess {
                 userSharedPrefs.apply {
                     cookies = null
                     user = null
                 }
 
-//                router.newRootScreen(Screens.loginScreen)
+                _action.emit(Action.Logout)
             }
             .onError {
                 _state.update { it.copy(isError = true) }

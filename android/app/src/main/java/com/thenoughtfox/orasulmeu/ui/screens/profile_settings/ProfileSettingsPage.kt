@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.profile_settings
+package com.thenoughtfox.orasulmeu.ui.screens.profile_settings
 
 import android.content.Context
 import android.content.Intent
@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,32 +27,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsContract.Action
-import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsContract.Event
-import com.thenoughtfox.orasulmeu.ui.profile_settings.ProfileSettingsContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.Event
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
-import com.thenoughtfox.orasulmeu.utils.showToast
 import com.thenoughtfox.orasulmeu.utils.view.Alert
 import com.thenoughtfox.orasulmeu.utils.view.Toolbar
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun ProfileSettingsPage(uiState: State, action: SharedFlow<Action>, onSendEvent: (Event) -> Unit) {
+fun ProfileSettingsPage(onSendEvent: (Event) -> Unit, onBackPressed: () -> Unit = {}) {
 
     var showDeleteAlert by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
     if (showDeleteAlert) {
         Alert(
@@ -71,16 +60,6 @@ fun ProfileSettingsPage(uiState: State, action: SharedFlow<Action>, onSendEvent:
         )
     }
 
-    LaunchedEffect(Unit) {
-        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            action.collectLatest {
-                when (it) {
-                    is Action.ShowToast -> context.showToast(it.msg)
-                }
-            }
-        }
-    }
-
     Column(
         modifier = Modifier
             .pageModifier()
@@ -88,9 +67,7 @@ fun ProfileSettingsPage(uiState: State, action: SharedFlow<Action>, onSendEvent:
     ) {
         Toolbar(
             title = stringResource(id = R.string.profile_settings_toolbar_title),
-            onBackClickListener = {
-                onSendEvent(Event.Back)
-            }
+            onBackClickListener = onBackPressed
         )
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -180,8 +157,6 @@ enum class ProfileSettingsPages(
 @Composable
 private fun PreviewProfileSettingsPage() {
     ProfileSettingsPage(
-        uiState = State(),
-        action = MutableSharedFlow(),
         onSendEvent = {}
     )
 }
