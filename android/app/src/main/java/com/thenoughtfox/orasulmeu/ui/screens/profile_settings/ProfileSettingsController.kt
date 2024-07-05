@@ -30,9 +30,10 @@ fun ProfileSettingsController() {
             vm.action.collectLatest {
                 when (it) {
                     is ProfileSettingsContract.Action.ShowToast -> context.showToast(it.msg)
-                    ProfileSettingsContract.Action.Logout -> rootNavigator.navigate(
-                        RootNavDestinations.Auth
-                    )
+                    ProfileSettingsContract.Action.Logout -> rootNavigator.apply {
+                        popBackStack()
+                        navigate(RootNavDestinations.Auth)
+                    }
                 }
             }
         }

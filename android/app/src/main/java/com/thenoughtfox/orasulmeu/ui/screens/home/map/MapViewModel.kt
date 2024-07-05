@@ -1,10 +1,10 @@
-package com.thenoughtfox.orasulmeu.ui.screens.map
+package com.thenoughtfox.orasulmeu.ui.screens.home.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.thenoughtfox.orasulmeu.ui.screens.map.MapContract.Action
-import com.thenoughtfox.orasulmeu.ui.screens.map.MapContract.Event
-import com.thenoughtfox.orasulmeu.ui.screens.map.MapContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.home.map.MapContract.Action
+import com.thenoughtfox.orasulmeu.ui.screens.home.map.MapContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.home.map.MapContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow

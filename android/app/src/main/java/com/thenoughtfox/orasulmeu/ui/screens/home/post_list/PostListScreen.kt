@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.screens.post_list
+package com.thenoughtfox.orasulmeu.ui.screens.home.post_list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,14 +19,16 @@ import androidx.compose.ui.unit.dp
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import com.thenoughtfox.orasulmeu.ui.post.PostView
+import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
 
 /**
  * @author Knurenko Bogdan 14.06.2024
  */
 @Composable
 fun PostListScreen(
-    state: PostListContract.State,
-    sendEvent: (PostListContract.Event) -> Unit
+    state: HomeContract.State,
+    sendEvent: (HomeContract.Event) -> Unit
 ) {
     if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -45,23 +47,23 @@ fun PostListScreen(
                 .background(color = colorResource(R.color.background_color)),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(state.list) {
-                PostView(state = it) { e ->
+            items(state.postsToShow) {
+                PostView(state = it.toState()) { e ->
                     when (e) {
                         PostContract.Action.ConfirmReport -> {
-                            sendEvent(PostListContract.Event.SendReport(it.id))
+                            sendEvent(HomeContract.Event.SendReport(it.id))
                         }
 
                         PostContract.Action.Dislike -> {
-                            sendEvent(PostListContract.Event.DislikePost(it.id))
+                            sendEvent(HomeContract.Event.DislikePost(it.id))
                         }
 
                         PostContract.Action.Like -> {
-                            sendEvent(PostListContract.Event.LikePost(it.id))
+                            sendEvent(HomeContract.Event.LikePost(it.id))
                         }
 
                         PostContract.Action.RevokeReaction -> {
-                            sendEvent(PostListContract.Event.RevokeReaction(it.id))
+                            sendEvent(HomeContract.Event.RevokeReaction(it.id))
                         }
                     }
                 }
@@ -71,11 +73,11 @@ fun PostListScreen(
         if (state.messageToShow != null) {
             AlertDialog(
                 onDismissRequest = {
-                    sendEvent(PostListContract.Event.CloseMessage)
+                    sendEvent(HomeContract.Event.CloseMessage)
                 },
                 confirmButton = {
                     Button(onClick = {
-                        sendEvent(PostListContract.Event.CloseMessage)
+                        sendEvent(HomeContract.Event.CloseMessage)
                     }) {
                         Text(text = "Okay")
                     }

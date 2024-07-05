@@ -1,5 +1,6 @@
 package com.thenoughtfox.orasulmeu.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,7 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.thenoughtfox.orasulmeu.ui.screens.map.MapController
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeController
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavBar
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
 import kotlinx.serialization.Serializable
@@ -28,7 +29,7 @@ interface MainGraphDestinations {
     object CreatePostScreen
 
     @Serializable
-    object MapScreen
+    object HomeScreen
 
     @Serializable
     object ProfileScreen
@@ -41,65 +42,71 @@ fun MainGraph() {
         var currentNavItem by remember { mutableStateOf(BottomNavTabs.Map) }
         var isBottomNavBarVisible by remember { mutableStateOf(true) }
 
-        Scaffold(bottomBar = {
-            if (isBottomNavBarVisible) {
-                BottomNavBar(
-                    selected = currentNavItem,
-                    onSelectTab = { navTabs ->
-                        if (navTabs == currentNavItem) return@BottomNavBar
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                if (isBottomNavBarVisible) {
+                    BottomNavBar(
+                        selected = currentNavItem,
+                        onSelectTab = { navTabs ->
+                            if (navTabs == currentNavItem) return@BottomNavBar
 
-                        when (navTabs.name) {
-                            BottomNavTabs.Map.name -> navController.navigate(
-                                MainGraphDestinations.MapScreen
-                            )
+                            when (navTabs.name) {
+                                BottomNavTabs.Map.name -> navController.navigate(
+                                    MainGraphDestinations.HomeScreen
+                                )
 
-                            BottomNavTabs.Create.name -> navController.navigate(
-                                MainGraphDestinations.CreatePostScreen
-                            )
+                                BottomNavTabs.Create.name -> navController.navigate(
+                                    MainGraphDestinations.CreatePostScreen
+                                )
 
-                            BottomNavTabs.Profile.name -> navController.navigate(
-                                MainGraphDestinations.ProfileScreen
-                            )
-                        }
-                    },
+                                BottomNavTabs.Profile.name -> navController.navigate(
+                                    MainGraphDestinations.ProfileScreen
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .fillMaxWidth()
+                    )
+                }
+            },
+            content = { padding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = MainGraphDestinations.HomeScreen,
                     modifier = Modifier
-                        .navigationBarsPadding()
-                        .fillMaxWidth()
-                )
-            }
-        }, content = { padding ->
-            NavHost(
-                navController = navController,
-                startDestination = MainGraphDestinations.MapScreen,
-                modifier = Modifier.padding(padding)
-            ) {
-                composable<MainGraphDestinations.MapScreen> {
-                    MapController()
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    composable<MainGraphDestinations.HomeScreen> {
+                        HomeController()
 
-                    SideEffect {
-                        currentNavItem = BottomNavTabs.Map
-                        isBottomNavBarVisible = true
+                        SideEffect {
+                            currentNavItem = BottomNavTabs.Map
+                            isBottomNavBarVisible = true
+                        }
                     }
-                }
 
-                composable<MainGraphDestinations.CreatePostScreen> {
-                    CreatePostGraph()
-                    SideEffect {
-                        currentNavItem = BottomNavTabs.Create
-                        isBottomNavBarVisible = false
+                    composable<MainGraphDestinations.CreatePostScreen> {
+                        CreatePostGraph()
+                        SideEffect {
+                            currentNavItem = BottomNavTabs.Create
+                            isBottomNavBarVisible = false
+                        }
                     }
-                }
 
-                composable<MainGraphDestinations.ProfileScreen> {
-                    ProfileGraph()
+                    composable<MainGraphDestinations.ProfileScreen> {
+                        ProfileGraph()
 
-                    SideEffect {
-                        currentNavItem = BottomNavTabs.Profile
-                        isBottomNavBarVisible = true
+                        SideEffect {
+                            currentNavItem = BottomNavTabs.Profile
+                            isBottomNavBarVisible = true
+                        }
                     }
                 }
             }
-        })
+        )
     }
 }
 

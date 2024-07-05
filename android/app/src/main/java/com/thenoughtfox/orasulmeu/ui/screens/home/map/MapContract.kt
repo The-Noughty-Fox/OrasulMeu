@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.screens.map
+package com.thenoughtfox.orasulmeu.ui.screens.home.map
 
 import com.mapbox.geojson.Point
 
