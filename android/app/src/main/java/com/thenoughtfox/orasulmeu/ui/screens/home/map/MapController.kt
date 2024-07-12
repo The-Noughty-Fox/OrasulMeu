@@ -56,7 +56,10 @@ fun MapController() {
         }
     }
 
-    var locationToGo: Point? by remember { mutableStateOf(null) }
+
+    val mapView = remember {
+        MapboxMapView(context)
+    }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(Unit) {
@@ -64,7 +67,7 @@ fun MapController() {
             vm.action.collect { action ->
                 when (action) {
                     is MapContract.Action.MoveToLocation -> {
-                        locationToGo = action.point
+                       mapView.redirectToLocation(action.point)
                     }
 
                     is MapContract.Action.ShowToast -> context.showToast(action.msg)
@@ -72,11 +75,9 @@ fun MapController() {
             }
         }
     }
-
     AndroidView(
         factory = {
-            MapboxMapView(it).apply {
-
+            mapView.apply {
                 onLoadMap {
                     locationRequester.launch(
                         arrayOf(
@@ -88,10 +89,5 @@ fun MapController() {
             }
         },
         modifier = Modifier.fillMaxSize()
-    ) { map ->
-        locationToGo?.let {
-            map.redirectToLocation(it)
-            locationToGo = null
-        }
-    }
+    )
 }
