@@ -65,4 +65,7 @@
     <string name="profile_settings_delete_dialog_desc">Sigur doriți să vă ștergeți profilul definitiv? Această acțiune nu poate fi anulată</string>
     <string name="profile_settings_delete_dialog_ok">Sterge</string>
     <string name="profile_settings_delete_dialog_cancel">Anuleaza</string>
+
+    <string name="home_view_type_list">Listă</string>
+    <string name="home_view_type_map">Hartă</string>
 </resources>

@@ -18,9 +18,7 @@ class OrasulMeuColor {
         get() = colorResource(R.color.black)
 
     val buttonNextBackground: Color
-        @Composable
-        @ReadOnlyComposable
-        get() = colorResource(R.color.button_next_color)
+        get() = Color(0xFFC7D2FE)
 
     val backgroundWhite: Color
         get() = Color.White
