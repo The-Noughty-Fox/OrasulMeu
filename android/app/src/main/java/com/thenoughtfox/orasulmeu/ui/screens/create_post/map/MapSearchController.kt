@@ -60,6 +60,7 @@ import com.mapbox.search.result.SearchSuggestion
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.service.LocationClient
+import com.thenoughtfox.orasulmeu.ui.basic.FindMeOnMapButton
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.map.view.MapboxMapView
@@ -128,38 +129,50 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
     ) {
         val (map, search, suggestion, pin, buttonNext) = createRefs()
 
-        AndroidView(modifier = Modifier
-            .fillMaxSize()
-            .constrainAs(map) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-                top.linkTo(parent.top)
-            },
-            factory = {
-                mapView.apply {
-                    onLoadMap {
-                        locationRequester.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                            )
-                        )
-
-                    }
-
-                    onCameraTrackingDismissed {
-                        scope.launch {
-                            viewModel.event.send(
-                                Event.OnCameraTrackingDismissed(
-                                    ReverseGeoOptions(center = mapboxMap.cameraState.center)
+        Box(modifier = Modifier.constrainAs(map) {
+            width = Dimension.matchParent
+            height = Dimension.matchParent
+        }) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = {
+                    mapView.apply {
+                        onLoadMap {
+                            locationRequester.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
                                 )
                             )
+
+                        }
+
+                        onCameraTrackingDismissed {
+                            scope.launch {
+                                viewModel.event.send(
+                                    Event.OnCameraTrackingDismissed(
+                                        ReverseGeoOptions(center = mapboxMap.cameraState.center)
+                                    )
+                                )
+                            }
                         }
                     }
                 }
+            )
+
+            FindMeOnMapButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 8.dp, bottom = 72.dp)
+            ) {
+                locationRequester.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                    )
+                )
             }
-        )
+        }
 
         SearchBarView(
             searchText = state.searchText,

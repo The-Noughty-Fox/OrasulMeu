@@ -89,7 +89,7 @@ class MapSearchViewModel @Inject constructor(
                     searchEngine.select(event.suggestion, selectCallback)
                 }
 
-                Event.ClearSearchText -> _state.update { it.copy(searchText = "") }
+                Event.ClearSearchText -> _state.update { it.copy(searchText = "", isSuggestionListShow = false) }
             }
         }
     }
