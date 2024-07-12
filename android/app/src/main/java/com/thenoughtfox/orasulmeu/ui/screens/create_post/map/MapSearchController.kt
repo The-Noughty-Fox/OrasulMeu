@@ -6,16 +6,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -30,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -58,6 +64,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.map.view.MapboxMapView
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.RoundButton
+import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 import com.thenoughtfox.orasulmeu.utils.showToast
 import kotlinx.coroutines.launch
 
@@ -117,7 +124,6 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
-//            .safeDrawingPadding()
             .background(color = colorResource(R.color.background_color))
     ) {
         val (map, search, suggestion, pin, buttonNext) = createRefs()
@@ -157,11 +163,14 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
 
         SearchBarView(
             searchText = state.searchText,
-            modifier = Modifier.constrainAs(search) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(parent.top)
-            }, onValueChanged = { text ->
+            modifier = Modifier
+                .constrainAs(search) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
+                }
+                .statusBarsPadding(),
+            onValueChanged = { text ->
                 scope.launch {
                     viewModel.event.send(Event.DoOnTextLocationChanged(text))
                 }
@@ -208,7 +217,7 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
             }
             .padding(horizontal = 24.dp),
             text = stringResource(id = R.string.map_button_next),
-            backgroundColor = colorResource(id = R.color.button_next_color),
+            backgroundColor = OrasulMeuTheme.colors.buttonNextBackground,
             textColor = colorResource(id = R.color.black),
             onClick = {
                 scope.launch {
@@ -279,25 +288,19 @@ private fun SearchBarView(
     onValueChanged: (String) -> Unit,
     onClear: () -> Unit = {}
 ) {
-    ConstraintLayout(
+    Row(
         modifier = modifier
             .padding(horizontal = 24.dp, vertical = 8.dp)
             .fillMaxWidth()
             .background(color = Color.White, shape = RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        val (searchImage, editText, closeImage) = createRefs()
-
-        Image(
+        Icon(
             painter = painterResource(id = R.drawable.ic_search),
             contentDescription = "search",
-            Modifier
-                .size(24.dp)
-                .constrainAs(searchImage) {
-                    start.linkTo(parent.start)
-                    bottom.linkTo(parent.bottom)
-                    top.linkTo(parent.top)
-                }
+            tint = OrasulMeuTheme.colors.onBackground,
+            modifier = Modifier.size(24.dp)
         )
 
         OutlinedTextField(
@@ -322,27 +325,23 @@ private fun SearchBarView(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
             ),
-            modifier = Modifier.constrainAs(editText) {
-                start.linkTo(searchImage.start)
-                end.linkTo(closeImage.end)
-                bottom.linkTo(parent.bottom)
-                top.linkTo(parent.top)
-            }
+            modifier = Modifier.weight(1f)
         )
 
-        Image(
-            painter = painterResource(id = R.drawable.ic_close),
-            contentDescription = "close",
-            modifier = Modifier
-                .size(24.dp)
-                .constrainAs(closeImage) {
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                    top.linkTo(parent.top)
-                }
+        if (searchText.isNotEmpty()) {
+            Box(modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
                 .clickable { onClear() }
-        )
-
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close),
+                    contentDescription = "close",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(24.dp)
+                )
+            }
+        }
     }
-
 }

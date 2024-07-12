@@ -177,24 +177,32 @@ fun ProfileView(
 
             Row(
                 modifier = Modifier
-                    .padding(
-                        top = 36.dp, bottom = 24.dp, start = 16.dp, end = 16.dp
-                    )
+                    .padding(top = 36.dp, bottom = 24.dp, start = 16.dp, end = 16.dp)
                     .height(IntrinsicSize.Min)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                ProfileInfoItem(title = "Reclamații", value = postCount.toString())
+                ProfileInfoItem(
+                    title = "Reclamații",
+                    value = postCount.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+
                 VerticalDivider(thickness = 1.dp, color = colorResource(R.color.black))
-                ProfileInfoItem(title = "Reactii", value = reactionsCount.toString())
+
+                ProfileInfoItem(
+                    title = "Reactii",
+                    value = reactionsCount.toString(),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ProfileInfoItem(title: String, value: String) =
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun ProfileInfoItem(title: String, value: String, modifier: Modifier = Modifier) =
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
         Text(
             text = value, style = TextStyle(
                 fontSize = 24.sp, fontWeight = FontWeight(700), color = colorResource(R.color.black)

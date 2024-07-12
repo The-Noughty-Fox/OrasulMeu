@@ -45,8 +45,8 @@ fun ChangeViewTypeButton(
             Icon(
                 painter = painterResource(
                     when (viewType) {
-                        SelectedViewType.Map -> R.drawable.ic_menu_map
-                        SelectedViewType.List -> R.drawable.ic_list
+                        SelectedViewType.Map -> R.drawable.ic_list
+                        SelectedViewType.List -> R.drawable.ic_menu_map
                     }
                 ),
                 contentDescription = null,
@@ -56,8 +56,8 @@ fun ChangeViewTypeButton(
 
             Text(
                 text = when (viewType) {
-                    SelectedViewType.Map -> "Hartă"
-                    SelectedViewType.List -> "Listă"
+                    SelectedViewType.Map -> "Listă"
+                    SelectedViewType.List -> "Hartă"
                 }, style = TextStyle(
                     color = OrasulMeuTheme.colors.backgroundWhite,
                     fontSize = 16.sp,

@@ -1,7 +1,8 @@
 package com.thenoughtfox.orasulmeu.navigation
 
-import androidx.compose.animation.SizeTransform
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -9,14 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,7 +48,11 @@ fun MainGraph() {
         Scaffold(
             topBar = {},
             bottomBar = {
-                if (isBottomNavBarVisible) {
+                AnimatedVisibility(
+                    visible = isBottomNavBarVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
                     BottomNavBar(
                         selected = currentNavItem,
                         onSelectTab = { navTabs ->
@@ -85,7 +89,7 @@ fun MainGraph() {
                     composable<MainGraphDestinations.HomeScreen> {
                         HomeController()
 
-                        SideEffect {
+                        LaunchedEffect(Unit) {
                             currentNavItem = BottomNavTabs.Map
                             isBottomNavBarVisible = true
                         }
@@ -93,7 +97,8 @@ fun MainGraph() {
 
                     composable<MainGraphDestinations.CreatePostScreen> {
                         CreatePostGraph()
-                        SideEffect {
+
+                        LaunchedEffect(Unit) {
                             currentNavItem = BottomNavTabs.Create
                             isBottomNavBarVisible = false
                         }
@@ -102,7 +107,7 @@ fun MainGraph() {
                     composable<MainGraphDestinations.ProfileScreen> {
                         ProfileGraph()
 
-                        SideEffect {
+                        LaunchedEffect(Unit) {
                             currentNavItem = BottomNavTabs.Profile
                             isBottomNavBarVisible = true
                         }
