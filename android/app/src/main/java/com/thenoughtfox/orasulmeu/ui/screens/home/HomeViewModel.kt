@@ -7,8 +7,10 @@ import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.PostsApi
@@ -25,10 +27,8 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(State())
     val state = _state.asStateFlow()
 
-    private val _event: MutableStateFlow<Event?> = MutableStateFlow(null)
-    suspend fun sendEvent(a: Event) {
-        _event.emit(a)
-    }
+    private val _event: Channel<Event> = Channel(Channel.UNLIMITED)
+    suspend fun sendEvent(a: Event) { _event.send(a) }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -43,7 +43,7 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            _event.collect { action ->
+            _event.consumeAsFlow().collect { action ->
                 when (action) {
                     is Event.DislikePost -> {
                         dislikePost(action.postId)
@@ -68,8 +68,6 @@ class HomeViewModel @Inject constructor(
                     Event.CloseMessage -> {
                         _state.update { it.copy(messageToShow = null) }
                     }
-
-                    null -> Unit
                 }
             }
         }

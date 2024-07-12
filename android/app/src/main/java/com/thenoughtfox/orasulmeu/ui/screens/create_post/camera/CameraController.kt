@@ -8,7 +8,6 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
@@ -31,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -43,6 +43,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.utils.CameraUtils.getCameraProvider
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.utils.CameraUtils.takePicture
 import com.thenoughtfox.orasulmeu.utils.showToast
+import com.thenoughtfox.orasulmeu.utils.view.Alert
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,7 +66,9 @@ fun CameraController(viewModel: CreatePostViewModel) {
         }
     )
 
+    var isOpenSettingsAlertVisible: Boolean by remember { mutableStateOf(false) }
     var isCameraPermissionGranted: Boolean by remember { mutableStateOf(false) }
+
     val cameraRequester = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -73,7 +76,7 @@ fun CameraController(viewModel: CreatePostViewModel) {
             isCameraPermissionGranted = true
         } else {
             context.showToast("Please provide location permissions")
-            askUserToOpenSettings(context)
+            isOpenSettingsAlertVisible = true
         }
     }
 
@@ -96,6 +99,19 @@ fun CameraController(viewModel: CreatePostViewModel) {
         }, onNext = {
             createPostNavigator.navigateUp()
         })
+
+    if (isOpenSettingsAlertVisible) {
+        Alert(
+            onDismissRequest = { isOpenSettingsAlertVisible = false },
+            dialogTitle = stringResource(R.string.camera_permission_denied_alert_title),
+            dialogText = stringResource(R.string.camera_permission_denied_aler_message),
+            confirmText = stringResource(R.string.camera_permission_denied_go_to_settings_button_text),
+            onConfirmation = {
+                startAppSettings(context)
+            },
+            dismissText = stringResource(R.string.camera_permission_denied_alert_cancel_button)
+        )
+    }
 }
 
 @Composable
@@ -183,20 +199,6 @@ fun CameraPreviewScreen(
                         onNext()
                     })
         }
-    }
-}
-
-//TODO in Compose
-private fun askUserToOpenSettings(context: Context) {
-    AlertDialog.Builder(context).apply {
-        setTitle(R.string.camera_permission_denied_alert_title)
-        setMessage(R.string.camera_permission_denied_aler_message)
-        setPositiveButton(R.string.camera_permission_denied_go_to_settings_button_text) { _, _ ->
-            startAppSettings(context)
-        }
-        setNegativeButton(R.string.camera_permission_denied_alert_cancel_button) { dialog, _ -> dialog.dismiss() }
-        create()
-        show()
     }
 }
 

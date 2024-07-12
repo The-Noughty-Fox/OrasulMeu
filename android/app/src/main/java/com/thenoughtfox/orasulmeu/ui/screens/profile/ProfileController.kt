@@ -10,19 +10,19 @@ import com.thenoughtfox.orasulmeu.navigation.ProfileDestinations
 
 @Composable
 fun ProfileController() {
-    val vm: ProfileViewModel = hiltViewModel()
+    val viewModel: ProfileViewModel = hiltViewModel()
     val profileNavController = LocalProfileNavigator.current
 
     val pickImageLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
 
-            vm.sendEvent(ProfileContract.Event.ChangePicture(uri))
+            viewModel.sendEvent(ProfileContract.Event.ChangePicture(uri))
         }
 
     ProfileScreen(
-        state = vm.state.collectAsState().value,
-        onSendEvent = vm::sendEvent,
+        state = viewModel.state.collectAsState().value,
+        onSendEvent = viewModel::sendEvent,
         pickImage = { pickImageLauncher.launch("image/*") },
         sendNavAction = { profileNavController.navigate(ProfileDestinations.ProfileSettings) }
     )

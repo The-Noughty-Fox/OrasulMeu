@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileSettingsController() {
-    val vm: ProfileSettingsViewModel = hiltViewModel()
+    val viewModel: ProfileSettingsViewModel = hiltViewModel()
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -27,7 +27,7 @@ fun ProfileSettingsController() {
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            vm.action.collectLatest {
+            viewModel.action.collectLatest {
                 when (it) {
                     is ProfileSettingsContract.Action.ShowToast -> context.showToast(it.msg)
                     ProfileSettingsContract.Action.Logout -> rootNavigator.apply {
@@ -40,7 +40,7 @@ fun ProfileSettingsController() {
     }
 
     ProfileSettingsPage(
-        onSendEvent = { scope.launch { vm.event.send(it) } },
+        onSendEvent = { scope.launch { viewModel.event.send(it) } },
         onBackPressed = { profileNavigator.navigateUp() }
     )
 }

@@ -18,13 +18,13 @@ import com.thenoughtfox.orasulmeu.ui.screens.home.post_list.PostListController
 
 @Composable
 fun HomeController() {
-    val vm: HomeViewModel = hiltViewModel()
+    val viewModel: HomeViewModel = hiltViewModel()
     var selectedViewType: SelectedViewType by remember { mutableStateOf(SelectedViewType.Map) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (selectedViewType) {
             SelectedViewType.Map -> MapController()
-            SelectedViewType.List -> PostListController(viewModel = vm)
+            SelectedViewType.List -> PostListController(viewModel = viewModel)
         }
 
         ChangeViewTypeButton(

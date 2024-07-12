@@ -46,29 +46,33 @@ class ProfileSettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun logout() {
+    private fun logout() {
         userSharedPrefs.apply {
             cookies = null
             user = null
         }
 
-        _action.emit(Action.Logout)
+        viewModelScope.launch {
+            _action.emit(Action.Logout)
+        }
     }
 
-    private suspend fun deleteAccount() = viewModelScope.launch {
-        val id = userSharedPrefs.user?.id ?: return@launch
-        usersApi.remove(id = id.toString())
-            .toOperationResult { }
-            .onSuccess {
-                userSharedPrefs.apply {
-                    cookies = null
-                    user = null
-                }
+    private fun deleteAccount() {
+        viewModelScope.launch {
+            val id = userSharedPrefs.user?.id ?: return@launch
+            usersApi.remove(id = id.toString())
+                .toOperationResult { }
+                .onSuccess {
+                    userSharedPrefs.apply {
+                        cookies = null
+                        user = null
+                    }
 
-                _action.emit(Action.Logout)
-            }
-            .onError {
-                _state.update { it.copy(isError = true) }
-            }
+                    _action.emit(Action.Logout)
+                }
+                .onError {
+                    _state.update { it.copy(isError = true) }
+                }
+        }
     }
 }

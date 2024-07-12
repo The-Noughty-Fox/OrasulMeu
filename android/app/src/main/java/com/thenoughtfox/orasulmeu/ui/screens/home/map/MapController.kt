@@ -31,12 +31,10 @@ fun MapController() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val vm: MapViewModel = hiltViewModel()
+    val viewModel: MapViewModel = hiltViewModel()
 
     val sendEvent: (MapContract.Event) -> Unit = {
-        scope.launch {
-            vm.event.send(it)
-        }
+        scope.launch { viewModel.event.send(it) }
     }
 
     val locationClient: LocationClient = remember {
@@ -63,7 +61,7 @@ fun MapController() {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            vm.action.collect { action ->
+            viewModel.action.collect { action ->
                 when (action) {
                     is MapContract.Action.MoveToLocation -> {
                         mapView.redirectToLocation(action.point)
