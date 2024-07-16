@@ -15,6 +15,7 @@ import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-resu
 import { POST_NOT_FOUND } from '@/infrastructure/messages';
 import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
 import { ReactionType } from '@/shared/types';
+import { SupabaseService } from '@/resources/supabase/supabase.service';
 
 const fullPostRelations = [
   'author',
@@ -37,26 +38,30 @@ export class PostService {
     @InjectMapper()
     private readonly mapper: Mapper,
     private mediaService: MediaService,
+    private supabaseService: SupabaseService,
   ) {}
 
-  async create(createPostDto: CreatePostDto, userId: number) {
-    const postEntity = this.repository.create({
-      title: createPostDto.title,
-      content: createPostDto.content,
-      locationAddress: createPostDto.locationAddress,
-    });
-    postEntity.author = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-    postEntity.location = {
-      type: 'Point',
-      coordinates: [
-        createPostDto.location.longitude,
-        createPostDto.location.latitude,
-      ],
-    };
-    await this.repository.save(postEntity);
-    return this.mapper.map(postEntity, Post, PostDto);
+  async create(createPostDto: CreatePostDto) {
+    const supabase = this.supabaseService.getClient();
+
+    const { title, content, locationAddress, location } = createPostDto;
+
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([
+        {
+          title,
+          content,
+          location_address: locationAddress,
+          author_id: 'ae8003be-db22-4bc2-9508-e160dcea0508',
+          location: `POINT(${location.longitude} ${location.latitude})`,
+        },
+      ])
+      .select();
+
+    console.log(data, error);
+
+    return 'test';
   }
 
   async findAll(
@@ -82,6 +87,17 @@ export class PostService {
       where: { id },
       relations: fullPostRelations,
     });
+
+    const supabase = this.supabaseService.getClient();
+
+    const { data: posts, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', id);
+
+    console.log(posts, error);
+
+    console.log('we are here');
 
     if (!post) {
       throw new NotFoundException(POST_NOT_FOUND(id));

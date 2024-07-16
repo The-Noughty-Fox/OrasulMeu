@@ -10,12 +10,14 @@ import { UserModule } from '@/resources/user/user.module';
 import { MediaModule } from '@/resources/media/media.module';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
 import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
+import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, User, PostMedia, PostReaction]),
     UserModule,
     MediaModule,
+    SupabaseModule,
   ],
   controllers: [PostController],
   providers: [PostService, PostProfile, UserProfile],

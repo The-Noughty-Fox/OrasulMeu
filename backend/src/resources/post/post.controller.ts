@@ -32,7 +32,7 @@ import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query
 import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
 
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
 @Controller('posts')
 export class PostController {
@@ -42,8 +42,8 @@ export class PostController {
   @ApiBody({ type: CreatePostDto })
   @ApiOperation({ operationId: 'create-post' })
   @ApiResponse({ type: PostDto })
-  create(@Body() createPostDto: CreatePostDto, @Req() req) {
-    return this.postService.create(createPostDto, req.user.id);
+  create(@Body() createPostDto: CreatePostDto) {
+    return this.postService.create(createPostDto);
   }
 
   @Get()
