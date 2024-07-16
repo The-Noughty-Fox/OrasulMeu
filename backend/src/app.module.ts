@@ -21,6 +21,7 @@ import { Media } from '@/resources/media/entities/media.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PostMedia } from '@/resources/media/entities/post-media.entity';
 import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
+import { SupabaseModule } from '@/resources/supabase/supabase.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
     PostModule,
     CommentModule,
     MediaModule,
+    SupabaseModule,
   ],
 })
 export class AppModule {
