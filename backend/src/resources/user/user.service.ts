@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -8,118 +14,160 @@ import { InjectMapper } from '@automapper/nestjs';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserProfileDto } from '@/resources/user/dto/user-profile.dto';
+import { SupabaseService } from '../supabase/supabase.service';
+import { UserUpdateDto } from './dto/user-update.dto';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class UserService {
+  private readonly supabase: SupabaseClient;
+
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectMapper()
     private readonly mapper: Mapper,
-  ) {}
-
-  async create(createUserDto: UserCreateDto) {
-    const userEntity = this.userRepository.create(createUserDto);
-
-    const user = await this.userRepository.save(userEntity);
-
-    return this.mapper.map(user, User, UserDto);
+    private readonly supabaseService: SupabaseService,
+  ) {
+    this.supabase = this.supabaseService.getClient();
   }
 
-  async findAll() {
-    const users = await this.userRepository.find();
-
-    return this.mapper.mapArray(users, User, UserDto);
-  }
-
-  async findOne(id: number) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+  async create(createUserDto: UserCreateDto): Promise<UserDto> {
+    if (
+      !createUserDto.appleToken &&
+      !createUserDto.googleToken &&
+      !createUserDto.facebookToken
+    ) {
+      throw new BadRequestException('Provide a token to create a user');
     }
 
-    return this.mapper.map(user, User, UserDto);
-  }
+    const { data: user, error } = await this.supabase
+      .from('custom_users')
+      .insert([createUserDto])
+      .select('id, email, firstName, lastName, socialProfilePictureUrl');
 
-  async update(id: number, updateUserDto: UserDto) {
-    const userEntity = await this.userRepository.findOne({
-      where: { id },
-    });
-
-    if (!userEntity) {
-      throw new NotFoundException(`User with id ${id} not found`);
-    }
-
-    Object.assign(userEntity, updateUserDto);
-
-    const user = await this.userRepository.save(userEntity);
-
-    return this.mapper.map(user, User, UserDto);
-  }
-
-  async findBySocialMediaToken(socialMedia: SocialMedia, token: string) {
-    try {
-      let where = {};
-
-      switch (socialMedia) {
-        case SocialMedia.Apple: {
-          where = { apple_token: token };
-          break;
-        }
-        case SocialMedia.Facebook: {
-          where = { facebook_token: token };
-          break;
-        }
-        case SocialMedia.Google: {
-          where = { google_token: token };
-          break;
-        }
+    // one possible reason for fail of creating user is that the email is already taken
+    // email is unique in the database, same as each type of token, no two same google tokens
+    // but still could be other type of error
+    if (error || !user || user.length === 0) {
+      if (error.code === '23505') {
+        throw new ConflictException('Invalid input data');
+      } else {
+        throw new InternalServerErrorException('Could not create the user');
       }
+    }
 
-      const user = await this.userRepository.findOne({
-        where,
-      });
-
-      return this.mapper.map(user, User, UserDto);
-    } catch (error) {}
+    return user[0] as UserDto;
   }
 
-  async findByEmail(email: string) {
-    const user = await this.userRepository.findOne({
-      where: { email },
+  async findAll(): Promise<UserDto[]> {
+    const { data: users, error } = await this.supabase
+      .from('custom_users')
+      .select('id, email, firstName, lastName, socialProfilePictureUrl');
+
+    if (error) {
+      throw new InternalServerErrorException('Could not find the users');
+    }
+
+    if (users.length === 0) {
+      throw new NotFoundException(`No users found`);
+    }
+
+    return users as UserDto[];
+  }
+
+  async findOne(id: number): Promise<UserDto> {
+    const { data: user, error } = await this.supabase
+      .from('custom_users')
+      .select('id, email, firstName, lastName, socialProfilePictureUrl')
+      .eq('id', id);
+
+    if (error) {
+      throw new InternalServerErrorException('Could not find the user');
+    }
+
+    if (!user || user.length === 0) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user[0] as UserDto;
+  }
+
+  async update(id: number, updateUserDto: UserUpdateDto): Promise<UserDto> {
+    const existingUser = await this.findOne(id);
+
+    const user = { ...existingUser, ...updateUserDto };
+
+    const { data: updatedUser, error: updatedError } = await this.supabase
+      .from('custom_users')
+      .update(user)
+      .eq('id', id)
+      .select('id, email, firstName, lastName, socialProfilePictureUrl');
+
+    if (!updatedUser || updatedUser.length === 0 || updatedError) {
+      throw new InternalServerErrorException('Could not update the user');
+    }
+
+    return updatedUser[0] as UserDto;
+  }
+
+  async findBySocialMediaToken(
+    socialMedia: SocialMedia,
+    token: string,
+  ): Promise<UserDto> {
+    const { data: user, error } = await this.supabase
+      .from('custom_users')
+      .select('id, email, firstName, lastName, socialProfilePictureUrl')
+      .eq(`${socialMedia}Token`, token);
+
+    if (error) {
+      throw new InternalServerErrorException('Could not find the user');
+    }
+
+    if (!user || user.length === 0) {
+      throw new NotFoundException(`User with given token not found`);
+    }
+
+    return user[0] as UserDto;
+  }
+
+  async findByEmail(email: string): Promise<UserDto> {
+    const { data: user, error } = await this.supabase
+      .from('custom_users')
+      .select('id, email, firstName, lastName, socialProfilePictureUrl')
+      .eq('email', email);
+
+    if (error) {
+      throw new InternalServerErrorException('Could not find the user');
+    }
+
+    if (!user || user.length === 0) {
+      throw new NotFoundException(`User with given email not found`);
+    }
+
+    return user[0] as UserDto;
+  }
+
+  async profile(id: number): Promise<UserProfileDto> {
+    const { data: user, error } = await this.supabase.rpc('get_user_profile', {
+      user_id_input: id,
     });
 
-    return this.mapper.map(user, User, UserDto);
-  }
+    if (error) {
+      throw new InternalServerErrorException('Could not find users profile');
+    }
 
-  async profile(userId: number): Promise<UserProfileDto> {
-    const result = await this.userRepository
-      .createQueryBuilder('users')
-      .leftJoinAndSelect('users.posts', 'posts')
-      .leftJoinAndSelect('users.postReactions', 'postReactions')
-      .select([
-        'users.id',
-        'users.email',
-        'users.firstName',
-        'users.lastName',
-        'users.socialProfilePictureUrl',
-        'COUNT(DISTINCT posts.id) AS posts_count',
-        'COUNT(DISTINCT postReactions.id) AS posts_reactions_count',
-      ])
-      .where('users.id = :userId', { userId })
-      .groupBy('users.id')
-      .getRawOne();
+    if (user.length === 0) {
+      throw new NotFoundException(`User profile with id ${id} not found`);
+    }
 
     return {
-      id: result.users_id,
-      email: result.users_email,
-      firstName: result.users_firstName,
-      lastName: result.users_lastName,
-      socialProfilePictureUrl: result.users_socialProfilePictureUrl,
-      publicationsCount: parseInt(result.posts_count),
-      reactionsCount: parseInt(result.posts_reactions_count),
+      id: user[0].id,
+      email: user[0].email,
+      firstName: user[0].firstName,
+      lastName: user[0].lastName,
+      socialProfilePictureUrl: user[0].socialProfilePictureUrl,
+      publicationsCount: parseInt(user[0].postsCount),
+      reactionsCount: parseInt(user[0].postsReactionsCount),
     };
   }
 }

@@ -32,7 +32,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
         email: data.email || 'Unknown',
         firstName: data.first_name || 'Unknown',
         lastName: data.last_name || 'Unknown',
-        facebook_token: data.id as string,
+        facebookToken: data.id as string,
         socialProfilePictureUrl: data.picture.data.url,
       });
     }

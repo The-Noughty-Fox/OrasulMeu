@@ -43,7 +43,7 @@ export class AppleStrategy extends PassportStrategy(
         email,
         firstName: (req.body as any)?.userInfo?.Name.given ?? 'Anonymous',
         lastName: (req.body as any)?.userInfo?.Name.family ?? 'Anonymous',
-        apple_token: id,
+        appleToken: id,
       }));
 
     return existingUser;

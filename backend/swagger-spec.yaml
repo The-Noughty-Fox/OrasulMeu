@@ -23,10 +23,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserDto"
+              $ref: "#/components/schemas/UserCreateDto"
       responses:
         "201":
-          description: ""
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        "400":
+          description: Bad Request. No token provided
+        "409":
+          description: Conflict. Invalid input data
+        "500":
+          description: Internal Server Error
       tags: &a1
         - users
     get:
@@ -34,7 +44,17 @@ paths:
       parameters: []
       responses:
         "200":
-          description: ""
+          description: Users found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserDto"
+        "404":
+          description: No users found
+        "500":
+          description: Internal Server Error
       tags: *a1
   /users/profile:
     get:
@@ -42,12 +62,16 @@ paths:
       summary: ""
       parameters: []
       responses:
-        default:
-          description: ""
+        "200":
+          description: User profile found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfileDto"
+        "404":
+          description: User profile not found
+        "500":
+          description: Internal Server Error
       tags: *a1
   /users/{id}:
     get:
@@ -56,11 +80,20 @@ paths:
         - name: id
           required: true
           in: path
+          description: User id
           schema:
-            type: string
+            type: number
       responses:
         "200":
-          description: ""
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        "404":
+          description: User not found
+        "500":
+          description: Internal Server Error
       tags: *a1
     patch:
       operationId: update
@@ -68,37 +101,26 @@ paths:
         - name: id
           required: true
           in: path
+          description: User id
           schema:
-            type: string
+            type: number
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserDto"
+              $ref: "#/components/schemas/UserUpdateDto"
       responses:
         "200":
-          description: ""
-      tags: *a1
-    delete:
-      operationId: remove
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        "200":
-          description: ""
-      tags: *a1
-  /users/search:
-    get:
-      operationId: search
-      parameters: []
-      responses:
-        "200":
-          description: ""
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        "404":
+          description: User not found
+        "500":
+          description: Internal Server Error
       tags: *a1
   /auth/test/{id}:
     post:
@@ -458,6 +480,27 @@ tags:
 servers: []
 components:
   schemas:
+    UserCreateDto:
+      type: object
+      properties:
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        appleToken:
+          type: string
+        googleToken:
+          type: string
+        facebookToken:
+          type: string
+        socialProfilePictureUrl:
+          type: string
+      required:
+        - email
+        - firstName
+        - lastName
     UserDto:
       type: object
       properties:
@@ -500,6 +543,17 @@ components:
         - lastName
         - reactionsCount
         - publicationsCount
+    UserUpdateDto:
+      type: object
+      properties:
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        socialProfilePictureUrl:
+          type: string
     AppleApiBody:
       type: object
       properties:
