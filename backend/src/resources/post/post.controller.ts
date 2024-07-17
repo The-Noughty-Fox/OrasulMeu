@@ -43,7 +43,7 @@ export class PostController {
   @ApiOperation({ operationId: 'create-post' })
   @ApiResponse({ type: PostDto })
   create(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
+    return this.postService.create(createPostDto, 1);
   }
 
   @Get()

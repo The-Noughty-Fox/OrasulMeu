@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Mapper } from '@automapper/core';
-import { PostDto } from '@/resources/post/dto/post.dto';
+import { PostDto, PostReactionsDto } from '@/resources/post/dto/post.dto';
 import { Post } from '@/resources/post/entities/post.entity';
 import { InjectMapper } from '@automapper/nestjs';
 import { User } from '@/resources/user/entities/user.entity';
@@ -14,8 +18,11 @@ import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query
 import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-result.dto';
 import { POST_NOT_FOUND } from '@/infrastructure/messages';
 import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
-import { ReactionType } from '@/shared/types';
+import { Reaction, ReactionType } from '@/shared/types';
 import { SupabaseService } from '@/resources/supabase/supabase.service';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { UserService } from '../user/user.service';
+import { CommentService } from '../comment/comment.service';
 
 const fullPostRelations = [
   'author',
@@ -28,6 +35,8 @@ const fullPostRelations = [
 
 @Injectable()
 export class PostService {
+  private readonly supabase: SupabaseClient;
+
   constructor(
     @InjectRepository(Post) private readonly repository: Repository<Post>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
@@ -38,30 +47,83 @@ export class PostService {
     @InjectMapper()
     private readonly mapper: Mapper,
     private mediaService: MediaService,
-    private supabaseService: SupabaseService,
-  ) {}
+    private readonly supabaseService: SupabaseService,
+    private readonly userService: UserService,
+    private readonly commentService: CommentService,
+  ) {
+    this.supabase = this.supabaseService.getClient();
+  }
 
-  async create(createPostDto: CreatePostDto) {
-    const supabase = this.supabaseService.getClient();
-
+  async create(createPostDto: CreatePostDto, userId: number) {
     const { title, content, locationAddress, location } = createPostDto;
 
-    const { data, error } = await supabase
+    const { data: postData, error: postError } = await this.supabase
       .from('posts')
       .insert([
         {
           title,
           content,
-          location_address: locationAddress,
-          author_id: 'ae8003be-db22-4bc2-9508-e160dcea0508',
+          locationAddress,
+          userId,
           location: `POINT(${location.longitude} ${location.latitude})`,
         },
       ])
-      .select();
+      .select('id, title, content, locationAddress, location, createdAt');
 
-    console.log(data, error);
+    if (postError || !postData || postData.length === 0) {
+      throw new InternalServerErrorException('Could not create the post');
+    }
 
-    return 'test';
+    const reactions: PostReactionsDto = {
+      like: await this.findPostReactions(postData[0].id, Reaction.Like),
+      dislike: await this.findPostReactions(postData[0].id, Reaction.Dislike),
+      userReaction: null,
+    };
+
+    const post = postData[0];
+    post['author'] = await this.userService.findOne(userId);
+    post['reactions'] = reactions;
+    post['comments'] = await this.commentService.findByPostId(post.id);
+    post['media'] = await this.findMedia(post.id);
+
+    console.log(post);
+
+    return post;
+  }
+
+  async findPostReactions(postId: number, reactionType: ReactionType) {
+    const { data: reaction, error } = await this.supabase.rpc(
+      'get_reaction_count',
+      {
+        post_id_input: postId,
+        reaction_input: reactionType,
+      },
+    );
+
+    if (error) {
+      throw new InternalServerErrorException('Could not get post reactions');
+    }
+
+    return reaction;
+  }
+
+  async findMedia(postId: number) {
+    const { data: media, error } = await this.supabase.rpc(
+      'get_media_by_post_id',
+      {
+        post_id_input: postId,
+      },
+    );
+
+    if (error) {
+      throw new InternalServerErrorException('Could not get post media');
+    }
+
+    if (!media || media.length === 0) {
+      return [];
+    }
+
+    return media;
   }
 
   async findAll(
