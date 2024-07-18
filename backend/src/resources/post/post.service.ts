@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,7 +9,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Mapper } from '@automapper/core';
-import { PostDto, PostReactionsDto } from '@/resources/post/dto/post.dto';
+import { PostDto } from '@/resources/post/dto/post.dto';
 import { Post } from '@/resources/post/entities/post.entity';
 import { InjectMapper } from '@automapper/nestjs';
 import { User } from '@/resources/user/entities/user.entity';
@@ -18,11 +19,12 @@ import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query
 import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-result.dto';
 import { POST_NOT_FOUND } from '@/infrastructure/messages';
 import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
-import { Reaction, ReactionType } from '@/shared/types';
+import { ReactionType } from '@/shared/types';
 import { SupabaseService } from '@/resources/supabase/supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { UserService } from '../user/user.service';
 import { CommentService } from '../comment/comment.service';
+import { use } from 'passport';
 
 const fullPostRelations = [
   'author',
@@ -57,7 +59,7 @@ export class PostService {
   async create(createPostDto: CreatePostDto, userId: number) {
     const { title, content, locationAddress, location } = createPostDto;
 
-    const { data: postData, error: postError } = await this.supabase
+    const { data: postId, error: postError } = await this.supabase
       .from('posts')
       .insert([
         {
@@ -68,186 +70,158 @@ export class PostService {
           location: `POINT(${location.longitude} ${location.latitude})`,
         },
       ])
-      .select('id, title, content, locationAddress, location, createdAt');
+      .select('id');
 
-    if (postError || !postData || postData.length === 0) {
+    if (postError || !postId || postId.length === 0) {
       throw new InternalServerErrorException('Could not create the post');
     }
 
-    const reactions: PostReactionsDto = {
-      like: await this.findPostReactions(postData[0].id, Reaction.Like),
-      dislike: await this.findPostReactions(postData[0].id, Reaction.Dislike),
-      userReaction: null,
-    };
+    try {
+      const post = await this.findOne(postId[0].id);
 
-    const post = postData[0];
-    post['author'] = await this.userService.findOne(userId);
-    post['reactions'] = reactions;
-    post['comments'] = await this.commentService.findByPostId(post.id);
-    post['media'] = await this.findMedia(post.id);
-
-    console.log(post);
-
-    return post;
+      return post as PostDto;
+    } catch (e) {
+      throw new InternalServerErrorException('Could not create the post');
+    }
   }
 
-  async findPostReactions(postId: number, reactionType: ReactionType) {
-    const { data: reaction, error } = await this.supabase.rpc(
-      'get_reaction_count',
-      {
-        post_id_input: postId,
-        reaction_input: reactionType,
-      },
-    );
+  async findAll(paginationQuery: PaginationQueryDto) {
+    const { page = 1, limit = 10 } = paginationQuery;
+
+    const { data: posts, error } = await this.supabase.rpc('get_posts', {
+      page_input: page,
+      limit_input: limit,
+    });
 
     if (error) {
-      throw new InternalServerErrorException('Could not get post reactions');
+      throw new InternalServerErrorException('Could not find the posts');
     }
 
-    return reaction;
-  }
-
-  async findMedia(postId: number) {
-    const { data: media, error } = await this.supabase.rpc(
-      'get_media_by_post_id',
-      {
-        post_id_input: postId,
-      },
-    );
-
-    if (error) {
-      throw new InternalServerErrorException('Could not get post media');
-    }
-
-    if (!media || media.length === 0) {
+    if (!posts || posts.length === 0) {
       return [];
     }
 
-    return media;
-  }
-
-  async findAll(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<PaginationResultDto<PostDto>> {
-    const { page = 1, limit = 25 } = paginationQuery;
-    const [postEntities, total] = await this.repository.findAndCount({
-      relations: fullPostRelations,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
-    return {
-      page,
-      limit,
-      total,
-      data: this.mapper.mapArray(postEntities, Post, PostDto),
-    };
+    return posts;
   }
 
   async findOne(id: number) {
-    const post = await this.repository.findOne({
-      where: { id },
-      relations: fullPostRelations,
+    const { data: post, error } = await this.supabase.rpc('get_post_by_id', {
+      post_id: id,
     });
 
-    const supabase = this.supabaseService.getClient();
+    if (error) {
+      throw new InternalServerErrorException('Could not find the post');
+    }
 
-    const { data: posts, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('id', id);
-
-    console.log(posts, error);
-
-    console.log('we are here');
-
-    if (!post) {
+    if (!post || post.length === 0) {
       throw new NotFoundException(POST_NOT_FOUND(id));
     }
 
-    return this.mapper.map(post, Post, PostDto);
+    return post as PostDto;
   }
 
   async update(id: number, updatePostDto: UpdatePostDto) {
-    const post = await this.repository.findOne({
-      where: { id },
-      relations: fullPostRelations,
-    });
+    const { data: existingPost, error: existingError } = await this.supabase
+      .from('posts')
+      .select('title, content, locationAddress, location')
+      .eq('id', id);
 
-    if (!post) {
+    if (existingError) {
+      throw new InternalServerErrorException('Could not find the post');
+    }
+
+    if (!existingPost || existingPost.length === 0) {
       throw new NotFoundException(POST_NOT_FOUND(id));
     }
 
-    const updatedPost = await this.repository.save(
-      Object.assign(post, updatePostDto),
-    );
+    const post = {
+      title: updatePostDto.title || existingPost[0].title,
+      content: updatePostDto.content || existingPost[0].content,
+      locationAddress:
+        updatePostDto.locationAddress || existingPost[0].locationAddress,
+      location:
+        `POINT(${updatePostDto.location.longitude} ${updatePostDto.location.latitude})` ||
+        existingPost[0].location,
+    };
 
-    return this.mapper.map(updatedPost, Post, PostDto);
+    const { data: updatedUser, error: updatedError } = await this.supabase
+      .from('posts')
+      .update(post)
+      .eq('id', id)
+      .select('id');
+
+    if (updatedError || !updatedUser || updatedUser.length === 0) {
+      throw new InternalServerErrorException('Could not update the post');
+    }
+
+    try {
+      const updatedPost = await this.findOne(updatedUser[0].id);
+      return updatedPost as PostDto;
+    } catch (e) {
+      throw new InternalServerErrorException('Could not update the post');
+    }
   }
 
   async remove(id: number) {
-    const deletionResult = await this.repository.delete(id);
+    const { error } = await this.supabase.from('posts').delete().eq('id', id);
 
-    if (deletionResult.affected === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(id));
+    if (error) {
+      throw new InternalServerErrorException('Could not delete the post');
     }
 
     return true;
   }
 
-  async react(
-    postId: number,
-    userId: number,
-    reaction: ReactionType,
-  ): Promise<PostDto> {
-    let post = await this.repository.findOne({
-      where: { id: postId },
-      relations: fullPostRelations,
-    });
+  async react(postId: number, userId: number, reaction: ReactionType) {
+    const post = await this.findOne(postId);
 
-    if (!post) {
-      throw new NotFoundException(POST_NOT_FOUND(postId));
+    const { data: existingPostReaction, error: existingPostReactionError } =
+      await this.supabase
+        .from('post_reactions')
+        .select('id')
+        .eq('postId', postId)
+        .eq('userId', userId);
+
+    if (existingPostReactionError) {
+      throw new InternalServerErrorException(
+        'Could not react to the post. Please try again',
+      );
     }
 
-    const existingPostReaction = await this.postReactionRepository.findOne({
-      where: { post: { id: postId }, user: { id: userId } },
-    });
+    if (existingPostReaction && existingPostReaction.length > 0) {
+      const { error: deleteError } = await this.supabase
+        .from('post_reactions')
+        .delete()
+        .eq('id', existingPostReaction[0].id);
 
-    if (existingPostReaction) {
-      await this.postReactionRepository.delete(existingPostReaction.id);
-      post = {
-        ...post,
-        reactions: post.reactions.filter(
-          (r) => r.user.id !== userId && r.post.id !== postId,
-        ),
-      };
+      if (deleteError) {
+        throw new InternalServerErrorException(
+          'Could not react to the post. Please try again',
+        );
+      }
     }
 
-    if (
-      (existingPostReaction && existingPostReaction.reaction !== reaction) ||
-      !existingPostReaction
-    ) {
-      const postReaction = this.postReactionRepository.create({
-        post,
-        user: { id: userId },
-        reaction,
-      });
-      await this.postReactionRepository.save(postReaction);
-      post = {
-        ...post,
-        reactions: [...(post.reactions || []), postReaction],
-      };
+    const { data: postReaction, error: postReactionError } = await this.supabase
+      .from('post_reactions')
+      .insert([{ reaction, postId, userId }])
+      .select();
+
+    console.log(postReaction, postReactionError);
+
+    if (postReactionError || !postReaction || postReaction.length === 0) {
+      throw new InternalServerErrorException(
+        'Could not react to the post. Please try again',
+      );
     }
 
-    const postDto = this.mapper.map(post, Post, PostDto);
-    return {
-      ...postDto,
-      reactions: {
-        ...postDto.reactions,
-        userReaction:
-          existingPostReaction?.reaction === reaction ? null : reaction,
-      },
-    };
+    try {
+      const post = await this.findOne(postId);
+      return post;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Could not react to the post. Please try again',
+      );
+    }
   }
 
   async addMedia(postId: number, files: Express.Multer.File[]) {
@@ -263,12 +237,33 @@ export class PostService {
     return this.mapper.map(await this.repository.save(post), Post, PostDto);
   }
 
-  async getMyPosts(userId: number) {
-    const posts = await this.repository.find({
-      where: { author: { id: userId } },
-      relations: fullPostRelations,
-    });
+  async getMyPosts(userId: number, paginationQuery: PaginationQueryDto) {
+    try {
+      await this.userService.findOne(userId);
+    } catch (e) {
+      throw new BadRequestException('Invalid user id');
+    }
 
-    return this.mapper.mapArray(posts, Post, PostDto);
+    const { page = 1, limit = 10 } = paginationQuery;
+
+    const { data: posts, error } = await this.supabase.rpc(
+      'get_posts_for_user',
+      {
+        user_id_input: userId,
+        page_input: page,
+        limit_input: limit,
+      },
+    );
+
+    if (error) {
+      console.error(error);
+      throw new InternalServerErrorException("Could not user's posts");
+    }
+
+    if (!posts || posts.length === 0) {
+      return [];
+    }
+
+    return posts;
   }
 }

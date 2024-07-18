@@ -62,8 +62,8 @@ export class PostController {
     status: 200,
     schema: getPaginationSchema(PostDto),
   })
-  getMyPosts(@Req() req) {
-    return this.postService.getMyPosts(req.user.id);
+  getMyPosts(@Req() req, @Query() paginationQuery: PaginationQueryDto) {
+    return this.postService.getMyPosts(1, paginationQuery);
   }
 
   @Get(':id')
@@ -98,7 +98,7 @@ export class PostController {
     type: ReactToPostDto,
   })
   react(@Param('id') id: string, @Body() body: ReactToPostDto, @Req() req) {
-    return this.postService.react(+id, req.user.id, body.reaction);
+    return this.postService.react(+id, 1, body.reaction);
   }
 
   @Post(':id/media')
