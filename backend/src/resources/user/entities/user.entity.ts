@@ -16,11 +16,7 @@ export class User extends BaseEntity {
 
   @Column()
   @AutoMap()
-  firstName: string;
-
-  @Column()
-  @AutoMap()
-  lastName: string;
+  username: string;
 
   @Column({ nullable: true })
   @AutoMap()

@@ -40,8 +40,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (!existingUser) {
       return this.userService.create({
         email,
-        firstName: given_name,
-        lastName: family_name || '',
+        username: `${given_name || 'Unknown'} ${family_name || 'Unknown'}`,
         socialProfilePictureUrl: picture,
         googleToken: sub,
       });

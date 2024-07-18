@@ -43,7 +43,7 @@ export class UserService {
     const { data: user, error } = await this.supabase
       .from('custom_users')
       .insert([createUserDto])
-      .select('id, email, firstName, lastName, socialProfilePictureUrl');
+      .select('id, email, username, socialProfilePictureUrl');
 
     // one possible reason for fail of creating user is that the email is already taken
     // email is unique in the database, same as each type of token, no two same google tokens
@@ -62,7 +62,7 @@ export class UserService {
   async findAll(): Promise<UserDto[]> {
     const { data: users, error } = await this.supabase
       .from('custom_users')
-      .select('id, email, firstName, lastName, socialProfilePictureUrl');
+      .select('id, email, username, socialProfilePictureUrl');
 
     if (error) {
       throw new InternalServerErrorException('Could not find the users');
@@ -78,7 +78,7 @@ export class UserService {
   async findOne(id: number): Promise<UserDto> {
     const { data: user, error } = await this.supabase
       .from('custom_users')
-      .select('id, email, firstName, lastName, socialProfilePictureUrl')
+      .select('id, email, username, socialProfilePictureUrl')
       .eq('id', id);
 
     if (error) {
@@ -101,7 +101,7 @@ export class UserService {
       .from('custom_users')
       .update(user)
       .eq('id', id)
-      .select('id, email, firstName, lastName, socialProfilePictureUrl');
+      .select('id, email, username,  socialProfilePictureUrl');
 
     if (!updatedUser || updatedUser.length === 0 || updatedError) {
       throw new InternalServerErrorException('Could not update the user');
@@ -116,7 +116,7 @@ export class UserService {
   ): Promise<UserDto> {
     const { data: user, error } = await this.supabase
       .from('custom_users')
-      .select('id, email, firstName, lastName, socialProfilePictureUrl')
+      .select('id, email, username, socialProfilePictureUrl')
       .eq(`${socialMedia}Token`, token);
 
     if (error) {
@@ -133,7 +133,7 @@ export class UserService {
   async findByEmail(email: string): Promise<UserDto> {
     const { data: user, error } = await this.supabase
       .from('custom_users')
-      .select('id, email, firstName, lastName, socialProfilePictureUrl')
+      .select('id, email, username, socialProfilePictureUrl')
       .eq('email', email);
 
     if (error) {
@@ -163,8 +163,7 @@ export class UserService {
     return {
       id: user[0].id,
       email: user[0].email,
-      firstName: user[0].firstName,
-      lastName: user[0].lastName,
+      username: user[0].lastName,
       socialProfilePictureUrl: user[0].socialProfilePictureUrl,
       publicationsCount: parseInt(user[0].postsCount),
       reactionsCount: parseInt(user[0].postsReactionsCount),

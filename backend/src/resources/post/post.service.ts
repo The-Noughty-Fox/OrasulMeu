@@ -139,9 +139,9 @@ export class PostService {
       content: updatePostDto.content || existingPost[0].content,
       locationAddress:
         updatePostDto.locationAddress || existingPost[0].locationAddress,
-      location:
-        `POINT(${updatePostDto.location.longitude} ${updatePostDto.location.latitude})` ||
-        existingPost[0].location,
+      location: updatePostDto.location
+        ? `POINT(${updatePostDto.location.longitude} ${updatePostDto.location.latitude})`
+        : existingPost[0].location,
     };
 
     const { data: updatedUser, error: updatedError } = await this.supabase

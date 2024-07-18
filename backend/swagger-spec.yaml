@@ -497,9 +497,7 @@ components:
       properties:
         email:
           type: string
-        firstName:
-          type: string
-        lastName:
+        username:
           type: string
         appleToken:
           type: string
@@ -511,8 +509,7 @@ components:
           type: string
       required:
         - email
-        - firstName
-        - lastName
+        - username
     UserDto:
       type: object
       properties:
@@ -520,17 +517,14 @@ components:
           type: integer
         email:
           type: string
-        firstName:
-          type: string
-        lastName:
+        username:
           type: string
         socialProfilePictureUrl:
           type: string
       required:
         - id
         - email
-        - firstName
-        - lastName
+        - username
     UserProfileDto:
       type: object
       properties:
@@ -538,9 +532,7 @@ components:
           type: integer
         email:
           type: string
-        firstName:
-          type: string
-        lastName:
+        username:
           type: string
         socialProfilePictureUrl:
           type: string
@@ -551,8 +543,7 @@ components:
       required:
         - id
         - email
-        - firstName
-        - lastName
+        - username
         - reactionsCount
         - publicationsCount
     UserUpdateDto:
@@ -560,9 +551,7 @@ components:
       properties:
         email:
           type: string
-        firstName:
-          type: string
-        lastName:
+        username:
           type: string
         socialProfilePictureUrl:
           type: string

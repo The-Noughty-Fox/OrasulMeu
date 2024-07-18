@@ -41,8 +41,7 @@ export class AppleStrategy extends PassportStrategy(
       (await this.userService.findByEmail(email)) ||
       (await this.userService.create({
         email,
-        firstName: (req.body as any)?.userInfo?.Name.given ?? 'Anonymous',
-        lastName: (req.body as any)?.userInfo?.Name.family ?? 'Anonymous',
+        username: `${(req.body as any)?.userInfo?.Name.given ?? 'Anonymous'} ${(req.body as any)?.userInfo?.Name.family ?? 'Anonymous'}`,
         appleToken: id,
       }));
 

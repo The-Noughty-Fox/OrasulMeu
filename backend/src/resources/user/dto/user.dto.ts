@@ -19,13 +19,7 @@ export class UserDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ required: true })
-  firstName: string;
-
-  @AutoMap()
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({ required: true })
-  lastName: string;
+  username: string;
 
   @AutoMap()
   @IsOptional()

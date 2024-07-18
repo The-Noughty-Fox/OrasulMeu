@@ -13,13 +13,7 @@ export class UserCreateDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ required: true })
-  firstName: string;
-
-  @AutoMap()
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({ required: true })
-  lastName: string;
+  username: string;
 
   @AutoMap()
   @IsString()

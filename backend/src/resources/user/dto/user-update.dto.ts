@@ -10,12 +10,7 @@ export class UserUpdateDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ required: false })
-  firstName?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({ required: false })
-  lastName?: string;
+  username?: string;
 
   @IsString()
   @IsOptional()

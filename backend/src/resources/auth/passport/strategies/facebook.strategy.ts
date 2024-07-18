@@ -30,8 +30,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     if (!existingUser) {
       await this.userService.create({
         email: data.email || 'Unknown',
-        firstName: data.first_name || 'Unknown',
-        lastName: data.last_name || 'Unknown',
+        username: `${data.first_name || 'Unknown'} ${data.last_name || 'Unknown'}`,
         facebookToken: data.id as string,
         socialProfilePictureUrl: data.picture.data.url,
       });
