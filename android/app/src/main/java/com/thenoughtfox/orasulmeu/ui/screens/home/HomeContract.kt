@@ -9,7 +9,9 @@ interface HomeContract {
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,
         val lastLocation: Point? = null,
-        val messageToShow: String? = null
+        val messageToShow: String? = null,
+        val postListSorting: PostListSorting = PostListSorting.Popular,
+        val searchResult: List<PostDto> = emptyList()
     )
 
     sealed interface Event {
@@ -19,5 +21,11 @@ interface HomeContract {
         data class SendReport(val postId: Int) : Event
         data class NavigateToLocation(val point: Point) : Event
         data object CloseMessage : Event
+        data class SelectListSorting(val sortType: PostListSorting) : Event
+        data class SearchPostWithText(val searchText: String) : Event
+    }
+
+    enum class PostListSorting {
+        Popular, New
     }
 }

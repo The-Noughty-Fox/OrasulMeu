@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeController
+import com.thenoughtfox.orasulmeu.ui.screens.home.search.SearchPostsController
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavBar
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
 import kotlinx.serialization.Serializable
@@ -33,6 +34,9 @@ interface MainGraphDestinations {
 
     @Serializable
     object HomeScreen
+
+    @Serializable
+    object SearchPostsScreen
 
     @Serializable
     object ProfileScreen
@@ -92,6 +96,14 @@ fun MainGraph() {
                         LaunchedEffect(Unit) {
                             currentNavItem = BottomNavTabs.Map
                             isBottomNavBarVisible = true
+                        }
+                    }
+
+                    composable<MainGraphDestinations.SearchPostsScreen> {
+                        SearchPostsController()
+
+                        LaunchedEffect(Unit) {
+                            isBottomNavBarVisible = false
                         }
                     }
 
