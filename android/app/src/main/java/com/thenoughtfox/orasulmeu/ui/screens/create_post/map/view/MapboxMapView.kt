@@ -4,6 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.AttributeSet
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.findViewTreeCompositionContext
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -23,10 +26,15 @@ import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import com.thenoughtfox.orasulmeu.ui.post.PostMapPin
 import com.thenoughtfox.orasulmeu.utils.generateSmallIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.PostDto
 
 
 class MapboxMapView @JvmOverloads constructor(
@@ -37,6 +45,9 @@ class MapboxMapView @JvmOverloads constructor(
     private var onCameraTrackingDismissed: (() -> Unit)? = null
     private var style: String = Style.LIGHT
     private var pointAnnotationManager: PointAnnotationManager? = null
+
+    private val parentJob = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.Main + parentJob)
 
     companion object {
         private const val ZOOM_LEVEL = 15.0
@@ -123,7 +134,7 @@ class MapboxMapView @JvmOverloads constructor(
 
     data class Place(val point: Point, val bitmap: Bitmap)
 
-    fun addPlaces(places: List<Place>) = CoroutineScope(Dispatchers.IO).launch {
+    fun addPlaces(places: List<Place>) = scope.launch {
         val pointAnnotationOptions = places.map { place ->
             PointAnnotationOptions()
                 .withPoint(place.point)
@@ -134,12 +145,37 @@ class MapboxMapView @JvmOverloads constructor(
     }
 
 
+    fun addPost(post: PostDto, onPostClick: () -> Unit) = scope.launch {
+            val postPoint = post.location.let { Point.fromLngLat(it.longitude, it.latitude) }
+            viewAnnotationManager.addViewAnnotation(
+                view = ComposeView(context).apply {
+                    layoutParams = LayoutParams(36.dpToPixels(), 48.dpToPixels())
+                    setParentCompositionContext(this@MapboxMapView.findViewTreeCompositionContext())
+                    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                    setContent {
+                        PostMapPin(postDto = post, onClick = onPostClick)
+                    }
+                },
+                options = viewAnnotationOptions {
+                    geometry(postPoint)
+                    allowOverlap(true)
+                }
+            )
+        }
+
+
     fun clearPlaces() {
         pointAnnotationManager?.deleteAll()
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         gestures.removeOnMoveListener(onMoveListener)
+        parentJob.cancel()
+    }
+
+    private fun Int.dpToPixels(): Int {
+        val scale = context.resources.displayMetrics.density
+        val pixels = (this * scale + 0.5f)
+        return pixels.toInt()
     }
 }
