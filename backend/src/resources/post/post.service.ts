@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -55,18 +54,21 @@ export class PostService {
     this.supabase = this.supabaseService.getClient();
   }
 
-  async create(createPostDto: CreatePostDto, userId: number) {
-    const { title, content, locationAddress, location } = createPostDto;
-
+  async create(createPostDto: CreatePostDto, userId: number): Promise<PostDto> {
     const { data: postId, error: postError } = await this.supabase
       .from('posts')
       .insert([
         {
-          title,
-          content,
-          locationAddress,
+          title: createPostDto.title,
+          content: createPostDto.content,
+          locationAddress: createPostDto.locationAddress,
           userId,
-          location: `POINT(${location.longitude} ${location.latitude})`,
+          location:
+            createPostDto.location &&
+            createPostDto.location.longitude &&
+            createPostDto.location.latitude
+              ? `POINT(${createPostDto.location.longitude} ${createPostDto.location.latitude})`
+              : null,
         },
       ])
       .select('id');
@@ -77,14 +79,15 @@ export class PostService {
 
     try {
       const post = await this.findOne(postId[0].id);
-
       return post as PostDto;
     } catch (e) {
       throw new InternalServerErrorException('Could not create the post');
     }
   }
 
-  async findAll(paginationQuery: PaginationQueryDto) {
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
     const { page = 1, limit = 10 } = paginationQuery;
 
     const { data: posts, error } = await this.supabase.rpc('get_posts', {
@@ -96,14 +99,61 @@ export class PostService {
       throw new InternalServerErrorException('Could not find the posts');
     }
 
-    if (!posts || posts.length === 0) {
-      return [];
+    const { data: postsCount, error: countError } =
+      await this.supabase.rpc('count_posts');
+
+    if (countError) {
+      throw new InternalServerErrorException('Could not count the posts');
     }
 
-    return posts;
+    return {
+      data: posts ? (posts as PostDto[]) : [],
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
   }
 
-  async findOne(id: number) {
+  async findMyPosts(
+    userId: number,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 10 } = paginationQuery;
+
+    const { data: posts, error } = await this.supabase.rpc(
+      'get_posts_for_user',
+      {
+        user_id_input: userId,
+        page_input: page,
+        limit_input: limit,
+      },
+    );
+
+    if (error) {
+      throw new InternalServerErrorException("Could not find user's posts");
+    }
+
+    const { data: postsCount, error: countError } = await this.supabase.rpc(
+      'count_posts_for_user',
+      {
+        user_id_input: userId,
+      },
+    );
+
+    if (countError) {
+      console.error(countError);
+      throw new InternalServerErrorException('Could not count the posts');
+    }
+
+    return {
+      data: posts ? (posts as PostDto[]) : [],
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
+  }
+
+  async findOne(id: number): Promise<PostDto> {
     const { data: post, error } = await this.supabase.rpc('get_post_by_id', {
       post_id: id,
     });
@@ -119,7 +169,7 @@ export class PostService {
     return post as PostDto;
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto) {
+  async update(id: number, updatePostDto: UpdatePostDto): Promise<PostDto> {
     const { data: existingPost, error: existingError } = await this.supabase
       .from('posts')
       .select('title, content, locationAddress, location')
@@ -138,30 +188,45 @@ export class PostService {
       content: updatePostDto.content || existingPost[0].content,
       locationAddress:
         updatePostDto.locationAddress || existingPost[0].locationAddress,
-      location: updatePostDto.location
-        ? `POINT(${updatePostDto.location.longitude} ${updatePostDto.location.latitude})`
-        : existingPost[0].location,
+      location:
+        updatePostDto.location &&
+        updatePostDto.location.longitude &&
+        updatePostDto.location.latitude
+          ? `POINT(${updatePostDto.location.longitude} ${updatePostDto.location.latitude})`
+          : existingPost[0].location,
     };
 
-    const { data: updatedUser, error: updatedError } = await this.supabase
+    const { error: updatedError } = await this.supabase
       .from('posts')
       .update(post)
-      .eq('id', id)
-      .select('id');
+      .eq('id', id);
 
-    if (updatedError || !updatedUser || updatedUser.length === 0) {
+    if (updatedError) {
       throw new InternalServerErrorException('Could not update the post');
     }
 
     try {
-      const updatedPost = await this.findOne(updatedUser[0].id);
+      const updatedPost = await this.findOne(id);
       return updatedPost as PostDto;
     } catch (e) {
       throw new InternalServerErrorException('Could not update the post');
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<boolean> {
+    const { data: post, error: existingError } = await this.supabase
+      .from('posts')
+      .select('id')
+      .eq('id', id);
+
+    if (existingError) {
+      throw new InternalServerErrorException('Could not find the post');
+    }
+
+    if (!post || post.length === 0) {
+      throw new NotFoundException(POST_NOT_FOUND(id));
+    }
+
     const { error } = await this.supabase.from('posts').delete().eq('id', id);
 
     if (error) {
@@ -171,8 +236,23 @@ export class PostService {
     return true;
   }
 
-  async react(postId: number, userId: number, reaction: ReactionType) {
-    const post = await this.findOne(postId);
+  async react(
+    postId: number,
+    userId: number,
+    reaction: ReactionType,
+  ): Promise<PostDto> {
+    const { data: existingPost, error: existingError } = await this.supabase
+      .from('posts')
+      .select('id')
+      .eq('id', postId);
+
+    if (existingError) {
+      throw new InternalServerErrorException('Could not find the post');
+    }
+
+    if (!existingPost || existingPost.length === 0) {
+      throw new NotFoundException(POST_NOT_FOUND(postId));
+    }
 
     const { data: existingPostReaction, error: existingPostReactionError } =
       await this.supabase
@@ -205,8 +285,6 @@ export class PostService {
       .insert([{ reaction, postId, userId }])
       .select();
 
-    console.log(postReaction, postReactionError);
-
     if (postReactionError || !postReaction || postReaction.length === 0) {
       throw new InternalServerErrorException(
         'Could not react to the post. Please try again',
@@ -223,8 +301,19 @@ export class PostService {
     }
   }
 
-  async retrieveReaction(postId: number, userId: number) {
-    const post = await this.findOne(postId);
+  async retrieveReaction(postId: number, userId: number): Promise<PostDto> {
+    const { data: existingPost, error: existingError } = await this.supabase
+      .from('posts')
+      .select('id')
+      .eq('id', postId);
+
+    if (existingError) {
+      throw new InternalServerErrorException('Could not find the post');
+    }
+
+    if (!existingPost || existingPost.length === 0) {
+      throw new NotFoundException(POST_NOT_FOUND(postId));
+    }
 
     const { data: existingPostReaction, error: existingPostReactionError } =
       await this.supabase
@@ -262,7 +351,10 @@ export class PostService {
     }
   }
 
-  async addMedia(postId: number, files: Express.Multer.File[]) {
+  async addMedia(
+    postId: number,
+    files: Express.Multer.File[],
+  ): Promise<PostDto> {
     const media = await this.mediaService.create(files);
 
     const { data: existingPost, error: existingError } = await this.supabase
@@ -270,7 +362,11 @@ export class PostService {
       .select('id')
       .eq('id', postId);
 
-    if (existingError || !existingPost || existingPost.length === 0) {
+    if (existingError) {
+      throw new InternalServerErrorException('Could not add media post');
+    }
+
+    if (!existingPost || existingPost.length === 0) {
       throw new NotFoundException(POST_NOT_FOUND(postId));
     }
 
@@ -293,35 +389,5 @@ export class PostService {
     } catch (e) {
       throw new InternalServerErrorException('Could not upload media');
     }
-  }
-
-  async getMyPosts(userId: number, paginationQuery: PaginationQueryDto) {
-    try {
-      await this.userService.findOne(userId);
-    } catch (e) {
-      throw new BadRequestException('Invalid user id');
-    }
-
-    const { page = 1, limit = 10 } = paginationQuery;
-
-    const { data: posts, error } = await this.supabase.rpc(
-      'get_posts_for_user',
-      {
-        user_id_input: userId,
-        page_input: page,
-        limit_input: limit,
-      },
-    );
-
-    if (error) {
-      console.error(error);
-      throw new InternalServerErrorException("Could not user's posts");
-    }
-
-    if (!posts || posts.length === 0) {
-      return [];
-    }
-
-    return posts;
   }
 }

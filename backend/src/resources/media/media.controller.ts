@@ -9,7 +9,12 @@ import {
 import { MediaService } from './media.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
-import { ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiConsumes,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { mbToBytes } from '@/helpers/other';
 import { JwtAuthGuard } from '../auth/passport/guards';
 
@@ -23,6 +28,9 @@ export class MediaController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({ description: 'Media uploaded successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: mbToBytes(50) },
@@ -34,6 +42,9 @@ export class MediaController {
 
   @Post('files')
   @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({ description: 'Media uploaded successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @UseInterceptors(
     FilesInterceptor('files', 20, {
       limits: { fileSize: mbToBytes(50) },

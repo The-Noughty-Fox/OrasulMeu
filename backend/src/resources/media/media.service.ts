@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
@@ -21,43 +25,40 @@ export class MediaService {
     this.supabase = this.supabaseService.getClient();
   }
 
-  getUploadPath(filename: string) {
-    return `${this.configService.get<string>('API_BASE')}/uploads/${filename}`;
-  }
-
   async create(files: Express.Multer.File[]) {
     const results = [];
     let fileType: MediaType;
-    let bucketPath: string;
 
     for (const file of files) {
       const filename = `${uuidv4()}${path.extname(file.originalname)}`;
 
+      // get file type
       if (allowedMimeTypes.images.includes(file.mimetype)) {
         fileType = MediaType.Image;
-        bucketPath = '/images/post-images/';
       } else if (allowedMimeTypes.videos.includes(file.mimetype)) {
         fileType = MediaType.Video;
-        bucketPath = '/videos/post-videos/';
       } else {
         throw new BadRequestException('Invalid file type');
       }
 
+      // upload file to bucket
       const { data: uploadData, error: uploadError } =
         await this.supabase.storage
           .from('OrasulMeu')
-          .upload(`${bucketPath}${filename}`, file.buffer);
+          .upload(`/${fileType}s/post-${fileType}s/${filename}`, file.buffer);
 
       if (uploadError || !uploadData) {
-        throw new BadRequestException('Error uploading file');
+        throw new InternalServerErrorException('Error uploading file');
       }
 
       const filePath = uploadData.path;
 
+      // generate public url
       const { data: publicUrl } = this.supabase.storage
         .from('OrasulMeu')
         .getPublicUrl(filePath);
 
+      // get file entity
       const { data, error } = await this.supabase
         .from('media')
         .insert([
@@ -71,7 +72,7 @@ export class MediaService {
         .select('*');
 
       if (error || !data || data.length === 0) {
-        throw new BadRequestException('Error saving file');
+        throw new InternalServerErrorException('Error saving file');
       }
 
       results.push(data[0]);
