@@ -373,6 +373,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostDto"
       tags: *a3
+    delete:
+      operationId: retieve-reaction-to-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: *a3
   /posts/{id}/media:
     post:
       operationId: upload-post-media
@@ -629,11 +646,14 @@ components:
           type: string
         fileName:
           type: string
+        bucketPath:
+          type: string
       required:
         - id
         - type
         - url
         - fileName
+        - bucketPath
     PostDto:
       type: object
       properties:

@@ -17,7 +17,6 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '@/resources/auth/passport/guards';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { MediaService } from '@/resources/media/media.service';
 import {
   ApiBody,
   ApiConsumes,
@@ -31,6 +30,7 @@ import { MediaDto } from '@/resources/media/dto/media.dto';
 import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
 import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
+import { mbToBytes } from '@/helpers/other';
 
 // @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -101,6 +101,14 @@ export class PostController {
     return this.postService.react(+id, 1, body.reaction);
   }
 
+  @Delete(':id/react')
+  @ApiParam({ name: 'id', type: 'integer' })
+  @ApiOperation({ operationId: 'retieve-reaction-to-post' })
+  @ApiResponse({ type: PostDto })
+  retrieveReaction(@Param('id') id: string, @Req() req) {
+    return this.postService.retrieveReaction(+id, 1);
+  }
+
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiBody({
@@ -111,8 +119,7 @@ export class PostController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
-      limits: { fileSize: 1024 * 1024 * 50 }, // 50MB
-      storage: MediaService.getStorage(),
+      limits: { fileSize: mbToBytes(50) },
     }),
   )
   addMedia(

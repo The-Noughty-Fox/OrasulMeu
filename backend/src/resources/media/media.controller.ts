@@ -3,15 +3,17 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  Res,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ApiConsumes } from '@nestjs/swagger';
 import { mbToBytes } from '@/helpers/other';
+import { JwtAuthGuard } from '../auth/passport/guards';
 
+@UseGuards(JwtAuthGuard)
 @Controller('media')
 export class MediaController {
   constructor(
@@ -24,14 +26,10 @@ export class MediaController {
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: mbToBytes(50) },
-      storage: MediaService.getStorage(),
     }),
   )
-  upload(
-    @UploadedFile() file: Express.Multer.File,
-    @Res({ passthrough: true }) res,
-  ) {
-    res.json(this.mediaService.create([file]));
+  upload(@UploadedFile() file: Express.Multer.File) {
+    return this.mediaService.create([file]);
   }
 
   @Post('files')
@@ -39,13 +37,9 @@ export class MediaController {
   @UseInterceptors(
     FilesInterceptor('files', 20, {
       limits: { fileSize: mbToBytes(50) },
-      storage: MediaService.getStorage(),
     }),
   )
-  uploadFiles(
-    @UploadedFiles() files: Express.Multer.File[],
-    @Res({ passthrough: true }) res,
-  ) {
-    res.json(this.mediaService.create(files));
+  uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.mediaService.create(files);
   }
 }

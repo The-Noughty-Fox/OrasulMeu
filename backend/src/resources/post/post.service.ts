@@ -24,16 +24,15 @@ import { SupabaseService } from '@/resources/supabase/supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { UserService } from '../user/user.service';
 import { CommentService } from '../comment/comment.service';
-import { use } from 'passport';
 
-const fullPostRelations = [
-  'author',
-  'postMedia',
-  'postMedia.media',
-  'reactions',
-  'reactions.post',
-  'reactions.user',
-];
+// const fullPostRelations = [
+//   'author',
+//   'postMedia',
+//   'postMedia.media',
+//   'reactions',
+//   'reactions.post',
+//   'reactions.user',
+// ];
 
 @Injectable()
 export class PostService {
@@ -224,17 +223,76 @@ export class PostService {
     }
   }
 
+  async retrieveReaction(postId: number, userId: number) {
+    const post = await this.findOne(postId);
+
+    const { data: existingPostReaction, error: existingPostReactionError } =
+      await this.supabase
+        .from('post_reactions')
+        .select('id')
+        .eq('postId', postId)
+        .eq('userId', userId);
+
+    if (existingPostReactionError) {
+      throw new InternalServerErrorException(
+        'Could not retrieve the reaction. Please try again',
+      );
+    }
+
+    if (existingPostReaction && existingPostReaction.length > 0) {
+      const { error: deleteError } = await this.supabase
+        .from('post_reactions')
+        .delete()
+        .eq('id', existingPostReaction[0].id);
+
+      if (deleteError) {
+        throw new InternalServerErrorException(
+          'Could not retrieve the reaction. Please try again',
+        );
+      }
+    }
+
+    try {
+      const post = await this.findOne(postId);
+      return post;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Could not retrieve the reaction. Please try again',
+      );
+    }
+  }
+
   async addMedia(postId: number, files: Express.Multer.File[]) {
     const media = await this.mediaService.create(files);
-    const post = await this.repository.findOne({
-      where: { id: postId },
-      relations: ['postMedia'],
-    });
-    post.postMedia = [
-      ...post.postMedia,
-      ...media.map((m) => this.postMediaRepository.create({ media: m, post })),
-    ];
-    return this.mapper.map(await this.repository.save(post), Post, PostDto);
+
+    const { data: existingPost, error: existingError } = await this.supabase
+      .from('posts')
+      .select('id')
+      .eq('id', postId);
+
+    if (existingError || !existingPost || existingPost.length === 0) {
+      throw new NotFoundException(POST_NOT_FOUND(postId));
+    }
+
+    for (const mediaFile of media) {
+      const { data, error } = await this.supabase
+        .from('post_media')
+        .insert([{ postId, mediaId: mediaFile.id }])
+        .select('id');
+
+      if (error || !data || data.length === 0) {
+        throw new InternalServerErrorException(
+          'Could not add media to the post',
+        );
+      }
+    }
+
+    try {
+      const updatedPost = await this.findOne(postId);
+      return updatedPost as PostDto;
+    } catch (e) {
+      throw new InternalServerErrorException('Could not upload media');
+    }
   }
 
   async getMyPosts(userId: number, paginationQuery: PaginationQueryDto) {

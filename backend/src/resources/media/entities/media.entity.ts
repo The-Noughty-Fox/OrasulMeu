@@ -25,4 +25,9 @@ export class Media extends BaseEntity {
   @AutoMap()
   @ApiProperty()
   fileName: string;
+
+  @Column()
+  @AutoMap()
+  @ApiProperty()
+  bucketPath: string;
 }
