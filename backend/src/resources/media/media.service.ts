@@ -5,25 +5,12 @@ import {
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Media } from '@/resources/media/entities/media.entity';
-import { Repository } from 'typeorm';
 import { allowedMimeTypes, MediaType } from '@/resources/media/types';
 import { SupabaseService } from '../supabase/supabase.service';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class MediaService {
-  private readonly supabase: SupabaseClient;
-
-  constructor(
-    private configService: ConfigService,
-    @InjectRepository(Media) private repository: Repository<Media>,
-    private readonly supabaseService: SupabaseService,
-  ) {
-    this.supabase = this.supabaseService.getClient();
-  }
+  constructor(private readonly supabaseService: SupabaseService) {}
 
   async create(files: Express.Multer.File[]) {
     const results = [];
@@ -43,8 +30,9 @@ export class MediaService {
 
       // upload file to bucket
       const { data: uploadData, error: uploadError } =
-        await this.supabase.storage
-          .from('OrasulMeu')
+        await this.supabaseService
+          .getClient()
+          .storage.from('OrasulMeu')
           .upload(`/${fileType}s/post-${fileType}s/${filename}`, file.buffer);
 
       if (uploadError || !uploadData) {
@@ -54,12 +42,14 @@ export class MediaService {
       const filePath = uploadData.path;
 
       // generate public url
-      const { data: publicUrl } = this.supabase.storage
-        .from('OrasulMeu')
+      const { data: publicUrl } = this.supabaseService
+        .getClient()
+        .storage.from('OrasulMeu')
         .getPublicUrl(filePath);
 
       // get file entity
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseService
+        .getClient()
         .from('media')
         .insert([
           {

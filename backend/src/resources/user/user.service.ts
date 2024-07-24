@@ -5,31 +5,16 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
 import { SocialMedia } from '@/shared/types';
-import { Mapper } from '@automapper/core';
-import { InjectMapper } from '@automapper/nestjs';
 import { UserDto } from './dto/user.dto';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserProfileDto } from '@/resources/user/dto/user-profile.dto';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UserUpdateDto } from './dto/user-update.dto';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class UserService {
-  private readonly supabase: SupabaseClient;
-
-  constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectMapper()
-    private readonly mapper: Mapper,
-    private readonly supabaseService: SupabaseService,
-  ) {
-    this.supabase = this.supabaseService.getClient();
-  }
+  constructor(private readonly supabaseService: SupabaseService) {}
 
   async create(createUserDto: UserCreateDto): Promise<UserDto> {
     if (
@@ -40,7 +25,8 @@ export class UserService {
       throw new BadRequestException('Provide a token to create a user');
     }
 
-    const { data: user, error } = await this.supabase
+    const { data: user, error } = await this.supabaseService
+      .getClient()
       .from('custom_users')
       .insert([createUserDto])
       .select('id, email, username, socialProfilePictureUrl');
@@ -60,7 +46,8 @@ export class UserService {
   }
 
   async findAll(): Promise<UserDto[]> {
-    const { data: users, error } = await this.supabase
+    const { data: users, error } = await this.supabaseService
+      .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl');
 
@@ -76,7 +63,8 @@ export class UserService {
   }
 
   async findOne(id: number): Promise<UserDto> {
-    const { data: user, error } = await this.supabase
+    const { data: user, error } = await this.supabaseService
+      .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
       .eq('id', id);
@@ -97,11 +85,13 @@ export class UserService {
 
     const user = { ...existingUser, ...updateUserDto };
 
-    const { data: updatedUser, error: updatedError } = await this.supabase
-      .from('custom_users')
-      .update(user)
-      .eq('id', id)
-      .select('id, email, username,  socialProfilePictureUrl');
+    const { data: updatedUser, error: updatedError } =
+      await this.supabaseService
+        .getClient()
+        .from('custom_users')
+        .update(user)
+        .eq('id', id)
+        .select('id, email, username,  socialProfilePictureUrl');
 
     if (!updatedUser || updatedUser.length === 0 || updatedError) {
       throw new InternalServerErrorException('Could not update the user');
@@ -114,7 +104,8 @@ export class UserService {
     socialMedia: SocialMedia,
     token: string,
   ): Promise<UserDto> {
-    const { data: user, error } = await this.supabase
+    const { data: user, error } = await this.supabaseService
+      .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
       .eq(`${socialMedia}Token`, token);
@@ -131,7 +122,8 @@ export class UserService {
   }
 
   async findByEmail(email: string): Promise<UserDto> {
-    const { data: user, error } = await this.supabase
+    const { data: user, error } = await this.supabaseService
+      .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
       .eq('email', email);
@@ -148,9 +140,11 @@ export class UserService {
   }
 
   async profile(id: number): Promise<UserProfileDto> {
-    const { data: user, error } = await this.supabase.rpc('get_user_profile', {
-      user_id_input: id,
-    });
+    const { data: user, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_user_profile', {
+        user_id_input: id,
+      });
 
     if (error) {
       throw new InternalServerErrorException('Could not find users profile');

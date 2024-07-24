@@ -5,57 +5,24 @@ import {
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Mapper } from '@automapper/core';
 import { PostDto } from '@/resources/post/dto/post.dto';
-import { Post } from '@/resources/post/entities/post.entity';
-import { InjectMapper } from '@automapper/nestjs';
-import { User } from '@/resources/user/entities/user.entity';
 import { MediaService } from '@/resources/media/media.service';
-import { PostMedia } from '@/resources/media/entities/post-media.entity';
 import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
 import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-result.dto';
 import { POST_NOT_FOUND } from '@/infrastructure/messages';
-import { PostReaction } from '@/resources/post/entities/post-reaction.entity';
 import { ReactionType } from '@/shared/types';
 import { SupabaseService } from '@/resources/supabase/supabase.service';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { UserService } from '../user/user.service';
-import { CommentService } from '../comment/comment.service';
-
-// const fullPostRelations = [
-//   'author',
-//   'postMedia',
-//   'postMedia.media',
-//   'reactions',
-//   'reactions.post',
-//   'reactions.user',
-// ];
 
 @Injectable()
 export class PostService {
-  private readonly supabase: SupabaseClient;
-
   constructor(
-    @InjectRepository(Post) private readonly repository: Repository<Post>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(PostReaction)
-    private readonly postReactionRepository: Repository<PostReaction>,
-    @InjectRepository(PostMedia)
-    private readonly postMediaRepository: Repository<PostMedia>,
-    @InjectMapper()
-    private readonly mapper: Mapper,
     private mediaService: MediaService,
     private readonly supabaseService: SupabaseService,
-    private readonly userService: UserService,
-    private readonly commentService: CommentService,
-  ) {
-    this.supabase = this.supabaseService.getClient();
-  }
+  ) {}
 
   async create(createPostDto: CreatePostDto, userId: number): Promise<PostDto> {
-    const { data: postId, error: postError } = await this.supabase
+    const { data: postId, error: postError } = await this.supabaseService
+      .getClient()
       .from('posts')
       .insert([
         {
@@ -90,17 +57,20 @@ export class PostService {
   ): Promise<PaginationResultDto<PostDto>> {
     const { page = 1, limit = 10 } = paginationQuery;
 
-    const { data: posts, error } = await this.supabase.rpc('get_posts', {
-      page_input: page,
-      limit_input: limit,
-    });
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_posts', {
+        page_input: page,
+        limit_input: limit,
+      });
 
     if (error) {
       throw new InternalServerErrorException('Could not find the posts');
     }
 
-    const { data: postsCount, error: countError } =
-      await this.supabase.rpc('count_posts');
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts');
 
     if (countError) {
       throw new InternalServerErrorException('Could not count the posts');
@@ -120,25 +90,23 @@ export class PostService {
   ): Promise<PaginationResultDto<PostDto>> {
     const { page = 1, limit = 10 } = paginationQuery;
 
-    const { data: posts, error } = await this.supabase.rpc(
-      'get_posts_for_user',
-      {
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_posts_for_user', {
         user_id_input: userId,
         page_input: page,
         limit_input: limit,
-      },
-    );
+      });
 
     if (error) {
       throw new InternalServerErrorException("Could not find user's posts");
     }
 
-    const { data: postsCount, error: countError } = await this.supabase.rpc(
-      'count_posts_for_user',
-      {
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts_for_user', {
         user_id_input: userId,
-      },
-    );
+      });
 
     if (countError) {
       console.error(countError);
@@ -154,9 +122,11 @@ export class PostService {
   }
 
   async findOne(id: number): Promise<PostDto> {
-    const { data: post, error } = await this.supabase.rpc('get_post_by_id', {
-      post_id: id,
-    });
+    const { data: post, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_post_by_id', {
+        post_id: id,
+      });
 
     if (error) {
       throw new InternalServerErrorException('Could not find the post');
@@ -170,10 +140,12 @@ export class PostService {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<PostDto> {
-    const { data: existingPost, error: existingError } = await this.supabase
-      .from('posts')
-      .select('title, content, locationAddress, location')
-      .eq('id', id);
+    const { data: existingPost, error: existingError } =
+      await this.supabaseService
+        .getClient()
+        .from('posts')
+        .select('title, content, locationAddress, location')
+        .eq('id', id);
 
     if (existingError) {
       throw new InternalServerErrorException('Could not find the post');
@@ -196,7 +168,8 @@ export class PostService {
           : existingPost[0].location,
     };
 
-    const { error: updatedError } = await this.supabase
+    const { error: updatedError } = await this.supabaseService
+      .getClient()
       .from('posts')
       .update(post)
       .eq('id', id);
@@ -214,7 +187,8 @@ export class PostService {
   }
 
   async remove(id: number): Promise<boolean> {
-    const { data: post, error: existingError } = await this.supabase
+    const { data: post, error: existingError } = await this.supabaseService
+      .getClient()
       .from('posts')
       .select('id')
       .eq('id', id);
@@ -227,7 +201,11 @@ export class PostService {
       throw new NotFoundException(POST_NOT_FOUND(id));
     }
 
-    const { error } = await this.supabase.from('posts').delete().eq('id', id);
+    const { error } = await this.supabaseService
+      .getClient()
+      .from('posts')
+      .delete()
+      .eq('id', id);
 
     if (error) {
       throw new InternalServerErrorException('Could not delete the post');
@@ -241,10 +219,12 @@ export class PostService {
     userId: number,
     reaction: ReactionType,
   ): Promise<PostDto> {
-    const { data: existingPost, error: existingError } = await this.supabase
-      .from('posts')
-      .select('id')
-      .eq('id', postId);
+    const { data: existingPost, error: existingError } =
+      await this.supabaseService
+        .getClient()
+        .from('posts')
+        .select('id')
+        .eq('id', postId);
 
     if (existingError) {
       throw new InternalServerErrorException('Could not find the post');
@@ -255,7 +235,8 @@ export class PostService {
     }
 
     const { data: existingPostReaction, error: existingPostReactionError } =
-      await this.supabase
+      await this.supabaseService
+        .getClient()
         .from('post_reactions')
         .select('id')
         .eq('postId', postId)
@@ -268,7 +249,8 @@ export class PostService {
     }
 
     if (existingPostReaction && existingPostReaction.length > 0) {
-      const { error: deleteError } = await this.supabase
+      const { error: deleteError } = await this.supabaseService
+        .getClient()
         .from('post_reactions')
         .delete()
         .eq('id', existingPostReaction[0].id);
@@ -280,10 +262,12 @@ export class PostService {
       }
     }
 
-    const { data: postReaction, error: postReactionError } = await this.supabase
-      .from('post_reactions')
-      .insert([{ reaction, postId, userId }])
-      .select();
+    const { data: postReaction, error: postReactionError } =
+      await this.supabaseService
+        .getClient()
+        .from('post_reactions')
+        .insert([{ reaction, postId, userId }])
+        .select();
 
     if (postReactionError || !postReaction || postReaction.length === 0) {
       throw new InternalServerErrorException(
@@ -302,10 +286,12 @@ export class PostService {
   }
 
   async retrieveReaction(postId: number, userId: number): Promise<PostDto> {
-    const { data: existingPost, error: existingError } = await this.supabase
-      .from('posts')
-      .select('id')
-      .eq('id', postId);
+    const { data: existingPost, error: existingError } =
+      await this.supabaseService
+        .getClient()
+        .from('posts')
+        .select('id')
+        .eq('id', postId);
 
     if (existingError) {
       throw new InternalServerErrorException('Could not find the post');
@@ -316,7 +302,8 @@ export class PostService {
     }
 
     const { data: existingPostReaction, error: existingPostReactionError } =
-      await this.supabase
+      await this.supabaseService
+        .getClient()
         .from('post_reactions')
         .select('id')
         .eq('postId', postId)
@@ -329,7 +316,8 @@ export class PostService {
     }
 
     if (existingPostReaction && existingPostReaction.length > 0) {
-      const { error: deleteError } = await this.supabase
+      const { error: deleteError } = await this.supabaseService
+        .getClient()
         .from('post_reactions')
         .delete()
         .eq('id', existingPostReaction[0].id);
@@ -357,10 +345,12 @@ export class PostService {
   ): Promise<PostDto> {
     const media = await this.mediaService.create(files);
 
-    const { data: existingPost, error: existingError } = await this.supabase
-      .from('posts')
-      .select('id')
-      .eq('id', postId);
+    const { data: existingPost, error: existingError } =
+      await this.supabaseService
+        .getClient()
+        .from('posts')
+        .select('id')
+        .eq('id', postId);
 
     if (existingError) {
       throw new InternalServerErrorException('Could not add media post');
@@ -371,7 +361,8 @@ export class PostService {
     }
 
     for (const mediaFile of media) {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseService
+        .getClient()
         .from('post_media')
         .insert([{ postId, mediaId: mediaFile.id }])
         .select('id');

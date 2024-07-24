@@ -457,6 +457,10 @@ paths:
             schema:
               $ref: "#/components/schemas/MediaDto"
       responses:
+        "404":
+          description: Post not found
+        "500":
+          description: Internal Server Error
         default:
           description: ""
           content:
