@@ -57,16 +57,17 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get('profile')
+  @Get('profile/:id')
   @ApiOperation({ operationId: 'get-user-profile' })
+  @ApiParam({ name: 'id', description: 'User id', type: 'number' })
   @ApiOkResponse({
     description: 'User profile found',
     type: UserProfileDto,
   })
   @ApiNotFoundResponse({ description: 'User profile not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  getProfile(@Req() req) {
-    return this.userService.profile(req.user.id);
+  getProfile(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.profile(id);
   }
 
   @Get(':id')
@@ -81,19 +82,15 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch()
   @ApiOkResponse({
     description: 'User updated',
     type: UserDto,
   })
-  @ApiParam({ name: 'id', description: 'User id', type: 'number' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UserUpdateDto,
-  ) {
-    return this.userService.update(id, updateUserDto);
+  update(@Req() req, @Body() updateUserDto: UserUpdateDto) {
+    return this.userService.update(req.user.id, updateUserDto);
   }
 
   // NOT IMPLEMENTED YET

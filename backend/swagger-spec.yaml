@@ -56,11 +56,38 @@ paths:
         "500":
           description: Internal Server Error
       tags: *a1
-  /users/profile:
+    patch:
+      operationId: update
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDto"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        "404":
+          description: User not found
+        "500":
+          description: Internal Server Error
+      tags: *a1
+  /users/profile/{id}:
     get:
       operationId: get-user-profile
       summary: ""
-      parameters: []
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: User id
+          schema:
+            type: number
       responses:
         "200":
           description: User profile found
@@ -86,33 +113,6 @@ paths:
       responses:
         "200":
           description: User found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserDto"
-        "404":
-          description: User not found
-        "500":
-          description: Internal Server Error
-      tags: *a1
-    patch:
-      operationId: update
-      parameters:
-        - name: id
-          required: true
-          in: path
-          description: User id
-          schema:
-            type: number
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserUpdateDto"
-      responses:
-        "200":
-          description: User updated
           content:
             application/json:
               schema:
@@ -275,6 +275,56 @@ paths:
         "500":
           description: Internal Server Error
       tags: *a3
+  /posts/reaction:
+    get:
+      operationId: get-all-posts-ordered-by-reactions-count
+      summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+        - name: page
+          in: query
+          required: true
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            default: 10
+            type: integer
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
+        "500":
+          description: Internal Server Error
+      tags: *a3
   /posts/my:
     get:
       operationId: get-my-posts
@@ -370,7 +420,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostDto"
         "404":
-          description: Post not found
+          description: Post not found or unable to edit post
         "500":
           description: Internal Server Error
       tags: *a3
@@ -387,7 +437,7 @@ paths:
         "200":
           description: ""
         "404":
-          description: Post not found
+          description: Post not found or unable to delete post
         "500":
           description: Internal Server Error
       tags: *a3

@@ -55,7 +55,7 @@ export class UserService {
       throw new InternalServerErrorException('Could not find the users');
     }
 
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       throw new NotFoundException(`No users found`);
     }
 
@@ -142,7 +142,7 @@ export class UserService {
   async profile(id: number): Promise<UserProfileDto> {
     const { data: user, error } = await this.supabaseService
       .getClient()
-      .rpc('get_user_profile', {
+      .rpc('get_profile_by_id', {
         user_id_input: id,
       });
 
@@ -160,7 +160,7 @@ export class UserService {
       username: user[0].lastName,
       socialProfilePictureUrl: user[0].socialProfilePictureUrl,
       publicationsCount: parseInt(user[0].postsCount),
-      reactionsCount: parseInt(user[0].postsReactionsCount),
+      reactionsCount: parseInt(user[0].reactionsCount),
     };
   }
 }

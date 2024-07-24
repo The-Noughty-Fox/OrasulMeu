@@ -59,7 +59,7 @@ export class MediaService {
             fileName: filename,
           },
         ])
-        .select('*');
+        .select('id, type, url, bucketPath, fileName');
 
       if (error || !data || data.length === 0) {
         throw new InternalServerErrorException('Error saving file');

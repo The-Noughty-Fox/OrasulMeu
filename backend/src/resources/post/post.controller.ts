@@ -63,8 +63,25 @@ export class PostController {
     schema: getPaginationSchema(PostDto),
   })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
-    return this.postService.findAll(paginationQuery);
+  findAll(@Query() paginationQuery: PaginationQueryDto, @Req() req) {
+    return this.postService.findAll(paginationQuery, req.user.id);
+  }
+
+  @Get('reaction')
+  @ApiOperation({ operationId: 'get-all-posts-ordered-by-reactions-count' })
+  @ApiQuery({ type: PaginationQueryDto })
+  @ApiOkResponse({
+    schema: getPaginationSchema(PostDto),
+  })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  findAllReactionCountOrder(
+    @Query() paginationQuery: PaginationQueryDto,
+    @Req() req,
+  ) {
+    return this.postService.findAllReactionCountOrder(
+      paginationQuery,
+      req.user.id,
+    );
   }
 
   @Get('my')
@@ -84,8 +101,8 @@ export class PostController {
   @ApiOkResponse({ type: PostDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.postService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.postService.findOne(id, req.user.id);
   }
 
   @Patch(':id')
@@ -93,23 +110,26 @@ export class PostController {
   @ApiBody({ type: UpdatePostDto })
   @ApiOperation({ operationId: 'update-post' })
   @ApiOkResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Post not found' })
+  @ApiNotFoundResponse({ description: 'Post not found or unable to edit post' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
+    @Req() req,
   ) {
-    return this.postService.update(id, updatePostDto);
+    return this.postService.update(id, updatePostDto, req.user.id);
   }
 
   @Delete(':id')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'delete-post' })
   @ApiResponse({ status: 200 })
-  @ApiNotFoundResponse({ description: 'Post not found' })
+  @ApiNotFoundResponse({
+    description: 'Post not found or unable to delete post',
+  })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.postService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.postService.remove(id, req.user.id);
   }
 
   @Post(':id/react')
@@ -156,8 +176,9 @@ export class PostController {
   )
   addMedia(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    return this.postService.addMedia(id, files);
+    return this.postService.addMedia(id, req.user.id, files);
   }
 }

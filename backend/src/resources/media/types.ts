@@ -13,5 +13,13 @@ export const allowedMimeTypes = {
     'image/avif',
     'image/apng',
   ],
-  videos: ['video/mp4', 'video/avi', 'video/mpeg', 'video/webm'],
+  videos: [
+    'video/mp4',
+    'video/avi',
+    'video/mpeg',
+    'video/webm',
+    'video/quicktime',
+    'video/MP2T',
+    'video/x-m4v',
+  ],
 };

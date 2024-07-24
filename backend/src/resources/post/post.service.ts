@@ -45,7 +45,7 @@ export class PostService {
     }
 
     try {
-      const post = await this.findOne(postId[0].id);
+      const post = await this.findOne(postId[0].id, userId);
       return post as PostDto;
     } catch (e) {
       throw new InternalServerErrorException('Could not create the post');
@@ -54,6 +54,7 @@ export class PostService {
 
   async findAll(
     paginationQuery: PaginationQueryDto,
+    userId: number,
   ): Promise<PaginationResultDto<PostDto>> {
     const { page = 1, limit = 10 } = paginationQuery;
 
@@ -62,6 +63,41 @@ export class PostService {
       .rpc('get_posts', {
         page_input: page,
         limit_input: limit,
+        user_id_input: userId,
+      });
+
+    if (error) {
+      throw new InternalServerErrorException('Could not find the posts');
+    }
+
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts');
+
+    if (countError) {
+      throw new InternalServerErrorException('Could not count the posts');
+    }
+
+    return {
+      data: posts ? (posts as PostDto[]) : [],
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
+  }
+
+  async findAllReactionCountOrder(
+    paginationQuery: PaginationQueryDto,
+    userId: number,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 10 } = paginationQuery;
+
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_posts_ordered_by_reactions', {
+        page_input: page,
+        limit_input: limit,
+        user_id_input: userId,
       });
 
     if (error) {
@@ -121,11 +157,12 @@ export class PostService {
     };
   }
 
-  async findOne(id: number): Promise<PostDto> {
+  async findOne(id: number, userId: number): Promise<PostDto> {
     const { data: post, error } = await this.supabaseService
       .getClient()
-      .rpc('get_post_by_id', {
-        post_id: id,
+      .rpc('get_post', {
+        post_id_input: id,
+        user_id_input: userId,
       });
 
     if (error) {
@@ -139,20 +176,29 @@ export class PostService {
     return post as PostDto;
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto): Promise<PostDto> {
+  async update(
+    id: number,
+    updatePostDto: UpdatePostDto,
+    userId: number,
+  ): Promise<PostDto> {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
         .from('posts')
         .select('title, content, locationAddress, location')
-        .eq('id', id);
+        .eq('id', id)
+        .eq('userId', userId);
 
     if (existingError) {
-      throw new InternalServerErrorException('Could not find the post');
+      throw new InternalServerErrorException(
+        `Post with id ${id} not found or user not allowed to edit post`,
+      );
     }
 
     if (!existingPost || existingPost.length === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(id));
+      throw new NotFoundException(
+        `Post with id ${id} not found or user not allowed to edit post`,
+      );
     }
 
     const post = {
@@ -179,33 +225,39 @@ export class PostService {
     }
 
     try {
-      const updatedPost = await this.findOne(id);
+      const updatedPost = await this.findOne(id, userId);
       return updatedPost as PostDto;
     } catch (e) {
       throw new InternalServerErrorException('Could not update the post');
     }
   }
 
-  async remove(id: number): Promise<boolean> {
+  async remove(id: number, userId: number): Promise<boolean> {
     const { data: post, error: existingError } = await this.supabaseService
       .getClient()
       .from('posts')
       .select('id')
-      .eq('id', id);
+      .eq('id', id)
+      .eq('userId', userId);
 
     if (existingError) {
-      throw new InternalServerErrorException('Could not find the post');
+      throw new InternalServerErrorException(
+        `Post with id ${id} not found or user not allowed to delete post`,
+      );
     }
 
     if (!post || post.length === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(id));
+      throw new NotFoundException(
+        `Post with id ${id} not found or user not allowed to delete post`,
+      );
     }
 
     const { error } = await this.supabaseService
       .getClient()
       .from('posts')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('userId', userId);
 
     if (error) {
       throw new InternalServerErrorException('Could not delete the post');
@@ -276,7 +328,7 @@ export class PostService {
     }
 
     try {
-      const post = await this.findOne(postId);
+      const post = await this.findOne(postId, userId);
       return post;
     } catch (e) {
       throw new InternalServerErrorException(
@@ -330,7 +382,7 @@ export class PostService {
     }
 
     try {
-      const post = await this.findOne(postId);
+      const post = await this.findOne(postId, userId);
       return post;
     } catch (e) {
       throw new InternalServerErrorException(
@@ -341,10 +393,9 @@ export class PostService {
 
   async addMedia(
     postId: number,
+    userId: number,
     files: Express.Multer.File[],
   ): Promise<PostDto> {
-    const media = await this.mediaService.create(files);
-
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
@@ -359,6 +410,8 @@ export class PostService {
     if (!existingPost || existingPost.length === 0) {
       throw new NotFoundException(POST_NOT_FOUND(postId));
     }
+
+    const media = await this.mediaService.create(files);
 
     for (const mediaFile of media) {
       const { data, error } = await this.supabaseService
@@ -375,7 +428,7 @@ export class PostService {
     }
 
     try {
-      const updatedPost = await this.findOne(postId);
+      const updatedPost = await this.findOne(postId, userId);
       return updatedPost as PostDto;
     } catch (e) {
       throw new InternalServerErrorException('Could not upload media');
