@@ -29,12 +29,15 @@ export class UserService {
       .getClient()
       .from('custom_users')
       .insert([createUserDto])
-      .select('id, email, username, socialProfilePictureUrl');
+      .select('id, email, username, socialProfilePictureUrl')
+      .single();
 
-    // one possible reason for fail of creating user is that the email is already taken
-    // email is unique in the database, same as each type of token, no two same google tokens
-    // but still could be other type of error
-    if (error || !user || user.length === 0) {
+    // possible errors:
+    // 1. email already in use
+    // 2. google | apple | facebook token already in use
+    // 3. supabase failed to retrieve user from db
+    // 4. supabase failed to insert user into db
+    if (error || !user) {
       if (error.code === '23505') {
         throw new ConflictException('Invalid input data');
       } else {
@@ -42,7 +45,7 @@ export class UserService {
       }
     }
 
-    return user[0] as UserDto;
+    return user;
   }
 
   async findAll(): Promise<UserDto[]> {
@@ -51,15 +54,11 @@ export class UserService {
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl');
 
-    if (error) {
+    if (error || !users) {
       throw new InternalServerErrorException('Could not find the users');
     }
 
-    if (!users || users.length === 0) {
-      throw new NotFoundException(`No users found`);
-    }
-
-    return users as UserDto[];
+    return users;
   }
 
   async findOne(id: number): Promise<UserDto> {
@@ -67,17 +66,14 @@ export class UserService {
       .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
-      .eq('id', id);
+      .eq('id', id)
+      .single();
 
-    if (error) {
-      throw new InternalServerErrorException('Could not find the user');
-    }
-
-    if (!user || user.length === 0) {
+    if (error || !user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return user[0] as UserDto;
+    return user;
   }
 
   async update(id: number, updateUserDto: UserUpdateDto): Promise<UserDto> {
@@ -91,13 +87,14 @@ export class UserService {
         .from('custom_users')
         .update(user)
         .eq('id', id)
-        .select('id, email, username,  socialProfilePictureUrl');
+        .select('id, email, username,  socialProfilePictureUrl')
+        .single();
 
-    if (!updatedUser || updatedUser.length === 0 || updatedError) {
+    if (updatedError || !updatedUser) {
       throw new InternalServerErrorException('Could not update the user');
     }
 
-    return updatedUser[0] as UserDto;
+    return updatedUser;
   }
 
   async findBySocialMediaToken(
@@ -108,17 +105,14 @@ export class UserService {
       .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
-      .eq(`${socialMedia}Token`, token);
+      .eq(`${socialMedia}Token`, token)
+      .single();
 
-    if (error) {
-      throw new InternalServerErrorException('Could not find the user');
-    }
-
-    if (!user || user.length === 0) {
+    if (error || !user) {
       throw new NotFoundException(`User with given token not found`);
     }
 
-    return user[0] as UserDto;
+    return user;
   }
 
   async findByEmail(email: string): Promise<UserDto> {
@@ -126,17 +120,14 @@ export class UserService {
       .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
-      .eq('email', email);
+      .eq('email', email)
+      .single();
 
-    if (error) {
-      throw new InternalServerErrorException('Could not find the user');
-    }
-
-    if (!user || user.length === 0) {
+    if (error || !user) {
       throw new NotFoundException(`User with given email not found`);
     }
 
-    return user[0] as UserDto;
+    return user;
   }
 
   async profile(id: number): Promise<UserProfileDto> {
@@ -144,23 +135,20 @@ export class UserService {
       .getClient()
       .rpc('get_profile_by_id', {
         user_id_input: id,
-      });
+      })
+      .single();
 
-    if (error) {
-      throw new InternalServerErrorException('Could not find users profile');
-    }
-
-    if (user.length === 0) {
+    if (error || !user) {
       throw new NotFoundException(`User profile with id ${id} not found`);
     }
 
     return {
-      id: user[0].id,
-      email: user[0].email,
-      username: user[0].lastName,
-      socialProfilePictureUrl: user[0].socialProfilePictureUrl,
-      publicationsCount: parseInt(user[0].postsCount),
-      reactionsCount: parseInt(user[0].reactionsCount),
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      socialProfilePictureUrl: user.socialProfilePictureUrl,
+      publicationsCount: user.postsCount,
+      reactionsCount: user.reactionsCount,
     };
   }
 }

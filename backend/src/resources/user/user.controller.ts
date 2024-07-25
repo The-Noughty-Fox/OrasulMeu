@@ -51,7 +51,6 @@ export class UserController {
     type: UserDto,
     isArray: true,
   })
-  @ApiNotFoundResponse({ description: 'No users found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAll() {
     return this.userService.findAll();
@@ -65,7 +64,6 @@ export class UserController {
     type: UserProfileDto,
   })
   @ApiNotFoundResponse({ description: 'User profile not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   getProfile(@Param('id', ParseIntPipe) id: number) {
     return this.userService.profile(id);
   }
@@ -77,7 +75,6 @@ export class UserController {
   })
   @ApiParam({ name: 'id', description: 'User id', type: 'number' })
   @ApiNotFoundResponse({ description: 'User not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
@@ -87,7 +84,6 @@ export class UserController {
     description: 'User updated',
     type: UserDto,
   })
-  @ApiNotFoundResponse({ description: 'User not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   update(@Req() req, @Body() updateUserDto: UserUpdateDto) {
     return this.userService.update(req.user.id, updateUserDto);

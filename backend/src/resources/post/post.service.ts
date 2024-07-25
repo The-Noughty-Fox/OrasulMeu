@@ -12,6 +12,10 @@ import { PaginationResultDto } from '@/infrastructure/models/dto/pagination-resu
 import { POST_NOT_FOUND } from '@/infrastructure/messages';
 import { ReactionType } from '@/shared/types';
 import { SupabaseService } from '@/resources/supabase/supabase.service';
+import { CUSTOM_ERROR_CODES } from '@/infrastructure/error-codes/custom-error-codes';
+import { timestamptzToDate } from '@/helpers/timestamptz-to-date';
+import { mapToReaction } from '@/helpers/map-to-reaction';
+import { mapToMediaType } from '@/helpers/map-to-media-type';
 
 @Injectable()
 export class PostService {
@@ -38,15 +42,16 @@ export class PostService {
               : null,
         },
       ])
-      .select('id');
+      .select('id')
+      .single();
 
-    if (postError || !postId || postId.length === 0) {
+    if (postError || !postId) {
       throw new InternalServerErrorException('Could not create the post');
     }
 
     try {
-      const post = await this.findOne(postId[0].id, userId);
-      return post as PostDto;
+      const post = await this.findOne(postId.id, userId);
+      return post;
     } catch (e) {
       throw new InternalServerErrorException('Could not create the post');
     }
@@ -66,8 +71,10 @@ export class PostService {
         user_id_input: userId,
       });
 
-    if (error) {
-      throw new InternalServerErrorException('Could not find the posts');
+    if (error && error.code === CUSTOM_ERROR_CODES.USER_NOT_FOUND) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    } else if (error) {
+      throw new InternalServerErrorException('Could not get the posts');
     }
 
     const { data: postsCount, error: countError } = await this.supabaseService
@@ -79,7 +86,18 @@ export class PostService {
     }
 
     return {
-      data: posts ? (posts as PostDto[]) : [],
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+          userReaction: mapToReaction(post.reactions.userReaction),
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
       page: page,
       limit: limit,
       total: postsCount,
@@ -94,13 +112,15 @@ export class PostService {
 
     const { data: posts, error } = await this.supabaseService
       .getClient()
-      .rpc('get_posts_ordered_by_reactions', {
+      .rpc('get_posts_by_reactions', {
         page_input: page,
         limit_input: limit,
         user_id_input: userId,
       });
 
-    if (error) {
+    if (error && error.code === CUSTOM_ERROR_CODES.USER_NOT_FOUND) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    } else if (error) {
       throw new InternalServerErrorException('Could not find the posts');
     }
 
@@ -113,7 +133,18 @@ export class PostService {
     }
 
     return {
-      data: posts ? (posts as PostDto[]) : [],
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+          userReaction: mapToReaction(post.reactions.userReaction),
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
       page: page,
       limit: limit,
       total: postsCount,
@@ -128,14 +159,16 @@ export class PostService {
 
     const { data: posts, error } = await this.supabaseService
       .getClient()
-      .rpc('get_posts_for_user', {
+      .rpc('get_user_posts', {
         user_id_input: userId,
         page_input: page,
         limit_input: limit,
       });
 
-    if (error) {
-      throw new InternalServerErrorException("Could not find user's posts");
+    if (error && error.code === CUSTOM_ERROR_CODES.USER_NOT_FOUND) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    } else if (error) {
+      throw new InternalServerErrorException('Could not find the posts');
     }
 
     const { data: postsCount, error: countError } = await this.supabaseService
@@ -150,7 +183,18 @@ export class PostService {
     }
 
     return {
-      data: posts ? (posts as PostDto[]) : [],
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+          userReaction: mapToReaction(post.reactions.userReaction),
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
       page: page,
       limit: limit,
       total: postsCount,
@@ -165,53 +209,55 @@ export class PostService {
         user_id_input: userId,
       });
 
-    if (error) {
+    if (error && error.code === CUSTOM_ERROR_CODES.POST_NOT_FOUND) {
+      throw new NotFoundException(POST_NOT_FOUND(id));
+    } else if (error && error.code === CUSTOM_ERROR_CODES.USER_NOT_FOUND) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    } else if (error || !post) {
       throw new InternalServerErrorException('Could not find the post');
     }
 
-    if (!post || post.length === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(id));
-    }
-
-    return post as PostDto;
+    return {
+      ...post,
+      createdAt: timestamptzToDate(post.createdAt),
+      reactions: {
+        ...post.reactions,
+        userReaction: mapToReaction(post.reactions.userReaction),
+      },
+      media: post.media.map((mediaItem) => ({
+        ...mediaItem,
+        type: mapToMediaType(mediaItem.type),
+      })),
+    };
   }
 
-  async update(
-    id: number,
-    updatePostDto: UpdatePostDto,
-    userId: number,
-  ): Promise<PostDto> {
+  async update(id: number, updatePostDto: UpdatePostDto, userId: number) {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
         .from('posts')
         .select('title, content, locationAddress, location')
         .eq('id', id)
-        .eq('userId', userId);
+        .eq('userId', userId)
+        .single();
 
-    if (existingError) {
-      throw new InternalServerErrorException(
-        `Post with id ${id} not found or user not allowed to edit post`,
-      );
-    }
-
-    if (!existingPost || existingPost.length === 0) {
+    if (existingError || !existingPost) {
       throw new NotFoundException(
         `Post with id ${id} not found or user not allowed to edit post`,
       );
     }
 
     const post = {
-      title: updatePostDto.title || existingPost[0].title,
-      content: updatePostDto.content || existingPost[0].content,
+      title: updatePostDto.title || existingPost.title,
+      content: updatePostDto.content || existingPost.content,
       locationAddress:
-        updatePostDto.locationAddress || existingPost[0].locationAddress,
+        updatePostDto.locationAddress || existingPost.locationAddress,
       location:
         updatePostDto.location &&
         updatePostDto.location.longitude &&
         updatePostDto.location.latitude
           ? `POINT(${updatePostDto.location.longitude} ${updatePostDto.location.latitude})`
-          : existingPost[0].location,
+          : existingPost.location,
     };
 
     const { error: updatedError } = await this.supabaseService
@@ -226,7 +272,7 @@ export class PostService {
 
     try {
       const updatedPost = await this.findOne(id, userId);
-      return updatedPost as PostDto;
+      return updatedPost;
     } catch (e) {
       throw new InternalServerErrorException('Could not update the post');
     }
@@ -238,15 +284,10 @@ export class PostService {
       .from('posts')
       .select('id')
       .eq('id', id)
-      .eq('userId', userId);
+      .eq('userId', userId)
+      .single();
 
-    if (existingError) {
-      throw new InternalServerErrorException(
-        `Post with id ${id} not found or user not allowed to delete post`,
-      );
-    }
-
-    if (!post || post.length === 0) {
+    if (existingError || !post) {
       throw new NotFoundException(
         `Post with id ${id} not found or user not allowed to delete post`,
       );
@@ -266,24 +307,17 @@ export class PostService {
     return true;
   }
 
-  async react(
-    postId: number,
-    userId: number,
-    reaction: ReactionType,
-  ): Promise<PostDto> {
+  async react(postId: number, userId: number, reaction: ReactionType) {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
         .from('posts')
         .select('id')
-        .eq('id', postId);
+        .eq('id', postId)
+        .single();
 
-    if (existingError) {
-      throw new InternalServerErrorException('Could not find the post');
-    }
-
-    if (!existingPost || existingPost.length === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(postId));
+    if (existingError || !existingPost) {
+      throw new NotFoundException('Could not find the post');
     }
 
     const { data: existingPostReaction, error: existingPostReactionError } =
@@ -319,9 +353,10 @@ export class PostService {
         .getClient()
         .from('post_reactions')
         .insert([{ reaction, postId, userId }])
-        .select();
+        .select()
+        .single();
 
-    if (postReactionError || !postReaction || postReaction.length === 0) {
+    if (postReactionError || !postReaction) {
       throw new InternalServerErrorException(
         'Could not react to the post. Please try again',
       );
@@ -337,20 +372,17 @@ export class PostService {
     }
   }
 
-  async retrieveReaction(postId: number, userId: number): Promise<PostDto> {
+  async retrieveReaction(postId: number, userId: number) {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
         .from('posts')
         .select('id')
-        .eq('id', postId);
+        .eq('id', postId)
+        .single();
 
-    if (existingError) {
-      throw new InternalServerErrorException('Could not find the post');
-    }
-
-    if (!existingPost || existingPost.length === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(postId));
+    if (existingError || !existingPost) {
+      throw new NotFoundException('Could not find the post');
     }
 
     const { data: existingPostReaction, error: existingPostReactionError } =
@@ -391,24 +423,18 @@ export class PostService {
     }
   }
 
-  async addMedia(
-    postId: number,
-    userId: number,
-    files: Express.Multer.File[],
-  ): Promise<PostDto> {
+  async addMedia(postId: number, userId: number, files: Express.Multer.File[]) {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
         .from('posts')
         .select('id')
-        .eq('id', postId);
+        .eq('id', postId)
+        .eq('userId', userId)
+        .single();
 
-    if (existingError) {
-      throw new InternalServerErrorException('Could not add media post');
-    }
-
-    if (!existingPost || existingPost.length === 0) {
-      throw new NotFoundException(POST_NOT_FOUND(postId));
+    if (existingError || !existingPost) {
+      throw new NotFoundException('Could not add media post');
     }
 
     const media = await this.mediaService.create(files);
@@ -429,7 +455,7 @@ export class PostService {
 
     try {
       const updatedPost = await this.findOne(postId, userId);
-      return updatedPost as PostDto;
+      return updatedPost;
     } catch (e) {
       throw new InternalServerErrorException('Could not upload media');
     }
