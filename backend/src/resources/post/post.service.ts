@@ -231,7 +231,11 @@ export class PostService {
     };
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto, userId: number) {
+  async update(
+    id: number,
+    updatePostDto: UpdatePostDto,
+    userId: number,
+  ): Promise<PostDto> {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
@@ -307,7 +311,11 @@ export class PostService {
     return true;
   }
 
-  async react(postId: number, userId: number, reaction: ReactionType) {
+  async react(
+    postId: number,
+    userId: number,
+    reaction: ReactionType,
+  ): Promise<PostDto> {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
@@ -372,7 +380,7 @@ export class PostService {
     }
   }
 
-  async retrieveReaction(postId: number, userId: number) {
+  async retrieveReaction(postId: number, userId: number): Promise<PostDto> {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()
@@ -423,7 +431,11 @@ export class PostService {
     }
   }
 
-  async addMedia(postId: number, userId: number, files: Express.Multer.File[]) {
+  async addMedia(
+    postId: number,
+    userId: number,
+    files: Express.Multer.File[],
+  ): Promise<PostDto> {
     const { data: existingPost, error: existingError } =
       await this.supabaseService
         .getClient()

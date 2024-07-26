@@ -62,6 +62,7 @@ export class PostController {
   @ApiOkResponse({
     schema: getPaginationSchema(PostDto),
   })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAll(@Query() paginationQuery: PaginationQueryDto, @Req() req) {
     return this.postService.findAll(paginationQuery, req.user.id);
@@ -73,6 +74,7 @@ export class PostController {
   @ApiOkResponse({
     schema: getPaginationSchema(PostDto),
   })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAllReactionCountOrder(
     @Query() paginationQuery: PaginationQueryDto,
@@ -90,6 +92,7 @@ export class PostController {
   @ApiOkResponse({
     schema: getPaginationSchema(PostDto),
   })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   getMyPosts(@Req() req, @Query() paginationQuery: PaginationQueryDto) {
     return this.postService.findMyPosts(req.user.id, paginationQuery);
@@ -99,7 +102,7 @@ export class PostController {
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'get-post' })
   @ApiOkResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Post not found' })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.postService.findOne(id, req.user.id);

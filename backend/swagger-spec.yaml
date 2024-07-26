@@ -264,6 +264,8 @@ paths:
                     type: number
                   limit:
                     type: number
+        "404":
+          description: Not found
         "500":
           description: Internal Server Error
       tags: *a3
@@ -314,6 +316,8 @@ paths:
                     type: number
                   limit:
                     type: number
+        "404":
+          description: Not found
         "500":
           description: Internal Server Error
       tags: *a3
@@ -364,6 +368,8 @@ paths:
                     type: number
                   limit:
                     type: number
+        "404":
+          description: Not found
         "500":
           description: Internal Server Error
       tags: *a3
@@ -385,7 +391,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostDto"
         "404":
-          description: Post not found
+          description: Not found
         "500":
           description: Internal Server Error
       tags: *a3
