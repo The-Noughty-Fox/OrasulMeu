@@ -16,9 +16,12 @@ jobs:
         with:
           distribution: 'adopt'  
           java-version: 17
-          
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Run Tests                   
-        run: ./gradlew test
+        run: android/gradlew test
 
       - name: Build Project              
-        run: ./gradlew assemble
+        run: android/gradlew assemble
