@@ -17,6 +17,17 @@ jobs:
           distribution: 'adopt'  
           java-version: 17
 
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install OpenAPI Generator CLI
+        run: npm install @openapitools/openapi-generator-cli -g
+
+      - name: Generate API Client
+        run: ./scripts/generateApiClients shared/swagger-spec.yaml android/generated/api
+
       - name: Make gradlew executable
         run: chmod +x gradlew
         working-directory: android
