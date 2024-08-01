@@ -7,9 +7,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v1
 
@@ -18,10 +16,7 @@ jobs:
         with:
           distribution: 'adopt'  
           java-version: 17
-
-      - name: Grant execute permissions for gradlew //this step is only for macOS
-        run: chmod +x ./gradlew 
-
+          
       - name: Run Tests                   
         run: ./gradlew test
 
