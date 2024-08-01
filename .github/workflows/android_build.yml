@@ -19,9 +19,12 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
+        working-directory: android
 
       - name: Run Tests                   
-        run: android/gradlew test
+        run: ./gradlew test
+        working-directory: android
 
       - name: Build Project              
-        run: android/gradlew assemble
+        run: ./gradlew assemble
+        working-directory: android
