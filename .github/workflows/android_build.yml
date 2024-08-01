@@ -7,9 +7,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v1
 
@@ -19,11 +17,26 @@ jobs:
           distribution: 'adopt'  
           java-version: 17
 
-      - name: Grant execute permissions for gradlew //this step is only for macOS
-        run: chmod +x ./gradlew 
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install OpenAPI Generator CLI
+        run: npm install @openapitools/openapi-generator-cli
+
+      - name: Generate API Client
+        run: npx openapi-generator-cli generate -g kotlin -i ./swagger-spec.yaml -o ../android/generated/api -t ../shared --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string
+        working-directory: shared
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+        working-directory: android
 
       - name: Run Tests                   
         run: ./gradlew test
+        working-directory: android
 
       - name: Build Project              
         run: ./gradlew assemble
+        working-directory: android
