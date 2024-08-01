@@ -26,7 +26,7 @@ jobs:
         run: npm install @openapitools/openapi-generator-cli
 
       - name: Generate API Client
-        run: npx openapi-generator-cli generate -g kotlin -i ./shared/swagger-spec.yaml -o ../android/generated/api -t ../shared --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string
+        run: npx openapi-generator-cli generate -g kotlin -i ./swagger-spec.yaml -o ../android/generated/api -t ../shared --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string
         working-directory: shared
 
       - name: Make gradlew executable
