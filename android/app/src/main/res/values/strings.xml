@@ -68,4 +68,11 @@
 
     <string name="home_view_type_list">Listă</string>
     <string name="home_view_type_map">Hartă</string>
+
+    <string name="post_list_sort_popular">Popular</string>
+    <string name="post_list_sort_new">Nou</string>
+
+    <string name="search_screen_title">Cautare</string>
+    <string name="search_for_posts">Cauta postarile</string>
+    <string name="search_posts_no_results_message">Niciun rezultat pentru căutarea ta.</string>
 </resources>

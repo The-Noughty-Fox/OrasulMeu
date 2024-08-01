@@ -33,23 +33,31 @@ object PostPreviewPlaceholders {
             Media(
                 id = 1,
                 type = Media.Type.image,
-                url = "url",
+                url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png",
                 fileName = "filename"
             ),
             Media(
                 id = 2,
                 type = Media.Type.image,
-                url = "url",
+                url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png",
                 fileName = "filename"
             ),
             Media(
                 id = 3,
                 type = Media.Type.image,
-                url = "url",
+                url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png",
                 fileName = "filename"
             )
         )
     )
+
+    val dummyPosts = List(12) {
+        val longitude = 28.8574 + it * 0.001
+        val latitude = 47.0042 + it * 0.001
+
+
+        postDto.copy(location = PointDto(latitude = latitude, longitude = longitude))
+    }
 
     val postState = PostContract.State().copy(
         author = "John Doe",

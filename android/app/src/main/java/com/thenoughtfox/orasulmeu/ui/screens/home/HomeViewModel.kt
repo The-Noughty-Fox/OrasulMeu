@@ -43,18 +43,18 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            _event.consumeAsFlow().collect { action ->
-                when (action) {
+            _event.consumeAsFlow().collect { event ->
+                when (event) {
                     is Event.DislikePost -> {
-                        dislikePost(action.postId)
+                        dislikePost(event.postId)
                     }
 
                     is Event.LikePost -> {
-                        likePost(action.postId)
+                        likePost(event.postId)
                     }
 
                     is Event.RevokeReaction -> {
-                        revokeReaction(action.postId)
+                        revokeReaction(event.postId)
                     }
 
                     is Event.SendReport -> {
@@ -62,15 +62,58 @@ class HomeViewModel @Inject constructor(
                     }
 
                     is Event.NavigateToLocation -> {
-                        _state.update { it.copy(lastLocation = action.point) }
+                        _state.update { it.copy(lastLocation = event.point) }
                     }
 
                     Event.CloseMessage -> {
                         _state.update { it.copy(messageToShow = null) }
                     }
+
+                    is Event.SelectListSorting -> {
+                        applyNewSorting(event.sortType)
+                    }
+
+                    is Event.SearchPostWithText -> {
+                        searchPosts(event.searchText)
+                    }
                 }
             }
         }
+    }
+
+    private fun applyNewSorting(newValue: HomeContract.PostListSorting) {
+        val posts = state.value.postsToShow
+        val sortedList = when (newValue) {
+            HomeContract.PostListSorting.Popular -> posts.sortedByDescending {
+                (it.reactions.like + it.reactions.dislike)
+            }
+
+            HomeContract.PostListSorting.New -> posts.sortedBy {
+                it.id   // todo change to createdAt
+            }
+        }
+
+        _state.update {
+            it.copy(
+                postListSorting = newValue,
+                postsToShow = sortedList
+            )
+        }
+    }
+
+    private fun searchPosts(text: String) {
+        if (text.isEmpty()) {
+            _state.update { it.copy(searchResult = emptyList()) }
+        }
+
+        val posts = state.value.postsToShow
+
+        val filteredPosts = posts.filter {
+            it.title.contains(text, ignoreCase = true)
+                    || it.content.contains(text, ignoreCase = true)
+        }
+
+        _state.update { it.copy(searchResult = filteredPosts) }
     }
 
     private suspend fun likePost(postId: Int) {
