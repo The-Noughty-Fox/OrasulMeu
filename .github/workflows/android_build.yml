@@ -23,11 +23,11 @@ jobs:
           node-version: '16'
 
       - name: Install OpenAPI Generator CLI
-        run: npm install @openapitools/openapi-generator-cli -g
+        run: npm install @openapitools/openapi-generator-cli
 
       - name: Generate API Client
-        run: ./generateApiClients ../shared/swagger-spec.yaml ../android/generated/api
-        working-directory: scripts
+        run: npx openapi-generator-cli generate -g kotlin -i ./shared/swagger-spec.yaml -o ../android/generated/api -t ../shared --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string
+        working-directory: shared
 
       - name: Make gradlew executable
         run: chmod +x gradlew
