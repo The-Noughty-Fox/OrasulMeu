@@ -58,7 +58,7 @@ fun CreatePostPage(
     sendNavEvent: (NavEvent) -> Unit = {}
 ) {
 
-    val outState = rememberScrollState()
+    val outState =  rememberScrollState()
 
     Column(
         modifier = Modifier
