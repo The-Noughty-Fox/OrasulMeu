@@ -26,7 +26,8 @@ jobs:
         run: npm install @openapitools/openapi-generator-cli -g
 
       - name: Generate API Client
-        run: ./scripts/generateApiClients shared/swagger-spec.yaml android/generated/api
+        run: ./generateApiClients ../shared/swagger-spec.yaml ../android/generated/api
+        working-directory: scripts
 
       - name: Make gradlew executable
         run: chmod +x gradlew
