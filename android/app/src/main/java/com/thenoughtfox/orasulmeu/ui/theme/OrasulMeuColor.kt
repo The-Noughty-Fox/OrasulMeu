@@ -22,4 +22,9 @@ class OrasulMeuColor {
 
     val backgroundWhite: Color
         get() = Color.White
+
+    val backgroundGrey: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = colorResource(R.color.background_color)
 }
