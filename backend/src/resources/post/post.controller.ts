@@ -21,10 +21,6 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiConsumes,
-  ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -47,11 +43,10 @@ export class PostController {
   @Post()
   @ApiBody({ type: CreatePostDto })
   @ApiOperation({ operationId: 'create-post' })
-  @ApiCreatedResponse({
+  @ApiResponse({
     description: 'Post created successfully',
     type: PostDto,
   })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   create(@Body() createPostDto: CreatePostDto, @Req() req) {
     return this.postService.create(createPostDto, req.user.id);
   }
@@ -59,11 +54,9 @@ export class PostController {
   @Get()
   @ApiOperation({ operationId: 'get-all-posts' })
   @ApiQuery({ type: PaginationQueryDto })
-  @ApiOkResponse({
+  @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
-  @ApiNotFoundResponse({ description: 'Not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAll(@Query() paginationQuery: PaginationQueryDto, @Req() req) {
     return this.postService.findAll(paginationQuery, req.user.id);
   }
@@ -71,11 +64,9 @@ export class PostController {
   @Get('reaction')
   @ApiOperation({ operationId: 'get-all-posts-ordered-by-reactions-count' })
   @ApiQuery({ type: PaginationQueryDto })
-  @ApiOkResponse({
+  @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
-  @ApiNotFoundResponse({ description: 'Not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAllReactionCountOrder(
     @Query() paginationQuery: PaginationQueryDto,
     @Req() req,
@@ -89,11 +80,9 @@ export class PostController {
   @Get('my')
   @ApiOperation({ operationId: 'get-my-posts' })
   @ApiQuery({ type: PaginationQueryDto })
-  @ApiOkResponse({
+  @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
-  @ApiNotFoundResponse({ description: 'Not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   getMyPosts(@Req() req, @Query() paginationQuery: PaginationQueryDto) {
     return this.postService.findMyPosts(req.user.id, paginationQuery);
   }
@@ -101,9 +90,7 @@ export class PostController {
   @Get(':id')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'get-post' })
-  @ApiOkResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiResponse({ type: PostDto })
   findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.postService.findOne(id, req.user.id);
   }
@@ -112,9 +99,7 @@ export class PostController {
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiBody({ type: UpdatePostDto })
   @ApiOperation({ operationId: 'update-post' })
-  @ApiOkResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Post not found or unable to edit post' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiResponse({ type: PostDto })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
@@ -127,10 +112,6 @@ export class PostController {
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'delete-post' })
   @ApiResponse({ status: 200 })
-  @ApiNotFoundResponse({
-    description: 'Post not found or unable to delete post',
-  })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.postService.remove(id, req.user.id);
   }
@@ -139,8 +120,6 @@ export class PostController {
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'react-to-post' })
   @ApiResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Post not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @ApiBody({
     type: ReactToPostDto,
   })
@@ -156,21 +135,15 @@ export class PostController {
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'retieve-reaction-to-post' })
   @ApiResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Post not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   retrieveReaction(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.postService.retrieveReaction(id, req.user.id);
   }
 
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiBody({
-    type: MediaDto,
-  })
+  @ApiBody({ type: MediaDto })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiResponse({ type: PostDto })
-  @ApiNotFoundResponse({ description: 'Post not found' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FilesInterceptor('files', 20, {

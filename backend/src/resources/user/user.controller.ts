@@ -12,14 +12,10 @@ import {
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 import {
-  ApiBadRequestResponse,
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/resources/auth/passport/guards';
@@ -34,13 +30,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiCreatedResponse({
+  @ApiResponse({
     description: 'User successfully created',
     type: UserDto,
   })
-  @ApiBadRequestResponse({ description: 'Bad Request. No token provided' })
-  @ApiConflictResponse({ description: 'Conflict. Invalid input data' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   create(@Body() createUserDto: UserCreateDto) {
     return this.userService.create(createUserDto);
   }
@@ -51,7 +44,6 @@ export class UserController {
     type: UserDto,
     isArray: true,
   })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   findAll() {
     return this.userService.findAll();
   }
@@ -59,32 +51,29 @@ export class UserController {
   @Get('profile/:id')
   @ApiOperation({ operationId: 'get-user-profile' })
   @ApiParam({ name: 'id', description: 'User id', type: 'number' })
-  @ApiOkResponse({
+  @ApiResponse({
     description: 'User profile found',
     type: UserProfileDto,
   })
-  @ApiNotFoundResponse({ description: 'User profile not found' })
   getProfile(@Param('id', ParseIntPipe) id: number) {
     return this.userService.profile(id);
   }
 
   @Get(':id')
-  @ApiOkResponse({
+  @ApiResponse({
     description: 'User found',
     type: UserDto,
   })
   @ApiParam({ name: 'id', description: 'User id', type: 'number' })
-  @ApiNotFoundResponse({ description: 'User not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
 
   @Patch()
-  @ApiOkResponse({
+  @ApiResponse({
     description: 'User updated',
     type: UserDto,
   })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   update(@Req() req, @Body() updateUserDto: UserUpdateDto) {
     return this.userService.update(req.user.id, updateUserDto);
   }

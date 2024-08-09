@@ -14,16 +14,16 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   @ApiProperty({ required: false })
-  content: string;
+  content?: string;
 
   @AutoMap()
   @IsOptional()
   @IsString()
   @ApiProperty({ required: false })
-  locationAddress: string;
+  locationAddress?: string;
 
   @ApiProperty({ type: PointDto, required: false })
   @IsOptional()
   @AutoMap()
-  location: PointDto;
+  location?: PointDto;
 }

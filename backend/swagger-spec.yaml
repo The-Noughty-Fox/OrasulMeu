@@ -25,18 +25,12 @@ paths:
             schema:
               $ref: "#/components/schemas/UserCreateDto"
       responses:
-        "201":
+        default:
           description: User successfully created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
-        "400":
-          description: Bad Request. No token provided
-        "409":
-          description: Conflict. Invalid input data
-        "500":
-          description: Internal Server Error
       tags: &a1
         - users
     get:
@@ -51,8 +45,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/UserDto"
-        "500":
-          description: Internal Server Error
       tags: *a1
     patch:
       operationId: update
@@ -64,14 +56,12 @@ paths:
             schema:
               $ref: "#/components/schemas/UserUpdateDto"
       responses:
-        "200":
+        default:
           description: User updated
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
-        "500":
-          description: Internal Server Error
       tags: *a1
   /users/profile/{id}:
     get:
@@ -85,14 +75,12 @@ paths:
           schema:
             type: number
       responses:
-        "200":
+        default:
           description: User profile found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfileDto"
-        "404":
-          description: User profile not found
       tags: *a1
   /users/{id}:
     get:
@@ -105,14 +93,12 @@ paths:
           schema:
             type: number
       responses:
-        "200":
+        default:
           description: User found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
-        "404":
-          description: User not found
       tags: *a1
   /auth/test/{id}:
     post:
@@ -208,14 +194,12 @@ paths:
             schema:
               $ref: "#/components/schemas/CreatePostDto"
       responses:
-        "201":
+        default:
           description: Post created successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDto"
-        "500":
-          description: Internal Server Error
       tags: &a3
         - posts
     get:
@@ -247,7 +231,7 @@ paths:
             default: 10
             type: integer
       responses:
-        "200":
+        default:
           description: ""
           content:
             application/json:
@@ -264,10 +248,6 @@ paths:
                     type: number
                   limit:
                     type: number
-        "404":
-          description: Not found
-        "500":
-          description: Internal Server Error
       tags: *a3
   /posts/reaction:
     get:
@@ -299,7 +279,7 @@ paths:
             default: 10
             type: integer
       responses:
-        "200":
+        default:
           description: ""
           content:
             application/json:
@@ -316,10 +296,6 @@ paths:
                     type: number
                   limit:
                     type: number
-        "404":
-          description: Not found
-        "500":
-          description: Internal Server Error
       tags: *a3
   /posts/my:
     get:
@@ -351,7 +327,7 @@ paths:
             default: 10
             type: integer
       responses:
-        "200":
+        default:
           description: ""
           content:
             application/json:
@@ -368,10 +344,6 @@ paths:
                     type: number
                   limit:
                     type: number
-        "404":
-          description: Not found
-        "500":
-          description: Internal Server Error
       tags: *a3
   /posts/{id}:
     get:
@@ -384,16 +356,12 @@ paths:
           schema:
             type: integer
       responses:
-        "200":
+        default:
           description: ""
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDto"
-        "404":
-          description: Not found
-        "500":
-          description: Internal Server Error
       tags: *a3
     patch:
       operationId: update-post
@@ -411,16 +379,12 @@ paths:
             schema:
               $ref: "#/components/schemas/UpdatePostDto"
       responses:
-        "200":
+        default:
           description: ""
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDto"
-        "404":
-          description: Post not found or unable to edit post
-        "500":
-          description: Internal Server Error
       tags: *a3
     delete:
       operationId: delete-post
@@ -434,10 +398,6 @@ paths:
       responses:
         "200":
           description: ""
-        "404":
-          description: Post not found or unable to delete post
-        "500":
-          description: Internal Server Error
       tags: *a3
   /posts/{id}/react:
     post:
@@ -456,10 +416,6 @@ paths:
             schema:
               $ref: "#/components/schemas/ReactToPostDto"
       responses:
-        "404":
-          description: Post not found
-        "500":
-          description: Internal Server Error
         default:
           description: ""
           content:
@@ -477,10 +433,6 @@ paths:
           schema:
             type: integer
       responses:
-        "404":
-          description: Post not found
-        "500":
-          description: Internal Server Error
         default:
           description: ""
           content:
@@ -505,10 +457,6 @@ paths:
             schema:
               $ref: "#/components/schemas/MediaDto"
       responses:
-        "404":
-          description: Post not found
-        "500":
-          description: Internal Server Error
         default:
           description: ""
           content:
@@ -527,7 +475,7 @@ paths:
             schema:
               $ref: "#/components/schemas/MediaSingleDto"
       responses:
-        "200":
+        default:
           description: Media file uploaded successfully
           content:
             application/json:
@@ -535,10 +483,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/MediaSupabaseDto"
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
       tags: &a4
         - media
   /media/files:
@@ -552,7 +496,7 @@ paths:
             schema:
               $ref: "#/components/schemas/MediaDto"
       responses:
-        "200":
+        default:
           description: Media files uploaded successfully
           content:
             application/json:
@@ -560,10 +504,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/MediaSupabaseDto"
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
       tags: *a4
   /comments:
     post:
