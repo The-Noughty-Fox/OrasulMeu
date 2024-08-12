@@ -16,13 +16,10 @@ import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.navigation.LocalMainNavigator
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.utils.showToast
 import kotlinx.coroutines.launch
-
-/**
- * @author Knurenko Bogdan 07.06.2024
- */
 
 @Composable
 fun CreatePostMediaController(viewModel: CreatePostViewModel) {
@@ -61,17 +58,16 @@ fun CreatePostMediaController(viewModel: CreatePostViewModel) {
     CreatePostMediaPage(
         uiState = uiState,
         onSendEvent = { scope.launch { viewModel.event.send(it) } },
-        onCameraClick = {
-            navigator.navigate(CreatePostDestinations.CameraScreen)
-        },
         onGalleryClick = {
             pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
-        onNextClick = {
-            navigator.navigate(CreatePostDestinations.CreatePostScreen)
-        },
-        onBackPressed = {
-            mainNavigator.navigateUp()
+        sendNavEvent = { event ->
+            when (event) {
+                NavEvent.GoBack -> mainNavigator.navigateUp()
+                NavEvent.Camera -> navigator.navigate(CreatePostDestinations.CameraScreen)
+                NavEvent.CreatePost -> navigator.navigate(CreatePostDestinations.CreatePostScreen)
+                else -> Unit
+            }
         }
     )
 }

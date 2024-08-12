@@ -39,22 +39,22 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.TopBar
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 import com.thenoughtfox.orasulmeu.utils.view.Alert
 import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
-import com.thenoughtfox.orasulmeu.utils.view.Toolbar
 
 @Composable
 fun CreatePostMediaPage(
     uiState: State,
     onSendEvent: (Event) -> Unit,
-    onCameraClick: () -> Unit = {},
     onGalleryClick: () -> Unit = {},
-    onNextClick: () -> Unit = {},
-    onBackPressed: () -> Unit = {}
+    sendNavEvent: (NavEvent) -> Unit = {}
 ) {
 
     if (uiState.removedUri != null) {
@@ -77,10 +77,16 @@ fun CreatePostMediaPage(
             .pageModifier()
             .verticalScroll(rememberScrollState())
     ) {
-        Toolbar(
-            title = stringResource(id = R.string.create_post_toolbar_title),
+        TopBar(
             modifier = Modifier.padding(horizontal = 16.dp),
-            onBackClickListener = onBackPressed
+            titleText = stringResource(id = R.string.create_post_toolbar_title),
+            leftItem = {
+                ClickableIcon(
+                    painter = painterResource(R.drawable.ic_chevron_left),
+                    color = colorResource(R.color.icons_dark_grey),
+                    onClick = { sendNavEvent(NavEvent.GoBack) }
+                )
+            }
         )
 
         val image = uiState.image ?: R.drawable.image_placeholder
@@ -123,7 +129,7 @@ fun CreatePostMediaPage(
 
         UploadButtons(
             onClickMedia = onGalleryClick,
-            onClickCamera = onCameraClick
+            onClickCamera = { sendNavEvent(NavEvent.Camera) }
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -133,7 +139,7 @@ fun CreatePostMediaPage(
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.create_post_button_next),
-            onClick = onNextClick
+            onClick = { sendNavEvent(NavEvent.CreatePost) }
         )
     }
 }

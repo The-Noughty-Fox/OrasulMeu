@@ -33,13 +33,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.TopBar
 import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.utils.view.Alert
-import com.thenoughtfox.orasulmeu.utils.view.Toolbar
 
 @Composable
-fun ProfileSettingsPage(onSendEvent: (Event) -> Unit, onBackPressed: () -> Unit = {}) {
+fun ProfileSettingsPage(
+    onSendEvent: (Event) -> Unit,
+    sendNavEvent: (NavEvent) -> Unit = {}
+) {
 
     var showDeleteAlert by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -65,9 +70,15 @@ fun ProfileSettingsPage(onSendEvent: (Event) -> Unit, onBackPressed: () -> Unit 
             .pageModifier()
             .padding(horizontal = 16.dp)
     ) {
-        Toolbar(
-            title = stringResource(id = R.string.profile_settings_toolbar_title),
-            onBackClickListener = onBackPressed
+        TopBar(
+            titleText = stringResource(id = R.string.profile_settings_toolbar_title),
+            leftItem = {
+                ClickableIcon(
+                    painter = painterResource(R.drawable.ic_chevron_left),
+                    color = colorResource(R.color.icons_dark_grey),
+                    onClick = { sendNavEvent(NavEvent.GoBack) }
+                )
+            }
         )
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

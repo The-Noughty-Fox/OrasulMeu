@@ -30,10 +30,8 @@ fun ProfileSettingsController() {
             viewModel.action.collectLatest {
                 when (it) {
                     is ProfileSettingsContract.Action.ShowToast -> context.showToast(it.msg)
-                    ProfileSettingsContract.Action.Logout -> rootNavigator.apply {
-                        popBackStack()
-                        navigate(RootNavDestinations.Auth)
-                    }
+                    ProfileSettingsContract.Action.Logout ->
+                        rootNavigator.popBackStack(RootNavDestinations.Auth, true)
                 }
             }
         }
@@ -41,6 +39,10 @@ fun ProfileSettingsController() {
 
     ProfileSettingsPage(
         onSendEvent = { scope.launch { viewModel.event.send(it) } },
-        onBackPressed = { profileNavigator.navigateUp() }
+        sendNavEvent = { event ->
+            when (event) {
+                ProfileSettingsContract.NavEvent.GoBack -> profileNavigator.navigateUp()
+            }
+        }
     )
 }

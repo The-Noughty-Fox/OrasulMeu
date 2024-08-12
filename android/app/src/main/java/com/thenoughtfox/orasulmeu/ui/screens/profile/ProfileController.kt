@@ -24,6 +24,6 @@ fun ProfileController() {
         state = viewModel.state.collectAsState().value,
         onSendEvent = viewModel::sendEvent,
         pickImage = { pickImageLauncher.launch("image/*") },
-        sendNavAction = { profileNavController.navigate(ProfileDestinations.ProfileSettings) }
+        sendNavEvent = { profileNavController.navigate(ProfileDestinations.ProfileSettings) }
     )
 }

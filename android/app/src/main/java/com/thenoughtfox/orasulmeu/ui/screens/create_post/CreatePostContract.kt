@@ -30,6 +30,8 @@ interface CreatePostContract {
         data object GoBack : NavEvent
         data object GoToMedia : NavEvent
         data object GoToMapSearch : NavEvent
+        data object CreatePost : NavEvent
+        data object Camera : NavEvent
     }
 
     sealed class Action {

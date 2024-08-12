@@ -25,6 +25,10 @@ interface HomeContract {
         data class SearchPostWithText(val searchText: String) : Event
     }
 
+    sealed interface NavEvent {
+        data object GoBack : NavEvent
+    }
+
     enum class PostListSorting {
         Popular, New
     }

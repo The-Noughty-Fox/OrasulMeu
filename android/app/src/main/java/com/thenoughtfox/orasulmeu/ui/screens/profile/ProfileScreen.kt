@@ -26,7 +26,7 @@ import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.Event
-import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.NavAction
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
 import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ProfileView
@@ -37,7 +37,7 @@ import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 fun ProfileScreen(
     state: State,
     onSendEvent: (Event) -> Unit = {},
-    sendNavAction: (NavAction) -> Unit = {},
+    sendNavEvent: (NavEvent) -> Unit = {},
     pickImage: () -> Unit,
 ) {
     Scaffold(
@@ -47,6 +47,7 @@ fun ProfileScreen(
             .statusBarsPadding(),
         topBar = {
             TopBar(
+                modifier = Modifier.padding(horizontal = 16.dp),
                 rightItem = {
                     if (state.isEditing) {
                         Box(
@@ -61,7 +62,7 @@ fun ProfileScreen(
                         ClickableIcon(
                             painter = painterResource(R.drawable.ic_settings),
                             color = colorResource(R.color.icons_dark_grey),
-                            onClick = { sendNavAction(NavAction.GoToSettings) }
+                            onClick = { sendNavEvent(NavEvent.GoToSettings) }
                         )
                     }
                 },

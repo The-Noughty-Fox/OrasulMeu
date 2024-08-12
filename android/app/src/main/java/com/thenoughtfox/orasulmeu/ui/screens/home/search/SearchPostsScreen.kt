@@ -51,13 +51,17 @@ import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 fun SearchPostsScreen(
     state: HomeContract.State,
     sendEvent: (HomeContract.Event) -> Unit,
-    onBackPress: () -> Unit = {}
+    sendNavEvent: (HomeContract.NavEvent) -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(),
-        topBar = { SearchTopBar(onBackPress = onBackPress) },
+        topBar = {
+            SearchTopBar(onBackPress = {
+                sendNavEvent(HomeContract.NavEvent.GoBack)
+            })
+        },
         content = { padding ->
             Column(
                 modifier = Modifier

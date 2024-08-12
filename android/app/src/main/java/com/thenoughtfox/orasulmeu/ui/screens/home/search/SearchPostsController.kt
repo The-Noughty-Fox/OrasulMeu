@@ -5,11 +5,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.thenoughtfox.orasulmeu.navigation.LocalMainNavigator
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SearchPostsController() {
+
     val homeViewModel: HomeViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val navigator = LocalMainNavigator.current
@@ -19,8 +21,10 @@ fun SearchPostsController() {
         sendEvent = {
             scope.launch { homeViewModel.sendEvent(it) }
         },
-        onBackPress = {
-            navigator.navigateUp()
+        sendNavEvent = { event ->
+            when (event) {
+                NavEvent.GoBack -> navigator.navigateUp()
+            }
         }
     )
 }

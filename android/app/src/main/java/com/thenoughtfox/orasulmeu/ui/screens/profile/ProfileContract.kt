@@ -25,7 +25,7 @@ interface ProfileContract {
         data class ChangePicture(val image: Uri) : Event
     }
 
-    sealed interface NavAction {
-        data object GoToSettings : NavAction
+    sealed interface NavEvent {
+        data object GoToSettings : NavEvent
     }
 }

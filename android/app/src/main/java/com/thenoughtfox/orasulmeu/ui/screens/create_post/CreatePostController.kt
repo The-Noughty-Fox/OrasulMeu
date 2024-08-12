@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import kotlinx.coroutines.launch
 
 /**
@@ -22,9 +23,10 @@ fun CreatePostController(viewModel: CreatePostViewModel) {
         onSendEvent = { scope.launch { viewModel.event.send(it) } },
         sendNavEvent = {
             when (it) {
-                CreatePostContract.NavEvent.GoBack -> navController.navigateUp()
-                CreatePostContract.NavEvent.GoToMapSearch -> navController.navigate(CreatePostDestinations.MapSearchScreen)
-                CreatePostContract.NavEvent.GoToMedia ->  navController.navigateUp()
+                NavEvent.GoBack -> navController.navigateUp()
+                NavEvent.GoToMapSearch -> navController.navigate(CreatePostDestinations.MapSearchScreen)
+                NavEvent.GoToMedia -> navController.navigateUp()
+                else -> Unit
             }
         }
     )

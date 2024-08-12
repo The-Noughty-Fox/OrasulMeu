@@ -41,15 +41,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.thenoughtfox.orasulmeu.R
-import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.*
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.RoundButton
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.UserImage
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
+import com.thenoughtfox.orasulmeu.ui.screens.profile.components.TopBar
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.bodyModifier
 import com.thenoughtfox.orasulmeu.ui.theme.outlinedTextFieldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
-import com.thenoughtfox.orasulmeu.utils.view.Toolbar
 
 @Composable
 fun CreatePostPage(
@@ -66,10 +69,14 @@ fun CreatePostPage(
             .padding(horizontal = 16.dp)
             .verticalScroll(outState)
     ) {
-        Toolbar(
-            title = stringResource(id = R.string.create_post_toolbar_title),
-            onBackClickListener = {
-                sendNavEvent(NavEvent.GoBack)
+        TopBar(
+            titleText = stringResource(id = R.string.create_post_toolbar_title),
+            leftItem = {
+                ClickableIcon(
+                    painter = painterResource(R.drawable.ic_chevron_left),
+                    color = colorResource(R.color.icons_dark_grey),
+                    onClick = { sendNavEvent(NavEvent.GoBack) }
+                )
             }
         )
 

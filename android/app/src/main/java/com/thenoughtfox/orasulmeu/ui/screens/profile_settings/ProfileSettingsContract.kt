@@ -15,4 +15,8 @@ object ProfileSettingsContract {
         data class ShowToast(val msg: String) : Action
         data object Logout : Action
     }
+
+    sealed interface NavEvent {
+        data object GoBack : NavEvent
+    }
 }
