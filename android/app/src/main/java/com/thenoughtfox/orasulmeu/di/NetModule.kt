@@ -52,7 +52,7 @@ object NetModule {
         okHttpBuilder: OkHttpClient.Builder,
         @ApplicationContext context: Context
     ): ApiClient {
-        val baseUrl = "https://a3aa-178-168-82-61.ngrok-free.app/"
+        val baseUrl = "http://192.168.0.34:8080"
         return ApiClient(okHttpClientBuilder = okHttpBuilder, baseUrl = baseUrl)
     }
 

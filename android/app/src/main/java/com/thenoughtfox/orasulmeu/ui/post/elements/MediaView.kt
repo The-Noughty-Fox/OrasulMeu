@@ -41,7 +41,7 @@ fun MediaView(mediaItem: Media, modifier: Modifier = Modifier) {
         },
         loading = {
             CircularProgressIndicator(
-                modifier = modifier.padding(24.dp),
+                modifier = modifier.padding(175.dp),
                 color = colorResource(R.color.primary),
                 strokeWidth = 4.dp
             )

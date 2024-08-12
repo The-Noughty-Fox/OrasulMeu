@@ -49,6 +49,14 @@ fun LoginController() {
                         scope.launch {
                             viewModel.event.send(Event.SendToken(type = SingInType.Google, it))
                         }
+                    } ?: {
+                        scope.launch {
+                            viewModel.event.send(
+                                Event.FailedAuth(
+                                    type = SingInType.Google, msg = "Failed to get token"
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -90,9 +98,12 @@ fun LoginController() {
                         }
                     }
 
-                    Action.Proceed -> navigator.apply {
-                        popBackStack()
-                        navigate(RootNavDestinations.Main)
+                    Action.Proceed -> {
+                        navigator.navigate(RootNavDestinations.Main) {
+                            popUpTo(RootNavDestinations.Main) {
+                                inclusive = true
+                            }
+                        }
                     }
                 }
             }

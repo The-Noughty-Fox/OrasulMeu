@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.screens.create_post
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -7,6 +7,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import kotlinx.coroutines.launch
 
 /**

@@ -46,29 +46,27 @@ class ProfileSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun logout() {
+    private suspend fun logout() {
         userSharedPrefs.apply {
             cookies = null
             user = null
         }
 
-        viewModelScope.launch {
-            _action.emit(Action.Logout)
-        }
+        _action.emit(Action.Logout)
     }
 
     private fun deleteAccount() {
+        //TODO
+        //Not working --> DELETE http://192.168.0.34:8080/users/23
+        //19:14:45.707  I  --> END DELETE
+        //19:14:45.908  I  <-- 404 Not Found http://192.168.0.34:8080/users/23 (201ms)
+        //{"message":"Cannot DELETE /users/23","error":"Not Found","statusCode":404}
         viewModelScope.launch {
             val id = userSharedPrefs.user?.id ?: return@launch
             usersApi.remove(id = id.toString())
                 .toOperationResult { }
                 .onSuccess {
-                    userSharedPrefs.apply {
-                        cookies = null
-                        user = null
-                    }
-
-                    _action.emit(Action.Logout)
+                    logout()
                 }
                 .onError {
                     _state.update { it.copy(isError = true) }

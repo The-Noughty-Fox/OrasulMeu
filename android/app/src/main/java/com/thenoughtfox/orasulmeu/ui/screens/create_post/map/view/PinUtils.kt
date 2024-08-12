@@ -7,16 +7,21 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.thenoughtfox.orasulmeu.R
 
 object PinUtils {
 
     private const val INSET: Int = 4
 
-    fun maskDrawableToAnother(context: Context, sourceResId: Int, maskResId: Int): Bitmap {
+    fun maskDrawableToAnother(
+        context: Context,
+        sourceDrawable: Drawable?,
+        maskResId: Int = R.drawable.ic_pin_annotation
+    ): Bitmap {
         // Get the drawables
-        val sourceDrawable = ContextCompat.getDrawable(context, sourceResId)
         val maskDrawable = ContextCompat.getDrawable(context, maskResId)
 
         // Convert the drawables to bitmaps

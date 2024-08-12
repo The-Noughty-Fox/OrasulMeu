@@ -34,7 +34,11 @@ fun HomeController() {
                 .padding(bottom = 16.dp),
             onClick = {
                 selectedViewType =
-                    if (selectedViewType == SelectedViewType.Map) SelectedViewType.List else SelectedViewType.Map
+                    if (selectedViewType == SelectedViewType.Map) {
+                        SelectedViewType.List
+                    } else {
+                        SelectedViewType.Map
+                    }
             }
         )
     }

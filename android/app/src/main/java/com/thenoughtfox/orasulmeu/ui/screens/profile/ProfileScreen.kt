@@ -53,7 +53,6 @@ fun ProfileScreen(
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
                                 .clickable { onSendEvent(Event.SaveChanges) }
                         ) {
                             Text(text = stringResource(R.string.save))

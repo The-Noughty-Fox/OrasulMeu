@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.thenoughtfox.orasulmeu.navigation.LocalProfileNavigator
 import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
@@ -20,7 +21,7 @@ fun ProfileSettingsController() {
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
     val rootNavigator = LocalRootNavigator.current
     val profileNavigator = LocalProfileNavigator.current
@@ -31,7 +32,9 @@ fun ProfileSettingsController() {
                 when (it) {
                     is ProfileSettingsContract.Action.ShowToast -> context.showToast(it.msg)
                     ProfileSettingsContract.Action.Logout ->
-                        rootNavigator.popBackStack(RootNavDestinations.Auth, true)
+                        rootNavigator.navigate(RootNavDestinations.Auth) {
+                            popUpTo(RootNavDestinations.Auth) { inclusive = true }
+                        }
                 }
             }
         }

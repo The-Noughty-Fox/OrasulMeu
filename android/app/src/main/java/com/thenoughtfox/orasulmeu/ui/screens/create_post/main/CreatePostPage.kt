@@ -1,4 +1,4 @@
-package com.thenoughtfox.orasulmeu.ui.screens.create_post
+package com.thenoughtfox.orasulmeu.ui.screens.create_post.main
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -177,14 +177,14 @@ fun CreatePostPage(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val isTitleEmpty = uiState.title.isEmpty()
+        val isValid = uiState.title.isNotEmpty() && uiState.address.isNotEmpty()
         RoundButton(modifier = Modifier.align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.create_post_button_submit),
-            backgroundColor = colorResource(id = if (isTitleEmpty) R.color.white else R.color.dark_blue),
-            textColor = colorResource(id = if (isTitleEmpty) R.color.black else R.color.white),
+            backgroundColor = colorResource(id = if (isValid) R.color.dark_blue else R.color.white),
+            textColor = colorResource(id = if (isValid) R.color.white else R.color.black),
             isLoading = uiState.isLoading,
             onClick = {
-                if (!isTitleEmpty) {
+                if (isValid) {
                     onSendEvent(Event.Submit)
                 }
             })

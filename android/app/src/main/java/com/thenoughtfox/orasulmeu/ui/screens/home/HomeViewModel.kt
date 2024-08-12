@@ -20,19 +20,19 @@ import org.openapitools.client.models.ReactToPostDto
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val api: PostsApi
-) : ViewModel() {
-    private val _state: MutableStateFlow<State> =
-        MutableStateFlow(State())
+class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel() {
+
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State())
     val state = _state.asStateFlow()
 
     private val _event: Channel<Event> = Channel(Channel.UNLIMITED)
-    suspend fun sendEvent(a: Event) { _event.send(a) }
+
+    suspend fun sendEvent(a: Event) {
+        _event.send(a)
+    }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-
             _state.update { it.copy(isLoading = true) }
             api.getPosts().toOperationResult { it }.onSuccess { response ->
                 _state.update {
