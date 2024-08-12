@@ -123,14 +123,17 @@ export class UserService {
       .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
-      .eq('email', email)
-      .single();
+      .eq('email', email);
 
-    if (error || !user) {
-      throw new NotFoundException(`User with given email not found`);
+    if (error) {
+      throw new InternalServerErrorException(`Could not search for user`);
     }
 
-    return user;
+    if (!user) {
+      return null;
+    }
+
+    return user[0];
   }
 
   async profile(id: number): Promise<UserProfileDto> {
