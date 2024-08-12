@@ -105,14 +105,17 @@ export class UserService {
       .getClient()
       .from('custom_users')
       .select('id, email, username, socialProfilePictureUrl')
-      .eq(`${socialMedia}Token`, token)
-      .single();
+      .eq(`${socialMedia}Token`, token);
 
-    if (error || !user) {
-      throw new NotFoundException(`User with given token not found`);
+    if (error) {
+      throw new InternalServerErrorException(`Could not search for user`);
     }
 
-    return user;
+    if (!user) {
+      return null;
+    }
+
+    return user[0];
   }
 
   async findByEmail(email: string): Promise<UserDto> {
