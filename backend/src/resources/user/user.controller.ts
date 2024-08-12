@@ -5,15 +5,23 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   Req,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/resources/auth/passport/guards';
 import { UserProfileDto } from '@/resources/user/dto/user-profile.dto';
+import { UserCreateDto } from './dto/user-create.dto';
+import { UserUpdateDto } from './dto/user-update.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -22,37 +30,60 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: UserDto) {
+  @ApiResponse({
+    description: 'User successfully created',
+    type: UserDto,
+  })
+  create(@Body() createUserDto: UserCreateDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
+  @ApiOkResponse({
+    description: 'Users found',
+    type: UserDto,
+    isArray: true,
+  })
   findAll() {
     return this.userService.findAll();
   }
 
-  @Get('profile')
+  @Get('profile/:id')
   @ApiOperation({ operationId: 'get-user-profile' })
-  @ApiResponse({ type: UserProfileDto })
-  getProfile(@Req() req) {
-    return this.userService.profile(req.user.id);
+  @ApiParam({ name: 'id', description: 'User id', type: 'number' })
+  @ApiResponse({
+    description: 'User profile found',
+    type: UserProfileDto,
+  })
+  getProfile(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.profile(id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @ApiResponse({
+    description: 'User found',
+    type: UserDto,
+  })
+  @ApiParam({ name: 'id', description: 'User id', type: 'number' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Patch()
+  @ApiResponse({
+    description: 'User updated',
+    type: UserDto,
+  })
+  update(@Req() req, @Body() updateUserDto: UserUpdateDto) {
+    return this.userService.update(req.user.id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {}
+  // NOT IMPLEMENTED YET
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {}
 
-  @Get('search')
-  search() {
-    return this.userService.findAll();
-  }
+  // @Get('search')
+  // search() {
+  //   return this.userService.findAll();
+  // }
 }

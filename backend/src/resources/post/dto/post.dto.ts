@@ -1,10 +1,10 @@
 import { UserDto } from '@/resources/user/dto/user.dto';
 import { CommentDto } from '@/resources/comment/dto/comment.dto';
 import { AutoMap } from '@automapper/classes';
-import { Media } from '@/resources/media/entities/media.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { PointDto } from '@/infrastructure/models/dto/point.dto';
 import { Reaction, ReactionType } from '@/shared/types';
+import { MediaSupabaseDto } from '@/resources/media/dto/media-supabase.dto';
 
 type PostReactionsType = Record<ReactionType, number>;
 
@@ -42,11 +42,11 @@ export class PostDto {
   @ApiProperty({ type: CommentDto })
   comments: CommentDto[];
 
-  @ApiProperty({ type: Media, isArray: true })
-  media?: Media[];
+  @ApiProperty({ type: MediaSupabaseDto, isArray: true })
+  media?: MediaSupabaseDto[];
 
   @AutoMap()
-  createDate: Date;
+  createdAt: Date;
 
   @AutoMap()
   @ApiProperty()

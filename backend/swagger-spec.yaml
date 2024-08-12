@@ -23,10 +23,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserDto"
+              $ref: "#/components/schemas/UserCreateDto"
       responses:
-        "201":
-          description: ""
+        default:
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
       tags: &a1
         - users
     get:
@@ -34,16 +38,45 @@ paths:
       parameters: []
       responses:
         "200":
-          description: ""
+          description: Users found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserDto"
       tags: *a1
-  /users/profile:
+    patch:
+      operationId: update
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDto"
+      responses:
+        default:
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+      tags: *a1
+  /users/profile/{id}:
     get:
       operationId: get-user-profile
       summary: ""
-      parameters: []
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: User id
+          schema:
+            type: number
       responses:
         default:
-          description: ""
+          description: User profile found
           content:
             application/json:
               schema:
@@ -56,49 +89,16 @@ paths:
         - name: id
           required: true
           in: path
+          description: User id
           schema:
-            type: string
+            type: number
       responses:
-        "200":
-          description: ""
-      tags: *a1
-    patch:
-      operationId: update
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserDto"
-      responses:
-        "200":
-          description: ""
-      tags: *a1
-    delete:
-      operationId: remove
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        "200":
-          description: ""
-      tags: *a1
-  /users/search:
-    get:
-      operationId: search
-      parameters: []
-      responses:
-        "200":
-          description: ""
+        default:
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
       tags: *a1
   /auth/test/{id}:
     post:
@@ -195,7 +195,7 @@ paths:
               $ref: "#/components/schemas/CreatePostDto"
       responses:
         default:
-          description: ""
+          description: Post created successfully
           content:
             application/json:
               schema:
@@ -203,7 +203,7 @@ paths:
       tags: &a3
         - posts
     get:
-      operationId: get-posts
+      operationId: get-all-posts
       summary: ""
       parameters:
         - name: page
@@ -218,8 +218,68 @@ paths:
           schema:
             default: 10
             type: integer
+        - name: page
+          in: query
+          required: true
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            default: 10
+            type: integer
       responses:
-        "200":
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
+      tags: *a3
+  /posts/reaction:
+    get:
+      operationId: get-all-posts-ordered-by-reactions-count
+      summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+        - name: page
+          in: query
+          required: true
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            default: 10
+            type: integer
+      responses:
+        default:
           description: ""
           content:
             application/json:
@@ -241,9 +301,33 @@ paths:
     get:
       operationId: get-my-posts
       summary: ""
-      parameters: []
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+        - name: page
+          in: query
+          required: true
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            default: 10
+            type: integer
       responses:
-        "200":
+        default:
           description: ""
           content:
             application/json:
@@ -339,6 +423,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/PostDto"
       tags: *a3
+    delete:
+      operationId: retieve-reaction-to-post
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: *a3
   /posts/{id}/media:
     post:
       operationId: upload-post-media
@@ -367,16 +468,43 @@ paths:
     post:
       operationId: upload
       parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MediaSingleDto"
       responses:
-        "201":
-          description: ""
+        default:
+          description: Media file uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaSupabaseDto"
+      tags: &a4
+        - media
   /media/files:
     post:
       operationId: uploadFiles
       parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MediaDto"
       responses:
-        "201":
-          description: ""
+        default:
+          description: Media files uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaSupabaseDto"
+      tags: *a4
   /comments:
     post:
       operationId: create-comment
@@ -391,7 +519,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: &a4
+      tags: &a5
         - comments
     get:
       operationId: get-comments
@@ -400,7 +528,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a4
+      tags: *a5
   /comments/{id}:
     get:
       operationId: get-comment
@@ -414,7 +542,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a4
+      tags: *a5
     patch:
       operationId: update-comment
       summary: ""
@@ -433,7 +561,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a4
+      tags: *a5
     delete:
       operationId: delete-comment
       summary: ""
@@ -446,7 +574,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a4
+      tags: *a5
 info:
   title: Orasul Meu
   description: Orasul Meu Swagger API
@@ -458,6 +586,24 @@ tags:
 servers: []
 components:
   schemas:
+    UserCreateDto:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        appleToken:
+          type: string
+        googleToken:
+          type: string
+        facebookToken:
+          type: string
+        socialProfilePictureUrl:
+          type: string
+      required:
+        - email
+        - username
     UserDto:
       type: object
       properties:
@@ -465,17 +611,14 @@ components:
           type: integer
         email:
           type: string
-        firstName:
-          type: string
-        lastName:
+        username:
           type: string
         socialProfilePictureUrl:
           type: string
       required:
         - id
         - email
-        - firstName
-        - lastName
+        - username
     UserProfileDto:
       type: object
       properties:
@@ -483,9 +626,7 @@ components:
           type: integer
         email:
           type: string
-        firstName:
-          type: string
-        lastName:
+        username:
           type: string
         socialProfilePictureUrl:
           type: string
@@ -496,10 +637,18 @@ components:
       required:
         - id
         - email
-        - firstName
-        - lastName
+        - username
         - reactionsCount
         - publicationsCount
+    UserUpdateDto:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        socialProfilePictureUrl:
+          type: string
     AppleApiBody:
       type: object
       properties:
@@ -539,9 +688,6 @@ components:
           $ref: "#/components/schemas/PointDto"
       required:
         - title
-        - content
-        - locationAddress
-        - location
     PostReactionsDto:
       type: object
       properties:
@@ -560,7 +706,7 @@ components:
     CommentDto:
       type: object
       properties: {}
-    Media:
+    MediaSupabaseDto:
       type: object
       properties:
         id:
@@ -572,12 +718,18 @@ components:
             - video
         url:
           type: string
+          description: public url of media file
+        bucketPath:
+          type: string
+          description: path to the media file from the bucket
         fileName:
           type: string
+          description: name of the file
       required:
         - id
         - type
         - url
+        - bucketPath
         - fileName
     PostDto:
       type: object
@@ -597,7 +749,7 @@ components:
         media:
           type: array
           items:
-            $ref: "#/components/schemas/Media"
+            $ref: "#/components/schemas/MediaSupabaseDto"
         locationAddress:
           type: string
         location:
@@ -643,6 +795,14 @@ components:
             format: binary
       required:
         - files
+    MediaSingleDto:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
     CreateCommentDto:
       type: object
       properties: {}

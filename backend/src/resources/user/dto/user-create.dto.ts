@@ -13,28 +13,25 @@ export class UserCreateDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ required: true })
-  firstName: string;
-
-  @AutoMap()
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({ required: true })
-  lastName: string;
+  username: string;
 
   @AutoMap()
   @IsString()
+  @IsOptional()
   @ApiProperty({ required: false })
-  apple_token?: string;
+  appleToken?: string;
 
   @AutoMap()
   @IsString()
+  @IsOptional()
   @ApiProperty({ required: false })
-  google_token?: string;
+  googleToken?: string;
 
   @AutoMap()
   @IsString()
+  @IsOptional()
   @ApiProperty({ required: false })
-  facebook_token?: string;
+  facebookToken?: string;
 
   @AutoMap()
   @IsOptional()
