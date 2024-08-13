@@ -129,7 +129,7 @@ export class PostController {
 
   @Delete(':id/react')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiOperation({ operationId: 'retieve-reaction-to-post' })
+  @ApiOperation({ operationId: 'retrieve-reaction-to-post' })
   @ApiResponse({ type: PostDto })
   retrieveReaction(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.postService.retrieveReaction(id, req.user.id);
