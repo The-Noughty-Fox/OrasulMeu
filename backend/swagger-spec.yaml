@@ -247,6 +247,47 @@ paths:
                   limit:
                     type: number
       tags: *a3
+  /posts/search:
+    get:
+      operationId: get-posts-by-phrase
+      summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+        - name: phrase
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  limit:
+                    type: number
+      tags: *a3
   /posts/reaction:
     get:
       operationId: get-all-posts-ordered-by-reactions-count

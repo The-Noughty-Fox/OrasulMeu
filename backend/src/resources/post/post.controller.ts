@@ -31,6 +31,7 @@ import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query
 import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
 import { mbToBytes } from '@/helpers/other';
+import { PostsByPhraseQueryDto } from './dto/posts-by-phrase-query.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -56,6 +57,15 @@ export class PostController {
   })
   findAll(@Query() paginationQuery: PaginationQueryDto, @Req() req) {
     return this.postService.findAll(paginationQuery, req.user.id);
+  }
+
+  @Get('search')
+  @ApiOperation({ operationId: 'get-posts-by-phrase' })
+  @ApiResponse({
+    schema: getPaginationSchema(PostDto),
+  })
+  findByPhrase(@Query() query: PostsByPhraseQueryDto, @Req() req) {
+    return this.postService.findByPhrase(query, req.user.id);
   }
 
   @Get('reaction')
