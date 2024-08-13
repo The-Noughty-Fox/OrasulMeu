@@ -9,6 +9,7 @@ import {
   UseGuards,
   ParseIntPipe,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
@@ -84,8 +85,18 @@ export class UserController {
   @Delete()
   @ApiOperation({ operationId: 'delete-user' })
   @ApiResponse({ status: 200 })
-  remove(@Req() req) {
-    return this.userService.remove(req.user.id);
+  async remove(@Req() req, @Res() res) {
+    const result = await this.userService.remove(req.user.id);
+
+    if (result) {
+      res.cookie('access_token', '', {
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 0,
+      });
+    }
+
+    return res.status(200).send(result);
   }
 
   // NOT IMPLEMENTED YET

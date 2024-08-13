@@ -46,6 +46,7 @@ export class PostDto {
   media?: MediaSupabaseDto[];
 
   @AutoMap()
+  @ApiProperty({ type: Date })
   createdAt: Date;
 
   @AutoMap()
