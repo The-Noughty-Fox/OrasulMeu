@@ -8,11 +8,10 @@ import {
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { mbToBytes } from '@/helpers/other';
 import { JwtAuthGuard } from '../auth/passport/guards';
 import { MediaSupabaseDto } from './dto/media-supabase.dto';
-import { MediaDto, MediaSingleDto } from './dto/media.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('media')
@@ -22,7 +21,6 @@ export class MediaController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: MediaSingleDto })
   @ApiResponse({
     description: 'Media file uploaded successfully',
     type: MediaSupabaseDto,
@@ -39,7 +37,6 @@ export class MediaController {
 
   @Post('files')
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: MediaDto })
   @ApiResponse({
     description: 'Media files uploaded successfully',
     type: MediaSupabaseDto,

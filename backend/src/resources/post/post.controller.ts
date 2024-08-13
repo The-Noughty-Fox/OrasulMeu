@@ -27,7 +27,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
-import { MediaDto } from '@/resources/media/dto/media.dto';
 import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
 import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
@@ -137,7 +136,6 @@ export class PostController {
 
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiBody({ type: MediaDto })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiResponse({ type: PostDto })
   @ApiConsumes('multipart/form-data')
