@@ -87,12 +87,10 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         }
     }
 
-    var isPinVisible: Boolean by remember { mutableStateOf(false) }
     val locationRequester = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
         if (results.all { it.value }) {
-            isPinVisible = true
             locationClient.getLastLocation()
         } else {
             context.showToast("Please provide location permissions")
@@ -115,9 +113,9 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         }
     }
 
-    LaunchedEffect(state.address) {
+    LaunchedEffect(state.address, state.currentPoint) {
         createPostViewModel.event.send(
-            CreatePostContract.Event.SetAddress(state.address)
+            CreatePostContract.Event.SetAddress(state.address, state.currentPoint)
         )
     }
 
@@ -243,12 +241,14 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
 @Composable
 private fun PinView(modifier: Modifier, address: String) {
     Column(modifier = modifier) {
-        Surface(
-            color = Color.White,
-            shape = RoundedCornerShape(10.dp),
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-        ) {
-            Text(text = address, modifier = Modifier.padding(horizontal = 24.dp))
+        if (address.isNotEmpty()) {
+            Surface(
+                color = Color.White,
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(text = address, modifier = Modifier.padding(horizontal = 24.dp))
+            }
         }
 
         Image(

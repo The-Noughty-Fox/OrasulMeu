@@ -226,7 +226,7 @@ private fun Preview() = OrasulMeuTheme {
         avatarImageUrl = "test",
         postCount = 42,
         reactionsCount = 112,
-        isEditionModeEnabled = isEditionModeEnabled,
+        isEditionModeEnabled = false,
         onEditPress = { isEditionModeEnabled = true },
         onChangeImagePress = {},
         onNameTextChange = {}

@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.navigation.LocalMainNavigator
+import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
 fun CreatePostMediaController(viewModel: CreatePostViewModel) {
 
     val navigator = LocalCreatePostNavigator.current
-    val mainNavigator = LocalMainNavigator.current
+    val rootNavigator = LocalRootNavigator.current
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -50,6 +51,8 @@ fun CreatePostMediaController(viewModel: CreatePostViewModel) {
                     is CreatePostContract.Action.ShowToast -> {
                         context.showToast(action.msg)
                     }
+
+                    CreatePostContract.Action.GoBack -> rootNavigator.navigateUp()
                 }
             }
         }
@@ -63,7 +66,7 @@ fun CreatePostMediaController(viewModel: CreatePostViewModel) {
         },
         sendNavEvent = { event ->
             when (event) {
-                NavEvent.GoBack -> mainNavigator.navigateUp()
+                NavEvent.GoBack -> rootNavigator.navigateUp()
                 NavEvent.Camera -> navigator.navigate(CreatePostDestinations.CameraScreen)
                 NavEvent.CreatePost -> navigator.navigate(CreatePostDestinations.CreatePostScreen)
                 else -> Unit

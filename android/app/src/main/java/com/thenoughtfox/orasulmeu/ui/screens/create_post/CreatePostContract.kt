@@ -1,6 +1,7 @@
 package com.thenoughtfox.orasulmeu.ui.screens.create_post
 
 import android.net.Uri
+import com.mapbox.geojson.Point
 
 interface CreatePostContract {
     data class State(
@@ -11,7 +12,8 @@ interface CreatePostContract {
         val description: String = "",
         val image: Uri? = null,
         val address: String = "",
-        val removedUri: Uri? = null
+        val removedUri: Uri? = null,
+        val currentPoint: Point = Point.fromLngLat(0.0, 0.0),
     )
 
     sealed class Event {
@@ -21,7 +23,7 @@ interface CreatePostContract {
         data class PickImages(val uris: List<Uri>) : Event()
         data class SelectImage(val image: Uri) : Event()
         data class RemoveImage(val image: Uri) : Event()
-        data class SetAddress(val address: String) : Event()
+        data class SetAddress(val address: String, val point: Point) : Event()
         data class ShowAlert(val uri: Uri) : Event()
         data object DismissAlert : Event()
     }
@@ -36,5 +38,6 @@ interface CreatePostContract {
 
     sealed class Action {
         data class ShowToast(val msg: String) : Action()
+        data object GoBack : Action()
     }
 }

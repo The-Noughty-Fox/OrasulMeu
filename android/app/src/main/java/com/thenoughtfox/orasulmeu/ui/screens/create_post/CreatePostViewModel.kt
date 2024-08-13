@@ -26,6 +26,8 @@ import org.openapitools.client.models.CreatePostDto
 import org.openapitools.client.models.PointDto
 import javax.inject.Inject
 
+private const val FILES_FORM_DATA = "files"
+
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val postsApi: PostsApi,
@@ -53,7 +55,7 @@ class CreatePostViewModel @Inject constructor(
                 is Event.PickImages -> addImages(event.uris)
                 is Event.SelectImage -> _state.update { it.copy(image = event.image) }
                 is Event.SetAddress -> {
-                    _state.update { it.copy(address = event.address) }
+                    _state.update { it.copy(address = event.address, currentPoint = event.point) }
                 }
 
                 is Event.RemoveImage -> removeImage(event.image)
@@ -88,7 +90,10 @@ class CreatePostViewModel @Inject constructor(
             title = state.value.title,
             content = state.value.description,
             locationAddress = state.value.address,
-            location = PointDto(latitude = 0.0, longitude = 0.0)
+            location = PointDto(
+                latitude = state.value.currentPoint.latitude(),
+                longitude = state.value.currentPoint.longitude()
+            ) // @TODO @lsimonenco This is required param ???
         )
 
         postsApi.createPost(post)
@@ -104,10 +109,11 @@ class CreatePostViewModel @Inject constructor(
         val parts = state.value.images.map { uri ->
             val path =
                 getRealPathFromURI(contentUri = uri, context = application.applicationContext)
-            if (path != null) {
-                toMultiPart(path, "files", MimeType.IMAGE.mimeTypes.first())
+
+            if (path.isNullOrEmpty()) {
+                toMultiPart(uri, FILES_FORM_DATA, MimeType.IMAGE.mimeTypes.first())
             } else {
-                toMultiPart(uri, "files", MimeType.IMAGE.mimeTypes.first())
+                toMultiPart(path, FILES_FORM_DATA, MimeType.IMAGE.mimeTypes.first())
             }
         }
 
@@ -115,6 +121,7 @@ class CreatePostViewModel @Inject constructor(
             .toOperationResult { it }
             .onSuccess {
                 _state.update { it.copy(isLoading = false) }
+                _action.emit(Action.GoBack)
             }
             .onError {
                 _state.update { it.copy(isLoading = false) }

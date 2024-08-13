@@ -30,24 +30,23 @@ import kotlinx.serialization.Serializable
 interface MainGraphDestinations {
 
     @Serializable
-    object CreatePostScreen
+    object HomeScreen : MainGraphDestinations
 
     @Serializable
-    object HomeScreen
+    object SearchPostsScreen : MainGraphDestinations
 
     @Serializable
-    object SearchPostsScreen
-
-    @Serializable
-    object ProfileScreen
+    object ProfileScreen : MainGraphDestinations
 }
 
 @Composable
 fun MainGraph() {
     val navController = rememberNavController()
+
     CompositionLocalProvider(LocalMainNavigator provides navController) {
         var currentNavItem by remember { mutableStateOf(BottomNavTabs.Map) }
         var isBottomNavBarVisible by remember { mutableStateOf(true) }
+        val rootNavigator = LocalRootNavigator.current
 
         Scaffold(
             topBar = {},
@@ -67,9 +66,11 @@ fun MainGraph() {
                                     MainGraphDestinations.HomeScreen
                                 )
 
-                                BottomNavTabs.Create.name -> navController.navigate(
-                                    MainGraphDestinations.CreatePostScreen
-                                )
+                                BottomNavTabs.Create.name -> {
+                                    rootNavigator.navigate(
+                                        RootNavDestinations.CreatePostScreen
+                                    )
+                                }
 
                                 BottomNavTabs.Profile.name -> navController.navigate(
                                     MainGraphDestinations.ProfileScreen
@@ -103,15 +104,6 @@ fun MainGraph() {
                         SearchPostsController()
 
                         LaunchedEffect(Unit) {
-                            isBottomNavBarVisible = false
-                        }
-                    }
-
-                    composable<MainGraphDestinations.CreatePostScreen> {
-                        CreatePostGraph()
-
-                        LaunchedEffect(Unit) {
-                            currentNavItem = BottomNavTabs.Create
                             isBottomNavBarVisible = false
                         }
                     }

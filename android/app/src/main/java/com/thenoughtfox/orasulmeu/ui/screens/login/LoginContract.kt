@@ -7,8 +7,7 @@ import com.thenoughtfox.orasulmeu.R
 data class State(
     val isLoadingGoogle: Boolean = false,
     val isLoadingFacebook: Boolean = false,
-    val isError: Boolean = false,
-    val isSuccess: Boolean = false
+    val isError: Boolean = false
 )
 
 sealed class Event {

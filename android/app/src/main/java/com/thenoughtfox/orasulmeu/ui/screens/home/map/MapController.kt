@@ -4,10 +4,15 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,10 +51,10 @@ fun MapController(homeViewModel: HomeViewModel) {
 
     val state = homeViewModel.state.collectAsStateWithLifecycle().value
 
-    val viewModel: MapViewModel = hiltViewModel()
+    val mapViewModel: MapViewModel = hiltViewModel()
 
     val sendEvent: (MapContract.Event) -> Unit = {
-        scope.launch { viewModel.event.send(it) }
+        scope.launch { mapViewModel.event.send(it) }
     }
 
     val locationClient: LocationClient = remember {
@@ -80,7 +85,7 @@ fun MapController(homeViewModel: HomeViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.action.collect { action ->
+            mapViewModel.action.collect { action ->
                 when (action) {
                     is MapContract.Action.MoveToLocation -> {
                         mapView.redirectToLocation(action.point)
@@ -95,11 +100,7 @@ fun MapController(homeViewModel: HomeViewModel) {
     LaunchedEffect(state) {
         if (mapView.isAttachedToWindow) {
             mapView.clearPlaces()
-            state.postsToShow.map {
-                mapView.addPost(post = it, onPostClick = {
-                    postToShow = it
-                })
-            }
+            mapView.addPosts(state.postsToShow)
         }
     }
 
@@ -114,6 +115,10 @@ fun MapController(homeViewModel: HomeViewModel) {
                                 Manifest.permission.ACCESS_COARSE_LOCATION,
                             )
                         )
+                    }
+
+                    onPostClick { post ->
+                        postToShow = post
                     }
                 }
             },
@@ -134,7 +139,10 @@ fun MapController(homeViewModel: HomeViewModel) {
         }
 
         if (postToShow != null) {
-            ModalBottomSheet(onDismissRequest = { postToShow = null }) {
+            ModalBottomSheet(
+                windowInsets = BottomSheetDefaults.windowInsets.only(WindowInsetsSides.Bottom),
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                onDismissRequest = { postToShow = null }) {
                 postToShow?.toState()?.let {
                     PostView(state = it) { action ->
                         when (action) {

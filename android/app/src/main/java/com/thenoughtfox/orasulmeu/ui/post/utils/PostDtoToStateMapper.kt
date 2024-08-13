@@ -1,18 +1,20 @@
 package com.thenoughtfox.orasulmeu.ui.post.utils
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import org.openapitools.client.models.PostDto
 import org.openapitools.client.models.PostReactionsDto
 
 object PostDtoToStateMapper {
     fun PostDto.toState(): PostContract.State = PostContract.State(
-        id = this.id,
+        id = this.id ?: 0,
         author = "${this.author.firstName} ${this.author.lastName}",
-        title = this.title,
-        textContent = this.content,
-        media = this.media,
+        title = this.title ?: "",
+        textContent = this.content ?: "",
+        media = this.media ?: listOf(),
         reaction = this.reactions.mapReaction(),
-        address = this.locationAddress,
+        address = this.locationAddress ?: "",
         time = "no time yet" // todo get from backend
     )
 
@@ -28,5 +30,21 @@ object PostDtoToStateMapper {
             likes = this.like,
             dislikes = this.dislike
         )
+    }
+
+
+    fun PostDto.toJsonElement(): JsonElement {
+        val gson = Gson()
+        val jsonString = gson.toJson(this)
+        return gson.fromJson(jsonString, JsonElement::class.java)
+    }
+
+    fun JsonElement.toPostDto(): PostDto? {
+        return try {
+            val gson = Gson()
+            gson.fromJson(this, PostDto::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
 }

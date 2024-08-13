@@ -33,10 +33,6 @@ class LoginViewModel @Inject constructor(
     val action: SharedFlow<Action> = _action
 
     init {
-        if (userSharedPrefs.user != null) {
-            _state.update { it.copy(isSuccess = true) }
-        }
-
         handleEvents()
     }
 
@@ -49,7 +45,6 @@ class LoginViewModel @Inject constructor(
                         SingInType.Facebook -> _state.update { it.copy(isLoadingFacebook = true) }
                     }
 
-                    _state.update { it.copy(isSuccess = true) }
                     _action.emit(Action.Auth(event.type))
                 }
 
@@ -67,7 +62,8 @@ class LoginViewModel @Inject constructor(
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
                                             lastName = it.lastName
                                         )
-                                    _state.update { s -> s.copy(isSuccess = true) }
+
+                                    _action.emit(Action.Proceed)
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))
@@ -86,7 +82,8 @@ class LoginViewModel @Inject constructor(
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
                                             lastName = it.lastName
                                         )
-                                    _state.update { s -> s.copy(isSuccess = true) }
+
+                                    _action.emit(Action.Proceed)
                                 }
                                 .onError {
                                     _action.emit(Action.ShowToast(it))

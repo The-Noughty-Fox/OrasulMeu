@@ -3,10 +3,16 @@ package com.thenoughtfox.orasulmeu.ui.screens.create_post.map.view
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.findViewTreeCompositionContext
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import com.google.gson.Gson
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -18,24 +24,30 @@ import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationSourceOptions
 import com.mapbox.maps.plugin.annotation.ClusterOptions
 import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorBearingChangedListener
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import com.thenoughtfox.orasulmeu.ui.post.PostMapPin
+import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toJsonElement
+import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toPostDto
 import com.thenoughtfox.orasulmeu.utils.generateSmallIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.PostDto
-
 
 class MapboxMapView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -47,7 +59,9 @@ class MapboxMapView @JvmOverloads constructor(
     private var pointAnnotationManager: PointAnnotationManager? = null
 
     private val parentJob = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.Main + parentJob)
+    private val scope = CoroutineScope(Dispatchers.IO + parentJob)
+
+    private var onPostClick: ((PostDto) -> Unit)? = null
 
     companion object {
         private const val ZOOM_LEVEL = 15.0
@@ -84,6 +98,14 @@ class MapboxMapView @JvmOverloads constructor(
                     )
                 )
             )
+
+            pointAnnotationManager?.addClickListener(OnPointAnnotationClickListener { annotation ->
+                val post = annotation.getData()?.toPostDto()
+                    ?: return@OnPointAnnotationClickListener false
+
+                onPostClick?.invoke(post)
+                true
+            })
         }
     }
 
@@ -132,36 +154,56 @@ class MapboxMapView @JvmOverloads constructor(
         }
     }
 
-    data class Place(val point: Point, val bitmap: Bitmap)
+    fun addPosts(posts: List<PostDto>) = scope.launch {
+        val pointAnnotationOptions = posts.map { post ->
+            val point = Point.fromLngLat(post.location.longitude, post.location.latitude)
+            val imageUrl = post.media.firstOrNull()?.url
+            val image: Drawable? = if (!imageUrl.isNullOrEmpty()) {
+                val request = ImageRequest.Builder(context)
+                    .data(post.media.firstOrNull()?.url ?: "")
+                    .allowHardware(false)
+                    .build()
 
-    fun addPlaces(places: List<Place>) = scope.launch {
-        val pointAnnotationOptions = places.map { place ->
-            PointAnnotationOptions()
-                .withPoint(place.point)
-                .withIconImage(place.bitmap.generateSmallIcon(context, 30, 36))
+                ImageLoader(context).execute(request).drawable
+            } else {
+                null
+            }
+
+            if (image == null) {
+                null
+            } else {
+                val bitmap = PinUtils.maskDrawableToAnother(context, image)
+                PointAnnotationOptions()
+                    .withData(post.toJsonElement())
+                    .withPoint(point)
+                    .withIconImage(bitmap.generateSmallIcon(context, 36, 48))
+            }
         }
 
-        pointAnnotationManager?.create(pointAnnotationOptions)
+        pointAnnotationManager?.create(pointAnnotationOptions.filterNotNull())
     }
 
+    fun onPostClick(onPostClick: (PostDto) -> Unit) {
+        this.onPostClick = onPostClick
+    }
 
     fun addPost(post: PostDto, onPostClick: () -> Unit) = scope.launch {
-            val postPoint = post.location.let { Point.fromLngLat(it.longitude, it.latitude) }
-            viewAnnotationManager.addViewAnnotation(
-                view = ComposeView(context).apply {
-                    layoutParams = LayoutParams(36.dpToPixels(), 48.dpToPixels())
-                    setParentCompositionContext(this@MapboxMapView.findViewTreeCompositionContext())
-                    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-                    setContent {
-                        PostMapPin(postDto = post, onClick = onPostClick)
-                    }
-                },
-                options = viewAnnotationOptions {
-                    geometry(postPoint)
-                    allowOverlap(true)
+        val postPoint = post.location.let { Point.fromLngLat(it.longitude, it.latitude) }
+        viewAnnotationManager.addViewAnnotation(
+            view = ComposeView(context).apply {
+                layoutParams = LayoutParams(36.dpToPixels(), 48.dpToPixels())
+                setParentCompositionContext(this@MapboxMapView.findViewTreeCompositionContext())
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    PostMapPin(postDto = post, onClick = onPostClick)
                 }
-            )
-        }
+            },
+            options = viewAnnotationOptions {
+                geometry(postPoint)
+                allowOverlap(true)
+            }
+        )
+    }
 
 
     fun clearPlaces() {
