@@ -47,7 +47,8 @@ paths:
                   $ref: "#/components/schemas/UserDto"
       tags: *a1
     patch:
-      operationId: update
+      operationId: edit-user
+      summary: ""
       parameters: []
       requestBody:
         required: true
@@ -62,6 +63,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
+      tags: *a1
+    delete:
+      operationId: delete-user
+      summary: ""
+      parameters: []
+      responses:
+        "200":
+          description: ""
       tags: *a1
   /users/profile/{id}:
     get:
@@ -84,7 +93,8 @@ paths:
       tags: *a1
   /users/{id}:
     get:
-      operationId: findOne
+      operationId: find-user-by-id
+      summary: ""
       parameters:
         - name: id
           required: true
@@ -750,6 +760,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/MediaSupabaseDto"
+        createdAt:
+          format: date-time
+          type: string
         locationAddress:
           type: string
         location:
@@ -762,6 +775,7 @@ components:
         - reactions
         - comments
         - media
+        - createdAt
         - locationAddress
         - location
     UpdatePostDto:
