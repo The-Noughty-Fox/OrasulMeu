@@ -23,7 +23,6 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -53,7 +52,6 @@ export class PostController {
 
   @Get()
   @ApiOperation({ operationId: 'get-all-posts' })
-  @ApiQuery({ type: PaginationQueryDto })
   @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
@@ -63,7 +61,6 @@ export class PostController {
 
   @Get('reaction')
   @ApiOperation({ operationId: 'get-all-posts-ordered-by-reactions-count' })
-  @ApiQuery({ type: PaginationQueryDto })
   @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
@@ -79,7 +76,6 @@ export class PostController {
 
   @Get('my')
   @ApiOperation({ operationId: 'get-my-posts' })
-  @ApiQuery({ type: PaginationQueryDto })
   @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
