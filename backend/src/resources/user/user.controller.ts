@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
   ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
@@ -60,6 +61,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @ApiOperation({ operationId: 'find-user-by-id' })
   @ApiResponse({
     description: 'User found',
     type: UserDto,
@@ -70,6 +72,7 @@ export class UserController {
   }
 
   @Patch()
+  @ApiOperation({ operationId: 'edit-user' })
   @ApiResponse({
     description: 'User updated',
     type: UserDto,
@@ -78,10 +81,14 @@ export class UserController {
     return this.userService.update(req.user.id, updateUserDto);
   }
 
-  // NOT IMPLEMENTED YET
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {}
+  @Delete()
+  @ApiOperation({ operationId: 'delete-user' })
+  @ApiResponse({ status: 200 })
+  remove(@Req() req) {
+    return this.userService.remove(req.user.id);
+  }
 
+  // NOT IMPLEMENTED YET
   // @Get('search')
   // search() {
   //   return this.userService.findAll();

@@ -157,4 +157,18 @@ export class UserService {
       reactionsCount: user.reactionsCount,
     };
   }
+
+  async remove(id: number): Promise<boolean> {
+    const { error } = await this.supabaseService
+      .getClient()
+      .from('custom_users')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new InternalServerErrorException('Could not delete user');
+    }
+
+    return true;
+  }
 }
