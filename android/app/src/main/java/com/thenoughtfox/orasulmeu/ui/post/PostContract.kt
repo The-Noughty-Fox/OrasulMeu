@@ -1,6 +1,6 @@
 package com.thenoughtfox.orasulmeu.ui.post
 
-import org.openapitools.client.models.Media
+import org.openapitools.client.models.MediaSupabaseDto
 
 interface PostContract {
 
@@ -9,7 +9,7 @@ interface PostContract {
         val author: String = "",
         val title: String = "",
         val textContent: String = "",
-        val media: List<Media> = emptyList(),
+        val media: List<MediaSupabaseDto> = emptyList(),
         val reaction: Reaction = Reaction(Reactions.NOTHING),
         val address: String = "",
         val time: String = ""

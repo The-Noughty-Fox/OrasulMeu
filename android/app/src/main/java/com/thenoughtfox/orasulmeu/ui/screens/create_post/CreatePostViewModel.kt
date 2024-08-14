@@ -90,10 +90,14 @@ class CreatePostViewModel @Inject constructor(
             title = state.value.title,
             content = state.value.description,
             locationAddress = state.value.address,
-            location = PointDto(
-                latitude = state.value.currentPoint.latitude(),
-                longitude = state.value.currentPoint.longitude()
-            ) // @TODO @lsimonenco This is required param ???
+            location = if (state.value.currentPoint == null) {
+                null
+            } else {
+                PointDto(
+                    latitude = state.value.currentPoint!!.latitude(),
+                    longitude = state.value.currentPoint!!.longitude()
+                )
+            }
         )
 
         postsApi.createPost(post)
@@ -116,16 +120,16 @@ class CreatePostViewModel @Inject constructor(
                 toMultiPart(path, FILES_FORM_DATA, MimeType.IMAGE.mimeTypes.first())
             }
         }
-
-        postsApi.uploadPostMedia(id = id, parts)
-            .toOperationResult { it }
-            .onSuccess {
-                _state.update { it.copy(isLoading = false) }
-                _action.emit(Action.GoBack)
-            }
-            .onError {
-                _state.update { it.copy(isLoading = false) }
-                _action.emit(Action.ShowToast(it))
-            }
+        //TODO ARRAY
+//        postsApi.uploadPostMedia(id = id, parts)
+//            .toOperationResult { it }
+//            .onSuccess {
+//                _state.update { it.copy(isLoading = false) }
+//                _action.emit(Action.GoBack)
+//            }
+//            .onError {
+//                _state.update { it.copy(isLoading = false) }
+//                _action.emit(Action.ShowToast(it))
+//            }
     }
 }

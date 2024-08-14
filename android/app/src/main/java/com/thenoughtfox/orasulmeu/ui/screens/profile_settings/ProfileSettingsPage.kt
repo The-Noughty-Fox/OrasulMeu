@@ -101,8 +101,7 @@ fun ProfileSettingsPage(
 }
 
 private fun contactUs(context: Context) {
-    //TODO replace with real email
-    val emailUri = Uri.parse("mailto:email_to")
+    val emailUri = Uri.parse("mailto:alex@thenoughtyfox.com")
     val intent = Intent(Intent.ACTION_SENDTO).apply {
         data = emailUri
         putExtra(Intent.EXTRA_SUBJECT, "email_subject")

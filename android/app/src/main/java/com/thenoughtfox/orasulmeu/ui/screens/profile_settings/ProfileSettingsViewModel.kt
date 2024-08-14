@@ -8,6 +8,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsCon
 import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,22 +56,15 @@ class ProfileSettingsViewModel @Inject constructor(
         _action.emit(Action.Logout)
     }
 
-    private fun deleteAccount() {
-        //TODO
-        //Not working --> DELETE http://192.168.0.34:8080/users/23
-        //19:14:45.707  I  --> END DELETE
-        //19:14:45.908  I  <-- 404 Not Found http://192.168.0.34:8080/users/23 (201ms)
-        //{"message":"Cannot DELETE /users/23","error":"Not Found","statusCode":404}
-        viewModelScope.launch {
-            val id = userSharedPrefs.user?.id ?: return@launch
-            usersApi.remove(id = id.toString())
-                .toOperationResult { }
-                .onSuccess {
-                    logout()
-                }
-                .onError {
-                    _state.update { it.copy(isError = true) }
-                }
-        }
+    private fun deleteAccount() = viewModelScope.launch(Dispatchers.IO) {
+        usersApi.deleteUser()
+            .toOperationResult { }
+            .onSuccess {
+                logout()
+            }
+            .onError {
+                _state.update { it.copy(isError = true) }
+            }
     }
+
 }

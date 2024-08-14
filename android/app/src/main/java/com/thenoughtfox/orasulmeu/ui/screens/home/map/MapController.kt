@@ -1,10 +1,10 @@
 package com.thenoughtfox.orasulmeu.ui.screens.home.map
 
 import android.Manifest
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,46 +44,14 @@ import com.thenoughtfox.orasulmeu.utils.toPoint
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.PostDto
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapController(homeViewModel: HomeViewModel) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    val state = homeViewModel.state.collectAsStateWithLifecycle().value
-
+    val state by homeViewModel.state.collectAsStateWithLifecycle()
     val mapViewModel: MapViewModel = hiltViewModel()
-
-    val sendEvent: (MapContract.Event) -> Unit = {
-        scope.launch { mapViewModel.event.send(it) }
-    }
-
-    val locationClient: LocationClient = remember {
-        LocationClient(context) { location ->
-            sendEvent(MapContract.Event.NavigateToUser(location.toPoint()))
-        }
-    }
-
-    val locationRequester = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { results ->
-        if (results.all { it.value }) {
-            locationClient.getLastLocation()
-        } else {
-            context.showToast("Please provide location permissions")
-        }
-    }
-
-
-    val mapView = remember {
-        MapboxMapView(context)
-    }
-
-    var postToShow: PostDto? by remember {
-        mutableStateOf(null)
-    }
-
+    val mapView = remember { MapboxMapView(context) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             mapViewModel.action.collect { action ->
@@ -100,7 +69,39 @@ fun MapController(homeViewModel: HomeViewModel) {
     LaunchedEffect(state) {
         if (mapView.isAttachedToWindow) {
             mapView.clearPlaces()
-            mapView.addPosts(state.postsToShow)
+            mapView.addPosts(state.popularPosts)
+        }
+    }
+
+    MapView(mapView, context, mapViewModel, homeViewModel)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapView(
+    mapView: MapboxMapView,
+    context: Context,
+    mapViewModel: MapViewModel,
+    homeViewModel: HomeViewModel
+) {
+    val scope = rememberCoroutineScope()
+    var postToShow: PostDto? by remember { mutableStateOf(null) }
+
+    val locationClient: LocationClient = remember {
+        LocationClient(context) { location ->
+            scope.launch {
+                mapViewModel.event.send(MapContract.Event.NavigateToUser(location.toPoint()))
+            }
+        }
+    }
+
+    val locationRequester = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        if (results.all { it.value }) {
+            locationClient.getLastLocation()
+        } else {
+            context.showToast("Please provide location permissions")
         }
     }
 
@@ -167,4 +168,20 @@ fun MapController(homeViewModel: HomeViewModel) {
             }
         }
     }
+}
+
+@Composable
+@Preview
+private fun PreviewMapView() {
+    val context = LocalContext.current
+    val mapView = remember {
+        MapboxMapView(context)
+    }
+
+    MapView(
+        mapView = mapView,
+        context = context,
+        mapViewModel = hiltViewModel(),
+        homeViewModel = hiltViewModel()
+    )
 }

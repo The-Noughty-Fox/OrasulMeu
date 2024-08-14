@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,7 +21,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -33,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,17 +56,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListSorting
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
-/**
- * @author Knurenko Bogdan 14.06.2024
- */
 @Composable
 fun PostListScreen(
     state: HomeContract.State,
@@ -96,32 +98,64 @@ fun PostListScreen(
                 )
             }
         } else {
+            val popularListState = rememberLazyListState()
+            val newListState = rememberLazyListState()
+            val scrollState by rememberUpdatedState(
+                newValue = if (state.postListSorting == PostListSorting.Popular) {
+                    popularListState
+                } else {
+                    newListState
+                }
+            )
+
+            val posts = if (state.postListSorting == PostListSorting.Popular) {
+                state.paginationPopularPosts.collectAsLazyPagingItems()
+            } else {
+                state.paginationNewPosts.collectAsLazyPagingItems()
+            }
+
             LazyColumn(
+                state = scrollState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .statusBarsPadding()
+                    .padding(top = padding.calculateTopPadding())
                     .background(color = colorResource(R.color.background_color)),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(state.postsToShow) {
-                    PostView(state = it.toState()) { e ->
-                        when (e) {
-                            PostContract.Action.ConfirmReport -> {
-                                sendEvent(HomeContract.Event.SendReport(it.id))
-                            }
+                items(
+                    posts.itemCount,
+                    key = posts.itemKey { it.id }
+                    //Fetch the message at the specific index from lazyPagingItems.
+                ) { index ->
+                    val post = posts[index]
+                    // Display the message or a placeholder.
+                    if (post != null) {
+                        PostView(state = post.toState()) { action ->
+                            when (action) {
+                                PostContract.Action.ConfirmReport -> {
+                                    sendEvent(HomeContract.Event.SendReport(post.id))
+                                }
 
-                            PostContract.Action.Dislike -> {
-                                sendEvent(HomeContract.Event.DislikePost(it.id))
-                            }
+                                PostContract.Action.Dislike -> {
+                                    sendEvent(HomeContract.Event.DislikePost(post.id))
+                                }
 
-                            PostContract.Action.Like -> {
-                                sendEvent(HomeContract.Event.LikePost(it.id))
-                            }
+                                PostContract.Action.Like -> {
+                                    sendEvent(HomeContract.Event.LikePost(post.id))
+                                }
 
-                            PostContract.Action.RevokeReaction -> {
-                                sendEvent(HomeContract.Event.RevokeReaction(it.id))
+                                PostContract.Action.RevokeReaction -> {
+                                    sendEvent(HomeContract.Event.RevokeReaction(post.id))
+                                }
                             }
+                        }
+                    } else {
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        ) {
+                            CircularProgressIndicator()
                         }
                     }
                 }
@@ -148,8 +182,8 @@ fun PostListScreen(
 
 @Composable
 private fun TopBar(
-    currentSorting: HomeContract.PostListSorting,
-    onChangeSorting: (HomeContract.PostListSorting) -> Unit = {},
+    currentSorting: PostListSorting,
+    onChangeSorting: (PostListSorting) -> Unit = {},
     onSearchClick: () -> Unit = {},
 ) {
     ConstraintLayout(
@@ -166,11 +200,11 @@ private fun TopBar(
             },
             selectedIndex = currentSorting.ordinal,
             items = listOf(
-                HomeContract.PostListSorting.Popular,
-                HomeContract.PostListSorting.New
+                PostListSorting.Popular,
+                PostListSorting.New
             ),
             onSelectionChange = {
-                val newSorting = HomeContract.PostListSorting.entries[it]
+                val newSorting = PostListSorting.entries[it]
                 onChangeSorting(newSorting)
             }
         )
@@ -200,7 +234,7 @@ private fun TopBar(
 private fun TextSwitch(
     modifier: Modifier = Modifier,
     selectedIndex: Int,
-    items: List<HomeContract.PostListSorting>,
+    items: List<PostListSorting>,
     onSelectionChange: (Int) -> Unit
 ) {
     BoxWithConstraints(
@@ -274,8 +308,8 @@ private fun TextSwitch(
                         Text(
                             modifier = Modifier.padding(8.dp),
                             text = when (sortingType) {
-                                HomeContract.PostListSorting.Popular -> stringResource(R.string.post_list_sort_popular)
-                                HomeContract.PostListSorting.New -> stringResource(R.string.post_list_sort_new)
+                                PostListSorting.Popular -> stringResource(R.string.post_list_sort_popular)
+                                PostListSorting.New -> stringResource(R.string.post_list_sort_new)
                             },
                             fontSize = 13.sp,
                             color = OrasulMeuTheme.colors.onBackground,
@@ -303,7 +337,7 @@ private fun Preview() = OrasulMeuTheme {
     var state by remember {
         mutableStateOf(
             HomeContract.State(
-                postsToShow = PostPreviewPlaceholders.dummyPosts
+                popularPosts = PostPreviewPlaceholders.dummyPosts
             )
         )
     }

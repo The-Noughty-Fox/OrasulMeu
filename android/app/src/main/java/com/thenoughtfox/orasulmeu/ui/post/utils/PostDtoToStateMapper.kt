@@ -8,13 +8,13 @@ import org.openapitools.client.models.PostReactionsDto
 
 object PostDtoToStateMapper {
     fun PostDto.toState(): PostContract.State = PostContract.State(
-        id = this.id ?: 0,
-        author = "${this.author.firstName} ${this.author.lastName}",
-        title = this.title ?: "",
-        textContent = this.content ?: "",
-        media = this.media ?: listOf(),
+        id = this.id,
+        author = this.author.username,
+        title = this.title,
+        textContent = this.content,
+        media = this.media,
         reaction = this.reactions.mapReaction(),
-        address = this.locationAddress ?: "",
+        address = this.locationAddress,
         time = "no time yet" // todo get from backend
     )
 

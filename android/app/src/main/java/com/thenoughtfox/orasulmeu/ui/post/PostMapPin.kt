@@ -24,11 +24,12 @@ import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.coil.CoilImage
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
-import org.openapitools.client.models.Media
+import org.openapitools.client.models.MediaSupabaseDto
 import org.openapitools.client.models.PointDto
 import org.openapitools.client.models.PostDto
 import org.openapitools.client.models.PostReactionsDto
 import org.openapitools.client.models.UserDto
+import java.time.OffsetDateTime
 
 @Composable
 fun PostMapPin(postDto: PostDto, onClick: () -> Unit = {}) {
@@ -58,8 +59,7 @@ private fun Preview() = OrasulMeuTheme {
     val author = UserDto(
         id = 0,
         email = "test@gmail.com",
-        firstName = "John",
-        lastName = "Doe",
+        username = "John Doe",
         socialProfilePictureUrl = null
     )
     val dto = PostDto(
@@ -69,15 +69,17 @@ private fun Preview() = OrasulMeuTheme {
         id = 0,
         locationAddress = "31th August str. 24",
         media = listOf(
-            Media(
+            MediaSupabaseDto(
                 id = 0,
-                type = Media.Type.image,
+                type = MediaSupabaseDto.Type.image,
                 fileName = "",
+                bucketPath = "",
                 url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png"
             )
         ),
         reactions = PostReactionsDto(dislike = 2, like = 12, userReaction = null),
         title = "Some dummy title",
+        createdAt = OffsetDateTime.now(),
         location = PointDto(0.0, 0.0)
     )
     PostMapPin(postDto = dto)

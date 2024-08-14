@@ -1,11 +1,12 @@
 package com.thenoughtfox.orasulmeu.ui.post.utils
 
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
-import org.openapitools.client.models.Media
+import org.openapitools.client.models.MediaSupabaseDto
 import org.openapitools.client.models.PointDto
 import org.openapitools.client.models.PostDto
 import org.openapitools.client.models.PostReactionsDto
 import org.openapitools.client.models.UserDto
+import java.time.OffsetDateTime
 
 /**
  * @author Knurenko Bogdan 26.04.2024
@@ -17,8 +18,7 @@ object PostPreviewPlaceholders {
         content = "Loren ipsum",
         author = UserDto(
             email = "test@gmail.com",
-            firstName = "John",
-            lastName = "Doe",
+            username = "John Doe",
             id = 4
         ),
         comments = 4,
@@ -30,25 +30,29 @@ object PostPreviewPlaceholders {
             userReaction = null
         ),
         media = listOf(
-            Media(
+            MediaSupabaseDto(
                 id = 1,
-                type = Media.Type.image,
+                type = MediaSupabaseDto.Type.image,
                 url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png",
-                fileName = "filename"
+                fileName = "filename",
+                bucketPath = "",
             ),
-            Media(
+            MediaSupabaseDto(
                 id = 2,
-                type = Media.Type.image,
+                type = MediaSupabaseDto.Type.image,
                 url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png",
-                fileName = "filename"
+                fileName = "filename",
+                bucketPath = ""
             ),
-            Media(
+            MediaSupabaseDto(
                 id = 3,
-                type = Media.Type.image,
+                type = MediaSupabaseDto.Type.image,
                 url = "https://i.pinimg.com/originals/a9/21/5a/a9215adf9680895e8c609ea27421f4b0.png",
-                fileName = "filename"
+                fileName = "filename",
+                bucketPath = ""
             )
-        )
+        ),
+        createdAt = OffsetDateTime.now()
     )
 
     val dummyPosts = List(12) {
@@ -66,9 +70,27 @@ object PostPreviewPlaceholders {
         title = "Hello Luke",
         textContent = "Have you heard the story about lord Darth Plegas the Wise blah blah blah blah blah blah blah blah blah blah blah blah",
         media = listOf(
-            Media(id = 0, type = Media.Type.image, url = "test", fileName = "test.jpg"),
-            Media(id = 0, type = Media.Type.image, url = "test", fileName = "test.jpg"),
-            Media(id = 0, type = Media.Type.image, url = "test", fileName = "test.jpg")
+            MediaSupabaseDto(
+                id = 0,
+                type = MediaSupabaseDto.Type.image,
+                url = "test",
+                fileName = "test.jpg",
+                bucketPath = ""
+            ),
+            MediaSupabaseDto(
+                id = 0,
+                type = MediaSupabaseDto.Type.image,
+                url = "test",
+                fileName = "test.jpg",
+                bucketPath = ""
+            ),
+            MediaSupabaseDto(
+                id = 0,
+                type = MediaSupabaseDto.Type.image,
+                url = "test",
+                fileName = "test.jpg",
+                bucketPath = ""
+            )
         ),
         reaction = PostContract.Reaction(
             selectedReaction = PostContract.Reactions.LIKE, likes = 214, dislikes = 63

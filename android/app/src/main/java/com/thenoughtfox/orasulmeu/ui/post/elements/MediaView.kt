@@ -21,10 +21,10 @@ import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
-import org.openapitools.client.models.Media
+import org.openapitools.client.models.MediaSupabaseDto
 
 @Composable
-fun MediaView(mediaItem: Media, modifier: Modifier = Modifier) {
+fun MediaView(mediaItem: MediaSupabaseDto, modifier: Modifier = Modifier) {
     CoilImage(
         modifier = modifier,
         imageModel = { mediaItem.url },
@@ -60,11 +60,12 @@ fun MediaView(mediaItem: Media, modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun Preview() = OrasulMeuTheme {
-    val media = Media(
+    val media = MediaSupabaseDto(
         id = 0,
         fileName = "test",
-        type = Media.Type.image,
-        url = "https://placehold.co/600x400/png"
+        type = MediaSupabaseDto.Type.image,
+        url = "https://placehold.co/600x400/png",
+        bucketPath = ""
     )
 
     Box(

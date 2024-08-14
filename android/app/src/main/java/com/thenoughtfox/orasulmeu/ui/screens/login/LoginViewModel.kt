@@ -60,7 +60,7 @@ class LoginViewModel @Inject constructor(
                                             id = it.id,
                                             email = it.email,
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
-                                            lastName = it.lastName
+                                            userName = it.username
                                         )
 
                                     _action.emit(Action.Proceed)
@@ -80,7 +80,7 @@ class LoginViewModel @Inject constructor(
                                             id = it.id,
                                             email = it.email,
                                             socialProfilePictureUrl = it.socialProfilePictureUrl,
-                                            lastName = it.lastName
+                                            userName = it.username
                                         )
 
                                     _action.emit(Action.Proceed)

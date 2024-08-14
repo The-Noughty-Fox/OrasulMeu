@@ -31,7 +31,7 @@ class ProfileViewModel @Inject constructor(userSharedPrefs: UserSharedPrefs) : V
             _state.update {
                 it.copy(
                     isLoading = false,
-                    name = user.lastName ?: "empty name",
+                    name = user.userName ?: "empty name",
                     imageUrl = user.socialProfilePictureUrl,
                 )
             }

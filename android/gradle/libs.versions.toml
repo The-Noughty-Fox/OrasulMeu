@@ -25,6 +25,7 @@ coroutines = "1.8.0"
 lifecycleViewmodelCompose = "2.7.0"
 mapboxAndroidCore = "4.0.0"
 noughtyAuthenticationLibAndroid = "0.7"
+pagingCompose = "3.3.2"
 permission = "4.8.0"
 permission_ktx = "1.1.4"
 playServicesAuth = "21.0.0"
@@ -50,6 +51,7 @@ androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constr
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
 androidx-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding", version.ref = "uiViewbinding" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-video = { module = "io.coil-kt:coil-video", version.ref = "coilVideo" }

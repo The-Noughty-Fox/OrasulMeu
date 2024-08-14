@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -56,7 +57,8 @@ fun SearchPostsScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .background(color = colorResource(R.color.background_color)),
         topBar = {
             SearchTopBar(onBackPress = {
                 sendNavEvent(HomeContract.NavEvent.GoBack)
@@ -66,7 +68,6 @@ fun SearchPostsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = OrasulMeuTheme.colors.backgroundGrey)
                     .padding(padding)
             ) {
                 var searchText by remember { mutableStateOf("") }

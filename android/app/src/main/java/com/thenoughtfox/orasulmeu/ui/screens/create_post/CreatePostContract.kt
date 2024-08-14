@@ -13,7 +13,7 @@ interface CreatePostContract {
         val image: Uri? = null,
         val address: String = "",
         val removedUri: Uri? = null,
-        val currentPoint: Point = Point.fromLngLat(0.0, 0.0),
+        val currentPoint: Point? = null
     )
 
     sealed class Event {

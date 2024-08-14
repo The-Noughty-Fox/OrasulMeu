@@ -2,27 +2,35 @@ package com.thenoughtfox.orasulmeu.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.map
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.home.post_list.utils.CombinedPostsPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.models.PostDto
-import org.openapitools.client.models.PostReactionsDto
 import org.openapitools.client.models.ReactToPostDto
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel() {
 
-    private val _state: MutableStateFlow<State> = MutableStateFlow(State())
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State(isLoading = true))
     val state = _state.asStateFlow()
 
     private val _event: Channel<Event> = Channel(Channel.UNLIMITED)
@@ -32,145 +40,188 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
     }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            _state.update { it.copy(isLoading = true) }
-            api.getPosts().toOperationResult { it }.onSuccess { response ->
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        postsToShow = response.data ?: emptyList()
-                    )
+        handleEvents()
+        getAllPopularPosts()
+        getAllPaginationPosts()
+    }
+
+    private fun handleEvents() = viewModelScope.launch {
+        _event.consumeAsFlow().collect { event ->
+            when (event) {
+                is Event.DislikePost -> {
+                    reactToPost(event.postId, ReactToPostDto.React.dislike)
                 }
-            }
 
-            _event.consumeAsFlow().collect { event ->
-                when (event) {
-                    is Event.DislikePost -> {
-                        dislikePost(event.postId)
-                    }
+                is Event.LikePost -> {
+                    reactToPost(event.postId, ReactToPostDto.React.like)
+                }
 
-                    is Event.LikePost -> {
-                        likePost(event.postId)
-                    }
+                is Event.RevokeReaction -> {
+                    revokeReaction(event.postId)
+                }
 
-                    is Event.RevokeReaction -> {
-                        revokeReaction(event.postId)
-                    }
+                is Event.SendReport -> {
+                    _state.update { it.copy(messageToShow = "Feature will be implemented soon") }
+                }
 
-                    is Event.SendReport -> {
-                        _state.update { it.copy(messageToShow = "Feature will be implemented soon") }
-                    }
+                is Event.NavigateToLocation -> {
+                    _state.update { it.copy(lastLocation = event.point) }
+                }
 
-                    is Event.NavigateToLocation -> {
-                        _state.update { it.copy(lastLocation = event.point) }
-                    }
+                Event.CloseMessage -> {
+                    _state.update { it.copy(messageToShow = null) }
+                }
 
-                    Event.CloseMessage -> {
-                        _state.update { it.copy(messageToShow = null) }
-                    }
+                is Event.SelectListSorting -> {
+                    applyNewSorting(event.sortType)
+                }
 
-                    is Event.SelectListSorting -> {
-                        applyNewSorting(event.sortType)
-                    }
-
-                    is Event.SearchPostWithText -> {
-                        searchPosts(event.searchText)
-                    }
+                is Event.SearchPostWithText -> {
+                    searchPosts(event.searchText)
                 }
             }
         }
     }
 
-    private fun applyNewSorting(newValue: HomeContract.PostListSorting) {
-        val posts = state.value.postsToShow
-        val sortedList = when (newValue) {
-            HomeContract.PostListSorting.Popular -> posts.sortedByDescending {
-                (it.reactions.like + it.reactions.dislike)
-            }
+    private fun getAllPaginationPosts() {
+        _state.update { it.copy(isLoading = true) }
+        val newPosts: Flow<PagingData<PostDto>> = Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { CombinedPostsPagingSource(api).newPostsPagingSource }
+        ).flow.cachedIn(viewModelScope)
 
-            HomeContract.PostListSorting.New -> posts.sortedBy {
-                it.id   // todo change to createdAt
-            }
-        }
+        val popularPosts: Flow<PagingData<PostDto>> = Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { CombinedPostsPagingSource(api).popularPostsPagingSource }
+        ).flow.cachedIn(viewModelScope)
 
         _state.update {
             it.copy(
-                postListSorting = newValue,
-                postsToShow = sortedList
+                paginationNewPosts = newPosts,
+                paginationPopularPosts = popularPosts,
+                isLoading = true
             )
         }
+    }
+
+    private fun getAllPopularPosts() = viewModelScope.launch(Dispatchers.IO) {
+        api.getAllPostsOrderedByReactionsCount(limit = 100)
+            .toOperationResult { it }
+            .onSuccess { response ->
+                val reactedPosts = response.data ?: emptyList()
+                _state.update {
+                    it.copy(isLoading = false, popularPosts = reactedPosts)
+                }
+            }
+    }
+
+    private fun applyNewSorting(newValue: HomeContract.PostListSorting) {
+        _state.update { it.copy(postListSorting = newValue) }
     }
 
     private fun searchPosts(text: String) {
-        if (text.isEmpty()) {
-            _state.update { it.copy(searchResult = emptyList()) }
-        }
-
-        val posts = state.value.postsToShow
-
-        val filteredPosts = posts.filter {
-            it.title.contains(text, ignoreCase = true)
-                    || it.content.contains(text, ignoreCase = true)
-        }
-
-        _state.update { it.copy(searchResult = filteredPosts) }
+        //TODO waiting for request from Max
+//        if (text.isEmpty()) {
+//            _state.update { it.copy(searchResult = emptyList()) }
+//        }
+//
+//        val posts = state.value.posts
+//
+//        val filteredPosts = posts.filter {
+//            it.title.contains(text, ignoreCase = true) || it.content.contains(
+//                text,
+//                ignoreCase = true
+//            )
+//        }
+//
+//        _state.update { it.copy(searchResult = filteredPosts) }
     }
 
-    private suspend fun likePost(postId: Int) {
-        updateListItem(postId) {
-            it.copy(
-                reactions = it.reactions.copy(
-                    like = it.reactions.like + 1,
-                    userReaction = PostReactionsDto.UserReaction.like,
-                )
-            )
-        }
-        api.reactToPost(postId, ReactToPostDto(ReactToPostDto.React.like))
-    }
+    private suspend fun reactToPost(postId: Int, reactionToSend: ReactToPostDto.React) {
+        api.reactToPost(postId, ReactToPostDto(reactionToSend))
+            .toOperationResult { it }
+            .onSuccess { reactPost ->
+//                val posts = state.value.posts.map {
+//                    if (it.id == reactPost.id) {
+//                        it.copy(
+//                            reactions = reactPost.reactions
+//                        )
+//                    } else {
+//                        it
+//                    }
+//                }
+//
+//                val popularPosts = state.value.popularPosts.map {
+//                    if (it.id == reactPost.id) {
+//                        it.copy(
+//                            reactions = reactPost.reactions
+//                        )
+//                    } else {
+//                        it
+//                    }
+//                }
+//
+//                _state.update {
+//                    it.copy(posts = posts, popularPosts = popularPosts)
+//                }
 
-    private suspend fun dislikePost(postId: Int) {
-        updateListItem(postId) {
-            it.copy(
-                reactions = it.reactions.copy(
-                    like = it.reactions.dislike + 1,
-                    userReaction = PostReactionsDto.UserReaction.dislike,
-                )
-            )
-        }
-        api.reactToPost(postId, ReactToPostDto(ReactToPostDto.React.dislike))
+                val newPosts = _state.value.paginationNewPosts.map { pagingData ->
+                    pagingData.filter {
+                        it.id == reactPost.id
+                    }.map {
+                        it.copy(reactions = reactPost.reactions)
+                    }
+                }
+
+                val popularPosts = _state.value.paginationPopularPosts.map { pagingData ->
+                    pagingData.filter {
+                        it.id == reactPost.id
+                    }.map {
+                        it.copy(reactions = reactPost.reactions)
+                    }
+                }
+
+                _state.update {
+                    it.copy(paginationNewPosts = newPosts, paginationPopularPosts = popularPosts)
+                }
+            }
+            .onError { error ->
+                _state.update { it.copy(messageToShow = error) }
+            }
     }
 
     private suspend fun revokeReaction(postId: Int) {
-        val post = _state.value.postsToShow.find { it.id == postId } ?: return
+        api.retieveReactionToPost(id = postId)
+            .toOperationResult { it }
+            .onSuccess { reactPost ->
+                val newPosts = _state.value.paginationNewPosts.map { pagingData ->
+                    pagingData.filter {
+                        it.id == reactPost.id
+                    }.map {
+                        it.copy(reactions = reactPost.reactions)
+                    }
+                }
 
-        val reactionToSend = when (post.reactions.userReaction) {
-            PostReactionsDto.UserReaction.like -> ReactToPostDto.React.dislike
-            PostReactionsDto.UserReaction.dislike -> ReactToPostDto.React.like
-            null -> null
-        } ?: return
+                val popularPosts = _state.value.paginationPopularPosts.map { pagingData ->
+                    pagingData.filter {
+                        it.id == reactPost.id
+                    }.map {
+                        it.copy(reactions = reactPost.reactions)
+                    }
+                }
 
-        var likes = post.reactions.like
-        if (post.reactions.userReaction == PostReactionsDto.UserReaction.like) likes -= 1
-
-        var dislikes = post.reactions.dislike
-        if (post.reactions.userReaction == PostReactionsDto.UserReaction.dislike) dislikes -= 1
-
-        updateListItem(postId) {
-            it.copy(
-                reactions = PostReactionsDto(
-                    dislike = dislikes,
-                    like = likes,
-                    userReaction = null
-                )
-            )
-        }
-
-        api.reactToPost(postId, ReactToPostDto(reactionToSend))
-    }
-
-    private fun updateListItem(id: Int, morph: (PostDto) -> PostDto) {
-        _state.update { s ->
-            s.copy(postsToShow = s.postsToShow.map { if (it.id == id) morph(it) else it })
-        }
+                _state.update {
+                    it.copy(paginationNewPosts = newPosts, paginationPopularPosts = popularPosts)
+                }
+            }
+            .onError { error ->
+                _state.update { it.copy(messageToShow = error) }
+            }
     }
 }

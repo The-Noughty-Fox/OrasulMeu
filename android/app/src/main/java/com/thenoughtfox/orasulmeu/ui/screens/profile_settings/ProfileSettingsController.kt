@@ -31,10 +31,7 @@ fun ProfileSettingsController() {
             viewModel.action.collectLatest {
                 when (it) {
                     is ProfileSettingsContract.Action.ShowToast -> context.showToast(it.msg)
-                    ProfileSettingsContract.Action.Logout ->
-                        rootNavigator.navigate(RootNavDestinations.Auth) {
-                            popUpTo(RootNavDestinations.Auth) { inclusive = true }
-                        }
+                    ProfileSettingsContract.Action.Logout -> rootNavigator.popBackStack()
                 }
             }
         }
