@@ -477,24 +477,36 @@ paths:
     post:
       operationId: upload
       parameters: []
+      requestBody:
+        required: true
+        description: File data
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MediaSingleDto"
       responses:
         default:
-          description: Media file uploaded successfully
+          description: ""
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/MediaSupabaseDto"
+                $ref: "#/components/schemas/MediaSupabaseDto"
       tags: &a4
         - media
   /media/files:
     post:
       operationId: uploadFiles
       parameters: []
+      requestBody:
+        required: true
+        description: File data
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MediaDto"
       responses:
         default:
-          description: Media files uploaded successfully
+          description: ""
           content:
             application/json:
               schema:
@@ -786,6 +798,24 @@ components:
             - dislike
       required:
         - react
+    MediaSingleDto:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+    MediaDto:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+      required:
+        - files
     CreateCommentDto:
       type: object
       properties: {}
