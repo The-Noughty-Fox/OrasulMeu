@@ -467,13 +467,10 @@ paths:
             type: integer
       requestBody:
         required: true
-        description: File data
         content:
           multipart/form-data:
             schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/MediaDto"
+              $ref: "#/components/schemas/MediaDto"
       responses:
         default:
           description: ""
@@ -512,9 +509,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/MediaDto"
+              $ref: "#/components/schemas/MediaDto"
       responses:
         default:
           description: ""

@@ -147,6 +147,9 @@ export class PostController {
 
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
+  @ApiBody({
+    type: MediaDto,
+  })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiBody({
     description: 'File data',

@@ -41,7 +41,6 @@ export class MediaController {
   @ApiBody({
     description: 'File data',
     type: MediaDto,
-    isArray: true,
   })
   @ApiResponse({ type: MediaSupabaseDto, isArray: true })
   @UseInterceptors(
