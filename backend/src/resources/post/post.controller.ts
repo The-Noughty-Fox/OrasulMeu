@@ -151,6 +151,7 @@ export class PostController {
   @ApiBody({
     description: 'File data',
     type: MediaDto,
+    isArray: true,
   })
   @ApiResponse({ type: PostDto })
   @ApiConsumes('multipart/form-data')
