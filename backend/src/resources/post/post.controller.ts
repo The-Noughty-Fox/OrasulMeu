@@ -32,6 +32,7 @@ import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
 import { mbToBytes } from '@/helpers/other';
 import { PostsByPhraseQueryDto } from './dto/posts-by-phrase-query.dto';
+import { MediaDto } from '@/resources/media/dto/media.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -146,6 +147,9 @@ export class PostController {
 
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
+  @ApiBody({
+    type: MediaDto,
+  })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiResponse({ type: PostDto })
   @ApiConsumes('multipart/form-data')
