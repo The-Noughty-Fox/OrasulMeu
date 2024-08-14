@@ -510,7 +510,9 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/MediaDto"
+              type: array
+              items:
+                $ref: "#/components/schemas/MediaDto"
       responses:
         default:
           description: ""
