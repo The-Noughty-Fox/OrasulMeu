@@ -465,6 +465,13 @@ paths:
           in: path
           schema:
             type: integer
+      requestBody:
+        required: true
+        description: File data
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MediaDto"
       responses:
         default:
           description: ""
@@ -798,14 +805,6 @@ components:
             - dislike
       required:
         - react
-    MediaSingleDto:
-      type: object
-      properties:
-        file:
-          type: string
-          format: binary
-      required:
-        - file
     MediaDto:
       type: object
       properties:
@@ -816,6 +815,14 @@ components:
             format: binary
       required:
         - files
+    MediaSingleDto:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
     CreateCommentDto:
       type: object
       properties: {}
