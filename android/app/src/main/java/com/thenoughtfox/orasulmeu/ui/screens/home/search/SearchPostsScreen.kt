@@ -7,14 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -40,18 +41,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
-import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.home.PostError
+import com.thenoughtfox.orasulmeu.ui.screens.home.PostLoading
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
 @Composable
 fun SearchPostsScreen(
-    state: HomeContract.State,
-    sendEvent: (HomeContract.Event) -> Unit,
+    state: State = State(),
+    sendEvent: (HomeContract.Event) -> Unit = {},
     sendNavEvent: (HomeContract.NavEvent) -> Unit = {}
 ) {
     Scaffold(
@@ -87,37 +93,70 @@ fun SearchPostsScreen(
                 )
 
                 if (searchText.isNotEmpty()) {
-                    if (state.searchResult.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Text(
-                                text = stringResource(R.string.search_posts_no_results_message),
-                                modifier = Modifier.align(Alignment.Center),
-                                style = TextStyle(
-                                    fontWeight = FontWeight(400),
-                                    fontSize = 20.sp,
-                                    color = OrasulMeuTheme.colors.onBackground
-                                )
+                    val posts = state.searchResult.collectAsLazyPagingItems()
+
+                    when (posts.loadState.refresh) {
+                        is LoadState.Loading -> {
+                            PostLoading(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(padding)
                             )
                         }
-                    } else {
-                        LazyColumn {
-                            items(state.searchResult) {
-                                PostView(state = it.toState()) { e ->
-                                    when (e) {
-                                        PostContract.Action.ConfirmReport -> {
-                                            sendEvent(HomeContract.Event.SendReport(it.id))
-                                        }
 
-                                        PostContract.Action.Dislike -> {
-                                            sendEvent(HomeContract.Event.DislikePost(it.id))
-                                        }
+                        is LoadState.NotLoading -> {
+                            if (posts.itemCount == 0) {
+                                PostError(modifier = Modifier.fillMaxSize())
+                            }
+                        }
 
-                                        PostContract.Action.Like -> {
-                                            sendEvent(HomeContract.Event.LikePost(it.id))
-                                        }
+                        else -> {
+                            LazyColumn {
+                                items(
+                                    posts.itemCount,
+                                    key = posts.itemKey { it.id }
+                                ) { index ->
+                                    val post = posts[index]
+                                    // Display the message or a placeholder.
+                                    if (post != null) {
+                                        PostView(state = post.toState()) { e ->
+                                            when (e) {
+                                                PostContract.Action.ConfirmReport -> {
+                                                    sendEvent(HomeContract.Event.SendReport(post.id))
+                                                }
 
-                                        PostContract.Action.RevokeReaction -> {
-                                            sendEvent(HomeContract.Event.RevokeReaction(it.id))
+                                                PostContract.Action.Dislike -> {
+                                                    sendEvent(HomeContract.Event.DislikePost(post.id))
+                                                }
+
+                                                PostContract.Action.Like -> {
+                                                    sendEvent(HomeContract.Event.LikePost(post.id))
+                                                }
+
+                                                PostContract.Action.RevokeReaction -> {
+                                                    sendEvent(HomeContract.Event.RevokeReaction(post.id))
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        Box(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(48.dp)
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                }
+
+                                if (posts.loadState.append is LoadState.Loading) {
+                                    item {
+                                        Box(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(48.dp)
+                                        ) {
+                                            CircularProgressIndicator()
                                         }
                                     }
                                 }
@@ -238,29 +277,5 @@ private fun SearchBarView(
 @Preview
 @Composable
 private fun Preview() = OrasulMeuTheme {
-    var state by remember { mutableStateOf(HomeContract.State()) }
-
-    val onSearch: (String) -> Unit = { searchText ->
-        val posts = PostPreviewPlaceholders.dummyPosts
-
-        if (searchText.isEmpty()) {
-            state = state.copy(searchResult = emptyList())
-        }
-
-        val filteredPosts = posts.filter {
-            it.title.contains(searchText, ignoreCase = true)
-                    || it.content.contains(searchText, ignoreCase = true)
-        }
-
-        state = state.copy(searchResult = filteredPosts)
-    }
-
-    SearchPostsScreen(
-        state = state,
-        sendEvent = {
-            if (it is HomeContract.Event.SearchPostWithText) {
-                onSearch(it.searchText)
-            }
-        }
-    )
+    SearchPostsScreen()
 }

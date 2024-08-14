@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thenoughtfox.orasulmeu.R
@@ -65,6 +66,7 @@ import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostPreviewPlaceholders
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListSorting
+import com.thenoughtfox.orasulmeu.ui.screens.home.PostLoading
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
 @Composable
@@ -114,60 +116,66 @@ fun PostListScreen(
                     state.paginationNewPosts.collectAsLazyPagingItems()
                 }
 
-                LazyColumn(
-                    state = scrollState,
-                    modifier = Modifier
-                        .padding(top = padding.calculateTopPadding())
-                        .background(color = colorResource(R.color.background_color)),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    items(
-                        posts.itemCount,
-                        key = posts.itemKey { it.id }
-                        //Fetch the message at the specific index from lazyPagingItems.
-                    ) { index ->
-                        val post = posts[index]
-                        // Display the message or a placeholder.
-                        if (post != null) {
-                            PostView(
-                                state = post.toState(),
-                                modifier = if (index == posts.itemCount - 1) {
-                                    Modifier.padding(bottom = 80.dp)
-                                } else {
+                if (posts.loadState.refresh is LoadState.Loading) {
+                    PostLoading(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                    )
+                } else {
+                    LazyColumn(
+                        state = scrollState,
+                        modifier = Modifier
+                            .padding(top = padding.calculateTopPadding())
+                            .background(color = colorResource(R.color.background_color)),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        items(
+                            posts.itemCount,
+                            key = posts.itemKey { it.id }
+                            //Fetch the message at the specific index from lazyPagingItems.
+                        ) { index ->
+                            val post = posts[index]
+                            // Display the message or a placeholder.
+                            if (post != null) {
+                                PostView(
+                                    state = post.toState(),
+                                    modifier = if (index == posts.itemCount - 1) {
+                                        Modifier.padding(bottom = 80.dp)
+                                    } else {
+                                        Modifier
+                                    }
+                                ) { action ->
+                                    when (action) {
+                                        PostContract.Action.ConfirmReport -> {
+                                            sendEvent(HomeContract.Event.SendReport(post.id))
+                                        }
+
+                                        PostContract.Action.Dislike -> {
+                                            sendEvent(HomeContract.Event.DislikePost(post.id))
+                                        }
+
+                                        PostContract.Action.Like -> {
+                                            sendEvent(HomeContract.Event.LikePost(post.id))
+                                        }
+
+                                        PostContract.Action.RevokeReaction -> {
+                                            sendEvent(HomeContract.Event.RevokeReaction(post.id))
+                                        }
+                                    }
+                                }
+                            } else {
+                                Box(
                                     Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp)
+                                ) {
+                                    CircularProgressIndicator()
                                 }
-                            ) { action ->
-                                when (action) {
-                                    PostContract.Action.ConfirmReport -> {
-                                        sendEvent(HomeContract.Event.SendReport(post.id))
-                                    }
-
-                                    PostContract.Action.Dislike -> {
-                                        sendEvent(HomeContract.Event.DislikePost(post.id))
-                                    }
-
-                                    PostContract.Action.Like -> {
-                                        sendEvent(HomeContract.Event.LikePost(post.id))
-                                    }
-
-                                    PostContract.Action.RevokeReaction -> {
-                                        sendEvent(HomeContract.Event.RevokeReaction(post.id))
-                                    }
-                                }
-                            }
-                        } else {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp)
-                            ) {
-                                CircularProgressIndicator()
                             }
                         }
                     }
                 }
-
-
 
                 if (state.messageToShow != null) {
                     AlertDialog(

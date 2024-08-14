@@ -16,7 +16,7 @@ interface HomeContract {
         val lastLocation: Point? = null,
         val messageToShow: String? = null,
         val postListSorting: PostListSorting = PostListSorting.Popular,
-        val searchResult: List<PostDto> = emptyList(),
+        val searchResult: Flow<PagingData<PostDto>> = emptyFlow(),
     )
 
     sealed interface Event {

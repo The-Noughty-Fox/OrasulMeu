@@ -12,7 +12,7 @@ import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
-import com.thenoughtfox.orasulmeu.ui.screens.home.post_list.utils.CombinedPostsPagingSource
+import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -132,52 +133,26 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
         _state.update { it.copy(postListSorting = newValue) }
     }
 
-    private fun searchPosts(text: String) {
-        //TODO waiting for request from Max
-//        if (text.isEmpty()) {
-//            _state.update { it.copy(searchResult = emptyList()) }
-//        }
-//
-//        val posts = state.value.posts
-//
-//        val filteredPosts = posts.filter {
-//            it.title.contains(text, ignoreCase = true) || it.content.contains(
-//                text,
-//                ignoreCase = true
-//            )
-//        }
-//
-//        _state.update { it.copy(searchResult = filteredPosts) }
+    private fun searchPosts(text: String) = viewModelScope.launch {
+        if (text.isEmpty()) {
+            _state.update { it.copy(searchResult = emptyFlow()) }
+        }
+
+        val posts: Flow<PagingData<PostDto>> = Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { CombinedPostsPagingSource(api).getPostsByPhrasePagingSource(text) }
+        ).flow.cachedIn(viewModelScope)
+
+        _state.update { it.copy(searchResult = posts) }
     }
 
     private suspend fun reactToPost(postId: Int, reactionToSend: ReactToPostDto.React) {
         api.reactToPost(postId, ReactToPostDto(reactionToSend))
             .toOperationResult { it }
             .onSuccess { reactPost ->
-//                val posts = state.value.posts.map {
-//                    if (it.id == reactPost.id) {
-//                        it.copy(
-//                            reactions = reactPost.reactions
-//                        )
-//                    } else {
-//                        it
-//                    }
-//                }
-//
-//                val popularPosts = state.value.popularPosts.map {
-//                    if (it.id == reactPost.id) {
-//                        it.copy(
-//                            reactions = reactPost.reactions
-//                        )
-//                    } else {
-//                        it
-//                    }
-//                }
-//
-//                _state.update {
-//                    it.copy(posts = posts, popularPosts = popularPosts)
-//                }
-
                 val newPosts = _state.value.paginationNewPosts.map { pagingData ->
                     pagingData.filter {
                         it.id == reactPost.id
