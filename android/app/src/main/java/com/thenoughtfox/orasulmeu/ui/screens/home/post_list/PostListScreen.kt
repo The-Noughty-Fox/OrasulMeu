@@ -82,102 +82,111 @@ fun PostListScreen(
                 onSearchClick = onSearchClick
             )
         },
-    ) { padding ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                CircularProgressIndicator(
+        content = { padding ->
+            if (state.isLoading) {
+                Box(
                     modifier = Modifier
-                        .size(128.dp)
-                        .align(Alignment.Center),
-                    color = colorResource(R.color.primary),
-                    strokeWidth = 4.dp
-                )
-            }
-        } else {
-            val popularListState = rememberLazyListState()
-            val newListState = rememberLazyListState()
-            val scrollState by rememberUpdatedState(
-                newValue = if (state.postListSorting == PostListSorting.Popular) {
-                    popularListState
-                } else {
-                    newListState
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(128.dp)
+                            .align(Alignment.Center),
+                        color = colorResource(R.color.primary),
+                        strokeWidth = 4.dp
+                    )
                 }
-            )
-
-            val posts = if (state.postListSorting == PostListSorting.Popular) {
-                state.paginationPopularPosts.collectAsLazyPagingItems()
             } else {
-                state.paginationNewPosts.collectAsLazyPagingItems()
-            }
+                val popularListState = rememberLazyListState()
+                val newListState = rememberLazyListState()
+                val scrollState by rememberUpdatedState(
+                    newValue = if (state.postListSorting == PostListSorting.Popular) {
+                        popularListState
+                    } else {
+                        newListState
+                    }
+                )
 
-            LazyColumn(
-                state = scrollState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
-                    .background(color = colorResource(R.color.background_color)),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(
-                    posts.itemCount,
-                    key = posts.itemKey { it.id }
-                    //Fetch the message at the specific index from lazyPagingItems.
-                ) { index ->
-                    val post = posts[index]
-                    // Display the message or a placeholder.
-                    if (post != null) {
-                        PostView(state = post.toState()) { action ->
-                            when (action) {
-                                PostContract.Action.ConfirmReport -> {
-                                    sendEvent(HomeContract.Event.SendReport(post.id))
+                val posts = if (state.postListSorting == PostListSorting.Popular) {
+                    state.paginationPopularPosts.collectAsLazyPagingItems()
+                } else {
+                    state.paginationNewPosts.collectAsLazyPagingItems()
+                }
+
+                LazyColumn(
+                    state = scrollState,
+                    modifier = Modifier
+                        .padding(top = padding.calculateTopPadding())
+                        .background(color = colorResource(R.color.background_color)),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(
+                        posts.itemCount,
+                        key = posts.itemKey { it.id }
+                        //Fetch the message at the specific index from lazyPagingItems.
+                    ) { index ->
+                        val post = posts[index]
+                        // Display the message or a placeholder.
+                        if (post != null) {
+                            PostView(
+                                state = post.toState(),
+                                modifier = if (index == posts.itemCount - 1) {
+                                    Modifier.padding(bottom = 80.dp)
+                                } else {
+                                    Modifier
                                 }
+                            ) { action ->
+                                when (action) {
+                                    PostContract.Action.ConfirmReport -> {
+                                        sendEvent(HomeContract.Event.SendReport(post.id))
+                                    }
 
-                                PostContract.Action.Dislike -> {
-                                    sendEvent(HomeContract.Event.DislikePost(post.id))
-                                }
+                                    PostContract.Action.Dislike -> {
+                                        sendEvent(HomeContract.Event.DislikePost(post.id))
+                                    }
 
-                                PostContract.Action.Like -> {
-                                    sendEvent(HomeContract.Event.LikePost(post.id))
-                                }
+                                    PostContract.Action.Like -> {
+                                        sendEvent(HomeContract.Event.LikePost(post.id))
+                                    }
 
-                                PostContract.Action.RevokeReaction -> {
-                                    sendEvent(HomeContract.Event.RevokeReaction(post.id))
+                                    PostContract.Action.RevokeReaction -> {
+                                        sendEvent(HomeContract.Event.RevokeReaction(post.id))
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                        ) {
-                            CircularProgressIndicator()
+                        } else {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
-            }
 
-            if (state.messageToShow != null) {
-                AlertDialog(
-                    onDismissRequest = {
-                        sendEvent(HomeContract.Event.CloseMessage)
-                    },
-                    confirmButton = {
-                        Button(onClick = {
+
+
+                if (state.messageToShow != null) {
+                    AlertDialog(
+                        onDismissRequest = {
                             sendEvent(HomeContract.Event.CloseMessage)
-                        }) {
-                            Text(text = "Okay")
-                        }
-                    },
-                    title = { Text(text = state.messageToShow) },
-                )
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                sendEvent(HomeContract.Event.CloseMessage)
+                            }) {
+                                Text(text = "Okay")
+                            }
+                        },
+                        title = { Text(text = state.messageToShow) },
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 @Composable

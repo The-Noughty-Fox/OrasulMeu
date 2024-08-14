@@ -55,6 +55,7 @@ import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
 @Composable
 fun PostView(
+    modifier: Modifier = Modifier,
     state: PostContract.State,
     onSendEvent: (PostContract.Action) -> Unit
 ) {
@@ -62,7 +63,7 @@ fun PostView(
     var shouldShowReportAlert by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentSize()
             .background(color = colorResource(R.color.white))
     ) {

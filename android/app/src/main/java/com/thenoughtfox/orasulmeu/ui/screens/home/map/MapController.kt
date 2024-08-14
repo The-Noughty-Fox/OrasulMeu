@@ -38,6 +38,7 @@ import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.map.view.MapboxMapView
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeViewModel
 import com.thenoughtfox.orasulmeu.utils.showToast
 import com.thenoughtfox.orasulmeu.utils.toPoint
@@ -45,22 +46,21 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.models.PostDto
 
 @Composable
-fun MapController(homeViewModel: HomeViewModel) {
+fun MapController(viewModel: HomeViewModel) {
+
     val context = LocalContext.current
-    val state by homeViewModel.state.collectAsStateWithLifecycle()
-    val mapViewModel: MapViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val mapView = remember { MapboxMapView(context) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            mapViewModel.action.collect { action ->
+            viewModel.action.collect { action ->
                 when (action) {
-                    is MapContract.Action.MoveToLocation -> {
+                    is HomeContract.Action.MoveToLocation -> {
                         mapView.redirectToLocation(action.point)
                     }
-
-                    is MapContract.Action.ShowToast -> context.showToast(action.msg)
                 }
             }
         }
@@ -73,7 +73,11 @@ fun MapController(homeViewModel: HomeViewModel) {
         }
     }
 
-    MapView(mapView, context, mapViewModel, homeViewModel)
+    MapView(mapView, context, state, sendEvent = {
+        scope.launch {
+            viewModel.sendEvent(it)
+        }
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,17 +85,14 @@ fun MapController(homeViewModel: HomeViewModel) {
 private fun MapView(
     mapView: MapboxMapView,
     context: Context,
-    mapViewModel: MapViewModel,
-    homeViewModel: HomeViewModel
+    state: State = State(),
+    sendEvent: (HomeContract.Event) -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
     var postToShow: PostDto? by remember { mutableStateOf(null) }
 
     val locationClient: LocationClient = remember {
         LocationClient(context) { location ->
-            scope.launch {
-                mapViewModel.event.send(MapContract.Event.NavigateToUser(location.toPoint()))
-            }
+            sendEvent(HomeContract.Event.NavigateToUser(location.toPoint()))
         }
     }
 
@@ -109,7 +110,12 @@ private fun MapView(
         AndroidView(
             factory = {
                 mapView.apply {
+                    if (state.lastLocation != null) {
+                        redirectToLocation(point = state.lastLocation)
+                    }
+
                     onLoadMap {
+                        if (state.lastLocation != null) return@onLoadMap
                         locationRequester.launch(
                             arrayOf(
                                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -147,21 +153,20 @@ private fun MapView(
                 postToShow?.toState()?.let {
                     PostView(state = it) { action ->
                         when (action) {
-                            PostContract.Action.ConfirmReport -> scope.launch {
-                                homeViewModel.sendEvent(HomeContract.Event.SendReport(it.id))
-                            }
+                            PostContract.Action.ConfirmReport ->
+                                sendEvent(HomeContract.Event.SendReport(it.id))
 
-                            PostContract.Action.Dislike -> scope.launch {
-                                homeViewModel.sendEvent(HomeContract.Event.DislikePost(it.id))
-                            }
 
-                            PostContract.Action.Like -> scope.launch {
-                                homeViewModel.sendEvent(HomeContract.Event.LikePost(it.id))
-                            }
+                            PostContract.Action.Dislike ->
+                                sendEvent(HomeContract.Event.DislikePost(it.id))
 
-                            PostContract.Action.RevokeReaction -> scope.launch {
-                                homeViewModel.sendEvent(HomeContract.Event.RevokeReaction(it.id))
-                            }
+
+                            PostContract.Action.Like ->
+                                sendEvent(HomeContract.Event.LikePost(it.id))
+
+
+                            PostContract.Action.RevokeReaction ->
+                                sendEvent(HomeContract.Event.RevokeReaction(it.id))
                         }
                     }
                 }
@@ -178,10 +183,5 @@ private fun PreviewMapView() {
         MapboxMapView(context)
     }
 
-    MapView(
-        mapView = mapView,
-        context = context,
-        mapViewModel = hiltViewModel(),
-        homeViewModel = hiltViewModel()
-    )
+    MapView(mapView = mapView, context = context)
 }

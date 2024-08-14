@@ -23,7 +23,7 @@ fun HomeController() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (selectedViewType) {
-            SelectedViewType.Map -> MapController(homeViewModel = viewModel)
+            SelectedViewType.Map -> MapController(viewModel = viewModel)
             SelectedViewType.List -> PostListController(viewModel = viewModel)
         }
 

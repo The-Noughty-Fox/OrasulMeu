@@ -9,6 +9,7 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.home.post_list.utils.CombinedPostsPagingSource
@@ -16,7 +17,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.map
@@ -34,6 +37,9 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
     val state = _state.asStateFlow()
 
     private val _event: Channel<Event> = Channel(Channel.UNLIMITED)
+
+    private val _action = MutableSharedFlow<Action>()
+    val action: SharedFlow<Action> = _action
 
     suspend fun sendEvent(a: Event) {
         _event.send(a)
@@ -64,10 +70,6 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
                     _state.update { it.copy(messageToShow = "Feature will be implemented soon") }
                 }
 
-                is Event.NavigateToLocation -> {
-                    _state.update { it.copy(lastLocation = event.point) }
-                }
-
                 Event.CloseMessage -> {
                     _state.update { it.copy(messageToShow = null) }
                 }
@@ -78,6 +80,11 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
 
                 is Event.SearchPostWithText -> {
                     searchPosts(event.searchText)
+                }
+
+                is Event.NavigateToUser -> {
+                    _state.update { it.copy(lastLocation = event.point) }
+                    _action.emit(Action.MoveToLocation(event.point))
                 }
             }
         }
@@ -197,7 +204,7 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
     }
 
     private suspend fun revokeReaction(postId: Int) {
-        api.retieveReactionToPost(id = postId)
+        api.retrieveReactionToPost(id = postId)
             .toOperationResult { it }
             .onSuccess { reactPost ->
                 val newPosts = _state.value.paginationNewPosts.map { pagingData ->
