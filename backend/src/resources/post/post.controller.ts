@@ -27,11 +27,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PostDto } from '@/resources/post/dto/post.dto';
-import { MediaDto } from '@/resources/media/dto/media.dto';
 import { PaginationQueryDto } from '@/infrastructure/models/dto/pagination-query.dto';
 import { getPaginationSchema } from '@/infrastructure/swagger/helpers';
 import { ReactToPostDto } from '@/resources/post/dto/react-to-post.dto';
 import { mbToBytes } from '@/helpers/other';
+import { PostsByPhraseQueryDto } from './dto/posts-by-phrase-query.dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
@@ -57,6 +57,15 @@ export class PostController {
   })
   findAll(@Query() paginationQuery: PaginationQueryDto, @Req() req) {
     return this.postService.findAll(paginationQuery, req.user.id);
+  }
+
+  @Get('search')
+  @ApiOperation({ operationId: 'get-posts-by-phrase' })
+  @ApiResponse({
+    schema: getPaginationSchema(PostDto),
+  })
+  findByPhrase(@Query() query: PostsByPhraseQueryDto, @Req() req) {
+    return this.postService.findByPhrase(query, req.user.id);
   }
 
   @Get('reaction')
@@ -129,7 +138,7 @@ export class PostController {
 
   @Delete(':id/react')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiOperation({ operationId: 'retieve-reaction-to-post' })
+  @ApiOperation({ operationId: 'retrieve-reaction-to-post' })
   @ApiResponse({ type: PostDto })
   retrieveReaction(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.postService.retrieveReaction(id, req.user.id);
@@ -137,7 +146,6 @@ export class PostController {
 
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
-  @ApiBody({ type: MediaDto })
   @ApiOperation({ operationId: 'upload-post-media' })
   @ApiResponse({ type: PostDto })
   @ApiConsumes('multipart/form-data')

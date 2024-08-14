@@ -16,6 +16,7 @@ import { CUSTOM_ERROR_CODES } from '@/infrastructure/error-codes/custom-error-co
 import { timestamptzToDate } from '@/helpers/timestamptz-to-date';
 import { mapToReaction } from '@/helpers/map-to-reaction';
 import { mapToMediaType } from '@/helpers/map-to-media-type';
+import { PostsByPhraseQueryDto } from './dto/posts-by-phrase-query.dto';
 
 @Injectable()
 export class PostService {
@@ -80,6 +81,54 @@ export class PostService {
     const { data: postsCount, error: countError } = await this.supabaseService
       .getClient()
       .rpc('count_posts');
+
+    if (countError) {
+      throw new InternalServerErrorException('Could not count the posts');
+    }
+
+    return {
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+          userReaction: mapToReaction(post.reactions.userReaction),
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
+  }
+
+  async findByPhrase(
+    query: PostsByPhraseQueryDto,
+    userId: number,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 10, phrase } = query;
+
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('search_posts_by_phrase', {
+        user_id_input: userId,
+        phrase_input: phrase,
+        limit_input: limit,
+        page_input: page,
+      });
+
+    if (error && error.code === CUSTOM_ERROR_CODES.USER_NOT_FOUND) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    } else if (error) {
+      throw new InternalServerErrorException('Could not get the posts');
+    }
+
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts_with_phrase', { phrase_input: phrase });
 
     if (countError) {
       throw new InternalServerErrorException('Could not count the posts');
