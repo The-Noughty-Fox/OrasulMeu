@@ -26,8 +26,6 @@ import org.openapitools.client.models.CreatePostDto
 import org.openapitools.client.models.PointDto
 import javax.inject.Inject
 
-private const val FILES_FORM_DATA = "files"
-
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val postsApi: PostsApi,
@@ -111,6 +109,7 @@ class CreatePostViewModel @Inject constructor(
 
     private suspend fun sendPostMedia(id: Int) {
         val parts = state.value.images.map { uri ->
+            val FILES_FORM_DATA = "files"
             val path =
                 getRealPathFromURI(contentUri = uri, context = application.applicationContext)
 
@@ -120,16 +119,16 @@ class CreatePostViewModel @Inject constructor(
                 toMultiPart(path, FILES_FORM_DATA, MimeType.IMAGE.mimeTypes.first())
             }
         }
-        //TODO ARRAY
-//        postsApi.uploadPostMedia(id = id, parts)
-//            .toOperationResult { it }
-//            .onSuccess {
-//                _state.update { it.copy(isLoading = false) }
-//                _action.emit(Action.GoBack)
-//            }
-//            .onError {
-//                _state.update { it.copy(isLoading = false) }
-//                _action.emit(Action.ShowToast(it))
-//            }
+
+        postsApi.uploadPostMedia(id = id, parts)
+            .toOperationResult { it }
+            .onSuccess {
+                _state.update { it.copy(isLoading = false) }
+                _action.emit(Action.GoMain)
+            }
+            .onError {
+                _state.update { it.copy(isLoading = false) }
+                _action.emit(Action.ShowToast(it))
+            }
     }
 }

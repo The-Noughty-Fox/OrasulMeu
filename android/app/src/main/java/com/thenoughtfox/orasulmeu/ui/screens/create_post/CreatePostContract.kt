@@ -39,5 +39,6 @@ interface CreatePostContract {
     sealed class Action {
         data class ShowToast(val msg: String) : Action()
         data object GoBack : Action()
+        data object GoMain : Action()
     }
 }

@@ -15,7 +15,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.AuthApi
-import org.openapitools.client.apis.EchoApi
+import org.openapitools.client.apis.MediaApi
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.apis.UsersApi
 import org.openapitools.client.infrastructure.ApiClient
@@ -58,8 +58,8 @@ object NetModule {
 
     @Provides
     @Singleton
-    fun provideEchoApi(apiClient: ApiClient): EchoApi =
-        apiClient.createService(EchoApi::class.java)
+    fun provideMediaApi(apiClient: ApiClient): MediaApi =
+        apiClient.createService(MediaApi::class.java)
 
     @Provides
     @Singleton

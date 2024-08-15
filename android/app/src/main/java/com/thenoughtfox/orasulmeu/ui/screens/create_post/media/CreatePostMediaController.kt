@@ -1,8 +1,10 @@
 package com.thenoughtfox.orasulmeu.ui.screens.create_post.media
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,15 +14,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.luck.picture.lib.basic.PictureSelector
+import com.luck.picture.lib.config.SelectMimeType
+import com.luck.picture.lib.config.SelectModeConfig
+import com.luck.picture.lib.entity.LocalMedia
+import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
-import com.thenoughtfox.orasulmeu.navigation.LocalMainNavigator
 import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.utils.showToast
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun CreatePostMediaController(viewModel: CreatePostViewModel) {
@@ -53,6 +60,8 @@ fun CreatePostMediaController(viewModel: CreatePostViewModel) {
                     }
 
                     CreatePostContract.Action.GoBack -> rootNavigator.navigateUp()
+
+                    else -> Unit
                 }
             }
         }
@@ -62,7 +71,26 @@ fun CreatePostMediaController(viewModel: CreatePostViewModel) {
         uiState = uiState,
         onSendEvent = { scope.launch { viewModel.event.send(it) } },
         onGalleryClick = {
-            pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            if (isPhotoPickerAvailable(context)) {
+                pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            } else {
+                PictureSelector.create(context)
+                    .openSystemGallery(SelectMimeType.ofImage())
+                    .setSelectionMode(SelectModeConfig.MULTIPLE)
+                    .forSystemResult(object : OnResultCallbackListener<LocalMedia> {
+                        override fun onResult(result: ArrayList<LocalMedia>) {
+                            val uris = result.map { Uri.fromFile(File(it.realPath)) }
+                            if (uris.isNotEmpty()) {
+                                scope.launch {
+                                    viewModel.event.send(CreatePostContract.Event.PickImages(uris))
+                                }
+                            }
+                        }
+
+                        override fun onCancel() {
+                        }
+                    })
+            }
         },
         sendNavEvent = { event ->
             when (event) {

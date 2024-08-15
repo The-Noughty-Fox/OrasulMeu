@@ -198,6 +198,8 @@ dependencies {
     //Paging
     implementation libs.androidx.paging.compose
 
+    implementation libs.pictureselector
+
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core

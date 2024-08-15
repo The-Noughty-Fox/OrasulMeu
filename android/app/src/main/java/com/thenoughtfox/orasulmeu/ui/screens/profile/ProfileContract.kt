@@ -13,16 +13,20 @@ interface ProfileContract {
         val reactionsCount: Int = 0,
         val ownedPost: List<PostContract.State> = emptyList(),
         val isEditing: Boolean = false,
-        val initialName: String = "",
-        val initialImageUrl: String? = null,
+        val newName: String? = null,
+        val newImageUri: Uri? = null,
     )
 
     sealed interface Event {
         data object EditProfile : Event
         data object DiscardChanges : Event
-        data object SaveChanges: Event
+        data object SaveChanges : Event
         data class ChangeName(val newName: String) : Event
         data class ChangePicture(val image: Uri) : Event
+    }
+
+    sealed interface Action {
+        data class ShowToast(val msg: String) : Action
     }
 
     sealed interface NavEvent {

@@ -49,6 +49,7 @@ process_ios() {
 }
 
 # Function to process Android platform
+#./generateApiClients ../shared/swagger-spec.yaml ../android/generated/api android
 process_android() {
     echo "Processing for Android..."
     openapi-generator generate -g kotlin -i "$input_file" -o "$output_file_android" -t ../shared --additional-properties=library=jvm-retrofit2,serializationLibrary=gson,omitGradlePluginVersions=true,omitGradleWrapper=true,useSettingsGradle=true,useCoroutines=true,dateLibrary=string &

@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
@@ -36,8 +37,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.luck.picture.lib.basic.PictureSelector
+import com.luck.picture.lib.config.SelectMimeType
+import com.luck.picture.lib.config.SelectModeConfig
+import com.luck.picture.lib.entity.LocalMedia
+import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.utils.CameraUtils.getCameraProvider
@@ -45,6 +52,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.utils.CameraUtil
 import com.thenoughtfox.orasulmeu.utils.showToast
 import com.thenoughtfox.orasulmeu.utils.view.Alert
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun CameraController(viewModel: CreatePostViewModel) {
@@ -86,9 +94,26 @@ fun CameraController(viewModel: CreatePostViewModel) {
 
     CameraPreviewScreen(lifecycleOwner, context, isCameraPermissionGranted,
         onGallery = {
-            pickMultipleMedia.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
+            if (isPhotoPickerAvailable(context)) {
+                pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            } else {
+                PictureSelector.create(context)
+                    .openSystemGallery(SelectMimeType.ofImage())
+                    .setSelectionMode(SelectModeConfig.MULTIPLE)
+                    .forSystemResult(object : OnResultCallbackListener<LocalMedia> {
+                        override fun onResult(result: ArrayList<LocalMedia>) {
+                            val uris = result.map { Uri.fromFile(File(it.realPath)) }
+                            if (uris.isNotEmpty()) {
+                                scope.launch {
+                                    viewModel.event.send(Event.PickImages(uris))
+                                }
+                            }
+                        }
+
+                        override fun onCancel() {
+                        }
+                    })
+            }
         }, onCapture = { imageCapture ->
             scope.launch {
                 takePicture(imageCapture, context)?.let { successUri ->

@@ -79,7 +79,7 @@ private fun Preview() = OrasulMeuTheme {
         ),
         reactions = PostReactionsDto(dislike = 2, like = 12, userReaction = null),
         title = "Some dummy title",
-        createdAt = OffsetDateTime.now(),
+        createdAt = OffsetDateTime.now().toString(),
         location = PointDto(0.0, 0.0)
     )
     PostMapPin(postDto = dto)

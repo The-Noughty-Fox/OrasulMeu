@@ -52,7 +52,7 @@ object PostPreviewPlaceholders {
                 bucketPath = ""
             )
         ),
-        createdAt = OffsetDateTime.now()
+        createdAt = OffsetDateTime.now().toString()
     )
 
     val dummyPosts = List(12) {
