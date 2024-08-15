@@ -133,10 +133,8 @@ fun PostListScreen(
                         items(
                             posts.itemCount,
                             key = posts.itemKey { it.id }
-                            //Fetch the message at the specific index from lazyPagingItems.
                         ) { index ->
                             val post = posts[index]
-                            // Display the message or a placeholder.
                             if (post != null) {
                                 PostView(
                                     state = post.toState(),

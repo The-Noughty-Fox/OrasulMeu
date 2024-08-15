@@ -13,6 +13,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
+import com.thenoughtfox.orasulmeu.ui.screens.home.utils.PostType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -98,7 +99,9 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
                 pageSize = 20,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { CombinedPostsPagingSource(api).newPostsPagingSource }
+            pagingSourceFactory = {
+                CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.NEW)
+            }
         ).flow.cachedIn(viewModelScope)
 
         val popularPosts: Flow<PagingData<PostDto>> = Pager(
@@ -106,7 +109,9 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
                 pageSize = 20,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { CombinedPostsPagingSource(api).popularPostsPagingSource }
+            pagingSourceFactory = {
+                CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.POPULAR)
+            }
         ).flow.cachedIn(viewModelScope)
 
         _state.update {
@@ -143,7 +148,11 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
                 pageSize = 20,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { CombinedPostsPagingSource(api).getPostsByPhrasePagingSource(text) }
+            pagingSourceFactory = {
+                CombinedPostsPagingSource(api).getPostsPagingSource(
+                    type = PostType.SEARCH, phrase = text
+                )
+            }
         ).flow.cachedIn(viewModelScope)
 
         _state.update { it.copy(searchResult = posts) }

@@ -1,7 +1,10 @@
 package com.thenoughtfox.orasulmeu.ui.screens.profile
 
 import android.net.Uri
-import com.thenoughtfox.orasulmeu.ui.post.PostContract
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import org.openapitools.client.models.PostDto
 
 interface ProfileContract {
 
@@ -11,10 +14,10 @@ interface ProfileContract {
         val imageUrl: String? = null,
         val postsCount: Int = 0,
         val reactionsCount: Int = 0,
-        val ownedPost: List<PostContract.State> = emptyList(),
         val isEditing: Boolean = false,
         val newName: String? = null,
         val newImageUri: Uri? = null,
+        val myPosts: Flow<PagingData<PostDto>> = emptyFlow(),
     )
 
     sealed interface Event {

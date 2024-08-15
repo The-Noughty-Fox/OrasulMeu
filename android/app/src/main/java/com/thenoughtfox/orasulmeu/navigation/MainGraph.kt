@@ -53,10 +53,6 @@ fun MainGraph() {
                     currentNavItem = BottomNavTabs.Map
                 }
 
-                MainGraphDestinations.SearchPostsScreen.toString() -> {
-                    currentNavItem = BottomNavTabs.Create
-                }
-
                 MainGraphDestinations.ProfileScreen.toString() -> {
                     currentNavItem = BottomNavTabs.Profile
                 }

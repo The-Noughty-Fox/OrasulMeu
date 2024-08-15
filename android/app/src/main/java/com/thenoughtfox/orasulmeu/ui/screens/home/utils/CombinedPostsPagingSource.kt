@@ -9,15 +9,23 @@ import java.io.IOException
 
 class CombinedPostsPagingSource(private val api: PostsApi) {
 
-    val popularPostsPagingSource = PopularPostsPagingSource()
-    val newPostsPagingSource = NewPostsPagingSource()
-    fun getPostsByPhrasePagingSource(phrase: String) = PostsByPhraseSource(phrase)
+    fun getPostsPagingSource(type: PostType, phrase: String = "") = PostsSource(type, phrase)
 
-    inner class PopularPostsPagingSource : PagingSource<Int, PostDto>() {
+    inner class PostsSource(private val postsType: PostType, private val phrase: String) :
+        PagingSource<Int, PostDto>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PostDto> {
             val position = params.key ?: 1
             return try {
-                val response = api.getAllPostsOrderedByReactionsCount(position, params.loadSize)
+                val response = when (postsType) {
+                    PostType.POPULAR -> {
+                        api.getAllPostsOrderedByReactionsCount(position, params.loadSize)
+                    }
+
+                    PostType.NEW -> api.getAllPosts(position, params.loadSize)
+                    PostType.SEARCH -> api.getPostsByPhrase(position, params.loadSize, phrase)
+                    PostType.MY -> api.getMyPosts(position, params.loadSize)
+                }
+
                 val posts = response.body()?.data ?: emptyList()
                 LoadResult.Page(
                     data = posts,
@@ -38,56 +46,8 @@ class CombinedPostsPagingSource(private val api: PostsApi) {
             }
         }
     }
+}
 
-    inner class NewPostsPagingSource : PagingSource<Int, PostDto>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PostDto> {
-            val position = params.key ?: 1
-            return try {
-                val response = api.getAllPosts(position, params.loadSize)
-                val posts = response.body()?.data ?: emptyList()
-                LoadResult.Page(
-                    data = posts,
-                    prevKey = if (position == 1) null else position - 1,
-                    nextKey = if (posts.isEmpty()) null else position + 1
-                )
-            } catch (e: IOException) {
-                LoadResult.Error(e)
-            } catch (e: HttpException) {
-                LoadResult.Error(e)
-            }
-        }
-
-        override fun getRefreshKey(state: PagingState<Int, PostDto>): Int? {
-            return state.anchorPosition?.let { anchorPosition ->
-                state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                    ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
-            }
-        }
-    }
-
-    inner class PostsByPhraseSource(private val phrase: String) : PagingSource<Int, PostDto>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PostDto> {
-            val position = params.key ?: 1
-            return try {
-                val response = api.getPostsByPhrase(position, params.loadSize, phrase)
-                val posts = response.body()?.data ?: emptyList()
-                LoadResult.Page(
-                    data = posts,
-                    prevKey = if (position == 1) null else position - 1,
-                    nextKey = if (posts.isEmpty()) null else position + 1
-                )
-            } catch (e: IOException) {
-                LoadResult.Error(e)
-            } catch (e: HttpException) {
-                LoadResult.Error(e)
-            }
-        }
-
-        override fun getRefreshKey(state: PagingState<Int, PostDto>): Int? {
-            return state.anchorPosition?.let { anchorPosition ->
-                state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                    ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
-            }
-        }
-    }
+enum class PostType {
+    POPULAR, NEW, SEARCH, MY
 }
