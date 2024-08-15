@@ -32,8 +32,10 @@ export class MediaController {
       limits: { fileSize: mbToBytes(50) },
     }),
   )
-  upload(@UploadedFile() file: Express.Multer.File) {
-    return this.mediaService.create([file]);
+  async upload(@UploadedFile() file: Express.Multer.File) {
+    const [newFile] = await this.mediaService.create([file]);
+
+    return newFile;
   }
 
   @Post('files')
