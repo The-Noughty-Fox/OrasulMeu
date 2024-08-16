@@ -104,13 +104,12 @@ fun SearchPostsScreen(
                             )
                         }
 
-                        is LoadState.NotLoading -> {
+                        else -> {
                             if (posts.itemCount == 0) {
                                 PostError(modifier = Modifier.fillMaxSize())
+                                return@Column
                             }
-                        }
 
-                        else -> {
                             LazyColumn {
                                 items(
                                     posts.itemCount,

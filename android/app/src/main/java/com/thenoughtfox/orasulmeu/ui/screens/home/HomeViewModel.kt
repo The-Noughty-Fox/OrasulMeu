@@ -6,9 +6,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.filter
 import androidx.paging.map
+import com.mapbox.geojson.Point
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
+import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
@@ -30,10 +31,14 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.models.PostDto
 import org.openapitools.client.models.ReactToPostDto
+import org.openapitools.client.models.ReactToPostDto.Reaction
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val api: PostsApi,
+    private val userSharedPrefs: UserSharedPrefs
+) : ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State(isLoading = true))
     val state = _state.asStateFlow()
@@ -51,17 +56,18 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
         handleEvents()
         getAllPopularPosts()
         getAllPaginationPosts()
+        setInitialLocation()
     }
 
     private fun handleEvents() = viewModelScope.launch {
         _event.consumeAsFlow().collect { event ->
             when (event) {
                 is Event.DislikePost -> {
-                    reactToPost(event.postId, ReactToPostDto.React.dislike)
+                    reactToPost(event.postId, Reaction.dislike)
                 }
 
                 is Event.LikePost -> {
-                    reactToPost(event.postId, ReactToPostDto.React.like)
+                    reactToPost(event.postId, Reaction.like)
                 }
 
                 is Event.RevokeReaction -> {
@@ -85,39 +91,31 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
                 }
 
                 is Event.NavigateToUser -> {
+                    userSharedPrefs.user = userSharedPrefs.user?.copy(
+                        latitude = event.point.latitude(),
+                        longitude = event.point.longitude()
+                    )
+
                     _state.update { it.copy(lastLocation = event.point) }
                     _action.emit(Action.MoveToLocation(event.point))
+                }
+
+                Event.Refresh -> {
+                    _state.update { it.copy(isRefreshing = true) }
+                    getAllPaginationPosts()
+                    _state.update { it.copy(isRefreshing = false) }
                 }
             }
         }
     }
 
-    private fun getAllPaginationPosts() {
-        _state.update { it.copy(isLoading = true) }
-        val newPosts: Flow<PagingData<PostDto>> = Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.NEW)
-            }
-        ).flow.cachedIn(viewModelScope)
-
-        val popularPosts: Flow<PagingData<PostDto>> = Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.POPULAR)
-            }
-        ).flow.cachedIn(viewModelScope)
+    private fun setInitialLocation() {
+        val lat = userSharedPrefs.user?.latitude ?: return
+        val lon = userSharedPrefs.user?.longitude ?: return
 
         _state.update {
             it.copy(
-                paginationNewPosts = newPosts,
-                paginationPopularPosts = popularPosts,
+                lastLocation = Point.fromLngLat(lon, lat),
                 isLoading = true
             )
         }
@@ -132,6 +130,39 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
                     it.copy(isLoading = false, popularPosts = reactedPosts)
                 }
             }
+    }
+
+    private fun getAllPaginationPosts() = viewModelScope.launch {
+        val newPosts: Flow<PagingData<PostDto>> = Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                CombinedPostsPagingSource(api).getPostsPagingSource(
+                    type = PostType.NEW
+                )
+            }
+        ).flow.cachedIn(viewModelScope)
+
+        val popularPosts: Flow<PagingData<PostDto>> = Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                CombinedPostsPagingSource(api).getPostsPagingSource(
+                    type = PostType.POPULAR
+                )
+            }
+        ).flow.cachedIn(viewModelScope)
+
+        _state.update {
+            it.copy(
+                paginationNewPosts = newPosts,
+                paginationPopularPosts = popularPosts
+            )
+        }
     }
 
     private fun applyNewSorting(newValue: HomeContract.PostListSorting) {
@@ -158,23 +189,27 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
         _state.update { it.copy(searchResult = posts) }
     }
 
-    private suspend fun reactToPost(postId: Int, reactionToSend: ReactToPostDto.React) {
+    private suspend fun reactToPost(postId: Int, reactionToSend: Reaction) {
         api.reactToPost(postId, ReactToPostDto(reactionToSend))
             .toOperationResult { it }
             .onSuccess { reactPost ->
                 val newPosts = _state.value.paginationNewPosts.map { pagingData ->
-                    pagingData.filter {
-                        it.id == reactPost.id
-                    }.map {
-                        it.copy(reactions = reactPost.reactions)
+                    pagingData.map {
+                        if (it.id == reactPost.id) {
+                            it.copy(reactions = reactPost.reactions)
+                        } else {
+                            it
+                        }
                     }
                 }
 
                 val popularPosts = _state.value.paginationPopularPosts.map { pagingData ->
-                    pagingData.filter {
-                        it.id == reactPost.id
-                    }.map {
-                        it.copy(reactions = reactPost.reactions)
+                    pagingData.map {
+                        if (it.id == reactPost.id) {
+                            it.copy(reactions = reactPost.reactions)
+                        } else {
+                            it
+                        }
                     }
                 }
 
@@ -192,18 +227,22 @@ class HomeViewModel @Inject constructor(private val api: PostsApi) : ViewModel()
             .toOperationResult { it }
             .onSuccess { reactPost ->
                 val newPosts = _state.value.paginationNewPosts.map { pagingData ->
-                    pagingData.filter {
-                        it.id == reactPost.id
-                    }.map {
-                        it.copy(reactions = reactPost.reactions)
+                    pagingData.map {
+                        if (it.id == reactPost.id) {
+                            it.copy(reactions = reactPost.reactions)
+                        } else {
+                            it
+                        }
                     }
                 }
 
                 val popularPosts = _state.value.paginationPopularPosts.map { pagingData ->
-                    pagingData.filter {
-                        it.id == reactPost.id
-                    }.map {
-                        it.copy(reactions = reactPost.reactions)
+                    pagingData.map {
+                        if (it.id == reactPost.id) {
+                            it.copy(reactions = reactPost.reactions)
+                        } else {
+                            it
+                        }
                     }
                 }
 

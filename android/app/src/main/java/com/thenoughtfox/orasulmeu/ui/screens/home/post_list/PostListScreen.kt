@@ -24,6 +24,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -69,6 +73,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListSorting
 import com.thenoughtfox.orasulmeu.ui.screens.home.PostLoading
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PostListScreen(
     state: HomeContract.State,
@@ -85,21 +90,11 @@ fun PostListScreen(
             )
         },
         content = { padding ->
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(128.dp)
-                            .align(Alignment.Center),
-                        color = colorResource(R.color.primary),
-                        strokeWidth = 4.dp
-                    )
-                }
-            } else {
+            val pullRefreshState = rememberPullRefreshState(state.isRefreshing, {
+                sendEvent(HomeContract.Event.Refresh)
+            })
+
+            Box(Modifier.pullRefresh(pullRefreshState)) {
                 val popularListState = rememberLazyListState()
                 val newListState = rememberLazyListState()
                 val scrollState by rememberUpdatedState(
@@ -175,21 +170,27 @@ fun PostListScreen(
                     }
                 }
 
-                if (state.messageToShow != null) {
-                    AlertDialog(
-                        onDismissRequest = {
+                PullRefreshIndicator(
+                    state.isRefreshing,
+                    pullRefreshState,
+                    Modifier.align(Alignment.TopCenter)
+                )
+            }
+
+            if (state.messageToShow != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        sendEvent(HomeContract.Event.CloseMessage)
+                    },
+                    confirmButton = {
+                        Button(onClick = {
                             sendEvent(HomeContract.Event.CloseMessage)
-                        },
-                        confirmButton = {
-                            Button(onClick = {
-                                sendEvent(HomeContract.Event.CloseMessage)
-                            }) {
-                                Text(text = "Okay")
-                            }
-                        },
-                        title = { Text(text = state.messageToShow) },
-                    )
-                }
+                        }) {
+                            Text(text = "Okay")
+                        }
+                    },
+                    title = { Text(text = state.messageToShow) },
+                )
             }
         }
     )

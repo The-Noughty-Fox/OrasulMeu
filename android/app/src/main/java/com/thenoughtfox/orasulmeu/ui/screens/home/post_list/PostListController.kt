@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PostListController(viewModel: HomeViewModel) {
+
     val scope = rememberCoroutineScope()
     val navigator = LocalMainNavigator.current
 
