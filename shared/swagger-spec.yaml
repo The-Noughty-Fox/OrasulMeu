@@ -798,13 +798,13 @@ components:
     ReactToPostDto:
       type: object
       properties:
-        react:
+        reaction:
           type: string
           enum:
             - like
             - dislike
       required:
-        - react
+        - reaction
     MediaDto:
       type: object
       properties:

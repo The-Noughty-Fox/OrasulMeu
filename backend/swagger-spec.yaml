@@ -467,6 +467,7 @@ paths:
             type: integer
       requestBody:
         required: true
+        description: File data
         content:
           multipart/form-data:
             schema:
@@ -797,13 +798,13 @@ components:
     ReactToPostDto:
       type: object
       properties:
-        react:
+        reaction:
           type: string
           enum:
             - like
             - dislike
       required:
-        - react
+        - reaction
     MediaDto:
       type: object
       properties:
