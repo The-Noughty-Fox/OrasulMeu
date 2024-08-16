@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openapitools.client.models.PostDto
 
 class MapboxMapView @JvmOverloads constructor(
@@ -166,7 +167,9 @@ class MapboxMapView @JvmOverloads constructor(
             }
         }
 
-        pointAnnotationManager?.create(pointAnnotationOptions.filterNotNull())
+        withContext(Dispatchers.Main) {
+            pointAnnotationManager?.create(pointAnnotationOptions.filterNotNull())
+        }
     }
 
     fun onPostClick(onPostClick: (PostDto) -> Unit) {

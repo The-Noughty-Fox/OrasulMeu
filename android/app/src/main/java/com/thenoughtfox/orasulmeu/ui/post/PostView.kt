@@ -144,25 +144,25 @@ fun PostView(
 
         CombinedTitleWithBody(title = state.title, body = state.textContent)
 
-        // comments
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_expand),
-                contentDescription = stringResource(R.string.show_comments_icon_desc),
-                tint = colorResource(R.color.comment_area),
-                modifier = Modifier.size(24.dp)
-            )
-
-            Text(
-                text = stringResource(R.string.open_comments_text),
-                style = TextStyle(fontSize = 14.sp, color = colorResource(R.color.comment_area))
-            )
-        }
+        // TODO comments
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp, vertical = 8.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Icon(
+//                painter = painterResource(R.drawable.ic_expand),
+//                contentDescription = stringResource(R.string.show_comments_icon_desc),
+//                tint = colorResource(R.color.comment_area),
+//                modifier = Modifier.size(24.dp)
+//            )
+//
+//            Text(
+//                text = stringResource(R.string.open_comments_text),
+//                style = TextStyle(fontSize = 14.sp, color = colorResource(R.color.comment_area))
+//            )
+//        }
 
         if (shouldShowReportAlert) {
             AlertDialog(
@@ -243,12 +243,14 @@ private fun CombinedTitleWithBody(title: String, body: String) {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
             append(title)
         }
+
         append(" $body")
     }
+
     Text(
         text = text,
         style = TextStyle(fontSize = 14.sp),
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
         maxLines = 2,
         overflow = TextOverflow.Ellipsis
     )

@@ -15,30 +15,32 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
-import coil.decode.VideoFrameDecoder
-import com.skydoves.landscapist.ImageOptions
-import com.skydoves.landscapist.coil.CoilImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
+import kotlinx.coroutines.Dispatchers
 import org.openapitools.client.models.MediaSupabaseDto
 
 @Composable
 fun MediaView(mediaItem: MediaSupabaseDto, modifier: Modifier = Modifier) {
-    CoilImage(
+    val imageRequest = ImageRequest.Builder(LocalContext.current)
+        .data(mediaItem.url)
+        .dispatcher(Dispatchers.IO)
+        .memoryCacheKey(mediaItem.url)
+        .diskCacheKey(mediaItem.url)
+        .diskCachePolicy(CachePolicy.ENABLED)
+        .memoryCachePolicy(CachePolicy.ENABLED)
+        .crossfade(true)
+        .build()
+
+    SubcomposeAsyncImage(
+        model = imageRequest,
+        contentDescription = "image",
         modifier = modifier,
-        imageModel = { mediaItem.url },
-        previewPlaceholder = R.drawable.photo_placeholder,
-        imageOptions = ImageOptions(
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.Center
-        ),
-        imageLoader = {
-            // for video thumbnail
-            ImageLoader.Builder(LocalContext.current)
-                .components { add(VideoFrameDecoder.Factory()) }
-                .build()
-        },
+        contentScale = ContentScale.Crop,
+        alignment = Alignment.Center,
         loading = {
             CircularProgressIndicator(
                 modifier = modifier.padding(175.dp),
@@ -46,7 +48,7 @@ fun MediaView(mediaItem: MediaSupabaseDto, modifier: Modifier = Modifier) {
                 strokeWidth = 4.dp
             )
         },
-        failure = {
+        error = {
             Icon(
                 modifier = modifier.padding(16.dp),
                 painter = painterResource(R.drawable.image_loading_failed_pic),

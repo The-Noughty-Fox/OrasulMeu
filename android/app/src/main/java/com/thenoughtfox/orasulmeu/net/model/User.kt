@@ -5,4 +5,6 @@ data class User(
     val email: String? = null,
     val socialProfilePictureUrl: String? = null,
     val userName: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
 )
