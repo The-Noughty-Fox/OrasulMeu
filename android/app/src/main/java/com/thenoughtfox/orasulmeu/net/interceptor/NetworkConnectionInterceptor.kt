@@ -11,6 +11,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody
 import java.io.IOException
+import java.net.SocketException
 
 class NetworkConnectionInterceptor(private val context: Context) : Interceptor {
 
@@ -25,6 +26,10 @@ class NetworkConnectionInterceptor(private val context: Context) : Interceptor {
             } else {
                 chain.proceed(chain.request())
             }
+        } catch (s: SocketException) {
+            createEmptyResponse(chain, "Socket closed")
+        } catch (io: IOException) {
+            createEmptyResponse(chain, "IOException")
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 context.showToast(context.getString(R.string.smth_went_wrong))
@@ -34,12 +39,15 @@ class NetworkConnectionInterceptor(private val context: Context) : Interceptor {
         }
     }
 
-    private fun createEmptyResponse(chain: Interceptor.Chain): Response {
+    private fun createEmptyResponse(
+        chain: Interceptor.Chain,
+        message: String = "Service Unavailable"
+    ): Response {
         return Response.Builder()
             .request(chain.request())
             .protocol(okhttp3.Protocol.HTTP_1_1)
             .code(503) // Service Unavailable
-            .message("Service Unavailable")
+            .message(message)
             .body(ResponseBody.create(null, ""))
             .build()
     }

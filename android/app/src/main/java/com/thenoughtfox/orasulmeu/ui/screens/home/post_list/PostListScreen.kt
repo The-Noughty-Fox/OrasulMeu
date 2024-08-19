@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
@@ -72,6 +72,7 @@ import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListSorting
 import com.thenoughtfox.orasulmeu.ui.screens.home.PostLoading
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
+import org.openapitools.client.models.PostDto
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -79,6 +80,8 @@ fun PostListScreen(
     state: HomeContract.State,
     sendEvent: (HomeContract.Event) -> Unit,
     onSearchClick: () -> Unit = {},
+    newPosts: LazyPagingItems<PostDto>? = null,
+    popularPosts: LazyPagingItems<PostDto>? = null,
 ) {
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
@@ -106,9 +109,9 @@ fun PostListScreen(
                 )
 
                 val posts = if (state.postListSorting == PostListSorting.Popular) {
-                    state.paginationPopularPosts.collectAsLazyPagingItems()
+                    popularPosts!!
                 } else {
-                    state.paginationNewPosts.collectAsLazyPagingItems()
+                    newPosts!!
                 }
 
                 if (posts.loadState.refresh is LoadState.Loading) {

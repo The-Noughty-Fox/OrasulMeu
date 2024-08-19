@@ -17,7 +17,7 @@ interface ProfileContract {
         val isEditing: Boolean = false,
         val newName: String? = null,
         val newImageUri: Uri? = null,
-        val myPosts: Flow<PagingData<PostDto>> = emptyFlow(),
+        val isRefreshing: Boolean = false
     )
 
     sealed interface Event {
@@ -26,6 +26,8 @@ interface ProfileContract {
         data object SaveChanges : Event
         data class ChangeName(val newName: String) : Event
         data class ChangePicture(val image: Uri) : Event
+        data object EnterSettings : Event
+        data object Refresh : Event
     }
 
     sealed interface Action {

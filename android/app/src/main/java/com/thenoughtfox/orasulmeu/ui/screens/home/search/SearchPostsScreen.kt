@@ -42,23 +42,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract
-import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.home.PostError
 import com.thenoughtfox.orasulmeu.ui.screens.home.PostLoading
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
+import org.openapitools.client.models.PostDto
 
 @Composable
 fun SearchPostsScreen(
-    state: State = State(),
     sendEvent: (HomeContract.Event) -> Unit = {},
-    sendNavEvent: (HomeContract.NavEvent) -> Unit = {}
+    sendNavEvent: (HomeContract.NavEvent) -> Unit = {},
+    searchPosts: LazyPagingItems<PostDto>? = null
 ) {
     Scaffold(
         modifier = Modifier
@@ -74,7 +74,7 @@ fun SearchPostsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .padding(top = padding.calculateTopPadding())
             ) {
                 var searchText by remember { mutableStateOf("") }
                 SearchBarView(
@@ -92,10 +92,8 @@ fun SearchPostsScreen(
                         .padding(8.dp)
                 )
 
-                if (searchText.isNotEmpty()) {
-                    val posts = state.searchResult.collectAsLazyPagingItems()
-
-                    when (posts.loadState.refresh) {
+                if (searchText.isNotEmpty() && searchPosts != null) {
+                    when (searchPosts.loadState.refresh) {
                         is LoadState.Loading -> {
                             PostLoading(
                                 modifier = Modifier
@@ -105,17 +103,17 @@ fun SearchPostsScreen(
                         }
 
                         else -> {
-                            if (posts.itemCount == 0) {
+                            if (searchPosts.itemCount == 0) {
                                 PostError(modifier = Modifier.fillMaxSize())
                                 return@Column
                             }
 
                             LazyColumn {
                                 items(
-                                    posts.itemCount,
-                                    key = posts.itemKey { it.id }
+                                    searchPosts.itemCount,
+                                    key = searchPosts.itemKey { it.id }
                                 ) { index ->
-                                    val post = posts[index]
+                                    val post = searchPosts[index]
                                     // Display the message or a placeholder.
                                     if (post != null) {
                                         PostView(state = post.toState()) { e ->
@@ -148,7 +146,7 @@ fun SearchPostsScreen(
                                     }
                                 }
 
-                                if (posts.loadState.append is LoadState.Loading) {
+                                if (searchPosts.loadState.append is LoadState.Loading) {
                                     item {
                                         Box(
                                             Modifier

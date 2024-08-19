@@ -3,6 +3,7 @@ package com.thenoughtfox.orasulmeu.ui.screens.profile
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.InvalidatingPagingSourceFactory
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -55,9 +56,17 @@ class ProfileViewModel @Inject constructor(
 
     val event = Channel<Event>(Channel.UNLIMITED)
 
+    private val postsInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
+        CombinedPostsPagingSource(postsApi).getPostsPagingSource(type = PostType.MY)
+    }
+
+    val myPosts: Flow<PagingData<PostDto>> = Pager(
+        config = PagingConfig(pageSize = 20),
+        pagingSourceFactory = postsInvalidatingSourceFactory
+    ).flow.cachedIn(viewModelScope)
+
     init {
         handleEvents()
-        getMyPosts()
         userSharedPrefs.user?.let { user ->
             _state.update {
                 it.copy(
@@ -101,6 +110,14 @@ class ProfileViewModel @Inject constructor(
                             imageUrl = userSharedPrefs.user?.socialProfilePictureUrl
                         )
                     }
+                }
+
+                Event.EnterSettings -> postsInvalidatingSourceFactory.invalidate()
+
+                Event.Refresh -> {
+                    _state.update { it.copy(isRefreshing = true) }
+                    postsInvalidatingSourceFactory.invalidate()
+                    _state.update { it.copy(isRefreshing = false) }
                 }
             }
         }
@@ -164,19 +181,5 @@ class ProfileViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun getMyPosts() = viewModelScope.launch {
-        val myPosts: Flow<PagingData<PostDto>> = Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                CombinedPostsPagingSource(postsApi).getPostsPagingSource(type = PostType.MY)
-            }
-        ).flow.cachedIn(viewModelScope)
-
-        _state.update { it.copy(myPosts = myPosts) }
     }
 }

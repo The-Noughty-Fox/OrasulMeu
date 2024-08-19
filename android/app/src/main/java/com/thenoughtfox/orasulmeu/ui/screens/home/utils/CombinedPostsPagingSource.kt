@@ -22,7 +22,14 @@ class CombinedPostsPagingSource(private val api: PostsApi) {
                     }
 
                     PostType.NEW -> api.getAllPosts(position, params.loadSize)
-                    PostType.SEARCH -> api.getPostsByPhrase(position, params.loadSize, phrase)
+                    PostType.SEARCH -> {
+                        if (phrase.isNotEmpty()) {
+                            api.getPostsByPhrase(position, params.loadSize, phrase)
+                        } else {
+                            return LoadResult.Page(emptyList(), null, null)
+                        }
+                    }
+
                     PostType.MY -> api.getMyPosts(position, params.loadSize)
                 }
 

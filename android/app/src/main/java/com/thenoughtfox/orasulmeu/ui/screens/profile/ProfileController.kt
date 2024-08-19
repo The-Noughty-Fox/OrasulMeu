@@ -14,6 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.config.SelectModeConfig
@@ -57,8 +58,9 @@ fun ProfileController() {
     }
 
     ProfileScreen(
+        posts = viewModel.myPosts.collectAsLazyPagingItems(),
         state = viewModel.state.collectAsState().value,
-        onSendEvent = { event ->
+        sendEvent = { event ->
             scope.launch {
                 viewModel.event.send(event)
             }

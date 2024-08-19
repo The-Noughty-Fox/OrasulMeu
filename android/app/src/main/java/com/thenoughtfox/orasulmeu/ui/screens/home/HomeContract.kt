@@ -1,22 +1,18 @@
 package com.thenoughtfox.orasulmeu.ui.screens.home
 
-import androidx.paging.PagingData
 import com.mapbox.geojson.Point
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import org.openapitools.client.models.PostDto
+import org.openapitools.client.models.PostReactionsDto
 
 interface HomeContract {
     data class State(
-        val paginationNewPosts: Flow<PagingData<PostDto>> = emptyFlow(),
-        val paginationPopularPosts: Flow<PagingData<PostDto>> = emptyFlow(),
         val popularPosts : List<PostDto> = emptyList(),
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,
         val lastLocation: Point? = null,
         val messageToShow: String? = null,
         val postListSorting: PostListSorting = PostListSorting.Popular,
-        val searchResult: Flow<PagingData<PostDto>> = emptyFlow()
+        val searchText: String = ""
     )
 
     sealed interface Event {
@@ -37,6 +33,10 @@ interface HomeContract {
 
     sealed interface NavEvent {
         data object GoBack : NavEvent
+    }
+
+    sealed interface PostListEvents {
+        data class Reaction(val postId: Int, val reactionsDto: PostReactionsDto) : PostListEvents
     }
 
     enum class PostListSorting {

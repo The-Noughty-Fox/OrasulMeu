@@ -2,6 +2,7 @@ package com.thenoughtfox.orasulmeu.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.InvalidatingPagingSourceFactory
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -12,20 +13,19 @@ import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListEvents
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.PostType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.PostsApi
@@ -48,6 +48,55 @@ class HomeViewModel @Inject constructor(
     private val _action = MutableSharedFlow<Action>()
     val action: SharedFlow<Action> = _action
 
+    private val modificationEvents = MutableStateFlow<List<PostListEvents>>(emptyList())
+
+    private val newPostsInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
+        CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.NEW)
+    }
+
+    val newPostsPager = Pager(
+        PagingConfig(pageSize = 20),
+        pagingSourceFactory = newPostsInvalidatingSourceFactory
+    ).flow
+        .cachedIn(viewModelScope)
+        .combine(modificationEvents) { pagingData, modifications ->
+            modifications.fold(pagingData) { acc, event ->
+                applyPostListEvents(acc, event)
+            }
+        }
+
+    private val popularPostsInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
+        CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.POPULAR)
+    }
+
+    val popularPostsPager = Pager(
+        PagingConfig(pageSize = 20),
+        pagingSourceFactory = popularPostsInvalidatingSourceFactory
+    ).flow
+        .cachedIn(viewModelScope)
+        .combine(modificationEvents) { pagingData, modifications ->
+            modifications.fold(pagingData) { acc, event ->
+                applyPostListEvents(acc, event)
+            }
+        }
+
+    private val searchInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
+        CombinedPostsPagingSource(api).getPostsPagingSource(
+            type = PostType.SEARCH, phrase = state.value.searchText
+        )
+    }
+
+    val searchPostsPager = Pager(
+        PagingConfig(pageSize = 20),
+        pagingSourceFactory = searchInvalidatingSourceFactory
+    ).flow
+        .cachedIn(viewModelScope)
+        .combine(modificationEvents) { pagingData, modifications ->
+            modifications.fold(pagingData) { acc, event ->
+                applyPostListEvents(acc, event)
+            }
+        }
+
     suspend fun sendEvent(a: Event) {
         _event.send(a)
     }
@@ -55,7 +104,6 @@ class HomeViewModel @Inject constructor(
     init {
         handleEvents()
         getAllPopularPosts()
-        getAllPaginationPosts()
         setInitialLocation()
     }
 
@@ -102,7 +150,12 @@ class HomeViewModel @Inject constructor(
 
                 Event.Refresh -> {
                     _state.update { it.copy(isRefreshing = true) }
-                    getAllPaginationPosts()
+                    if (state.value.postListSorting == HomeContract.PostListSorting.New) {
+                        newPostsInvalidatingSourceFactory.invalidate()
+                    } else {
+                        popularPostsInvalidatingSourceFactory.invalidate()
+                    }
+
                     _state.update { it.copy(isRefreshing = false) }
                 }
             }
@@ -132,36 +185,20 @@ class HomeViewModel @Inject constructor(
             }
     }
 
-    private fun getAllPaginationPosts() = viewModelScope.launch {
-        val newPosts: Flow<PagingData<PostDto>> = Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                CombinedPostsPagingSource(api).getPostsPagingSource(
-                    type = PostType.NEW
-                )
+    private fun applyPostListEvents(
+        paging: PagingData<PostDto>,
+        events: PostListEvents
+    ): PagingData<PostDto> {
+        return when (events) {
+            is PostListEvents.Reaction -> {
+                paging.map {
+                    if (it.id == events.postId) {
+                        it.copy(reactions = events.reactionsDto)
+                    } else {
+                        it
+                    }
+                }
             }
-        ).flow.cachedIn(viewModelScope)
-
-        val popularPosts: Flow<PagingData<PostDto>> = Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                CombinedPostsPagingSource(api).getPostsPagingSource(
-                    type = PostType.POPULAR
-                )
-            }
-        ).flow.cachedIn(viewModelScope)
-
-        _state.update {
-            it.copy(
-                paginationNewPosts = newPosts,
-                paginationPopularPosts = popularPosts
-            )
         }
     }
 
@@ -170,52 +207,19 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun searchPosts(text: String) = viewModelScope.launch {
-        if (text.isEmpty()) {
-            _state.update { it.copy(searchResult = emptyFlow()) }
+        if (text.isEmpty() || text.isBlank()) {
+            return@launch
         }
 
-        val posts: Flow<PagingData<PostDto>> = Pager(
-            config = PagingConfig(
-                pageSize = 20,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                CombinedPostsPagingSource(api).getPostsPagingSource(
-                    type = PostType.SEARCH, phrase = text
-                )
-            }
-        ).flow.cachedIn(viewModelScope)
-
-        _state.update { it.copy(searchResult = posts) }
+        _state.update { it.copy(searchText = text) }
+        searchInvalidatingSourceFactory.invalidate()
     }
 
     private suspend fun reactToPost(postId: Int, reactionToSend: Reaction) {
         api.reactToPost(postId, ReactToPostDto(reactionToSend))
             .toOperationResult { it }
             .onSuccess { reactPost ->
-                val newPosts = _state.value.paginationNewPosts.map { pagingData ->
-                    pagingData.map {
-                        if (it.id == reactPost.id) {
-                            it.copy(reactions = reactPost.reactions)
-                        } else {
-                            it
-                        }
-                    }
-                }
-
-                val popularPosts = _state.value.paginationPopularPosts.map { pagingData ->
-                    pagingData.map {
-                        if (it.id == reactPost.id) {
-                            it.copy(reactions = reactPost.reactions)
-                        } else {
-                            it
-                        }
-                    }
-                }
-
-                _state.update {
-                    it.copy(paginationNewPosts = newPosts, paginationPopularPosts = popularPosts)
-                }
+                modificationEvents.value += PostListEvents.Reaction(postId, reactPost.reactions)
             }
             .onError { error ->
                 _state.update { it.copy(messageToShow = error) }
@@ -226,29 +230,7 @@ class HomeViewModel @Inject constructor(
         api.retrieveReactionToPost(id = postId)
             .toOperationResult { it }
             .onSuccess { reactPost ->
-                val newPosts = _state.value.paginationNewPosts.map { pagingData ->
-                    pagingData.map {
-                        if (it.id == reactPost.id) {
-                            it.copy(reactions = reactPost.reactions)
-                        } else {
-                            it
-                        }
-                    }
-                }
-
-                val popularPosts = _state.value.paginationPopularPosts.map { pagingData ->
-                    pagingData.map {
-                        if (it.id == reactPost.id) {
-                            it.copy(reactions = reactPost.reactions)
-                        } else {
-                            it
-                        }
-                    }
-                }
-
-                _state.update {
-                    it.copy(paginationNewPosts = newPosts, paginationPopularPosts = popularPosts)
-                }
+                modificationEvents.value += PostListEvents.Reaction(postId, reactPost.reactions)
             }
             .onError { error ->
                 _state.update { it.copy(messageToShow = error) }
