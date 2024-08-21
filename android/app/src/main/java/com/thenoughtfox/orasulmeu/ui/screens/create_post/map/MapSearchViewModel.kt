@@ -79,8 +79,10 @@ class MapSearchViewModel @Inject constructor(
                     searchEngine.search(event.text, searchOptions, searchCallback)
                 }
 
-                is Event.OnCameraTrackingDismissed ->
+                is Event.OnCameraTrackingDismissed -> {
+                    _state.update { it.copy(searchText = "") }
                     searchEngine.search(event.geo, reverseSearchCallback)
+                }
 
                 is Event.OnSearchSuggestionClicked -> {
                     val shortAddress =

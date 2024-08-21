@@ -174,6 +174,7 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
 
         SearchBarView(
             searchText = state.searchText,
+            address = state.address,
             modifier = Modifier
                 .constrainAs(search) {
                     start.linkTo(parent.start)
@@ -298,6 +299,7 @@ private fun SuggestionListView(
 private fun SearchBarView(
     modifier: Modifier,
     searchText: String,
+    address: String,
     onValueChanged: (String) -> Unit,
     onClear: () -> Unit = {}
 ) {
@@ -329,7 +331,7 @@ private fun SearchBarView(
             maxLines = 1,
             placeholder = {
                 Text(
-                    text = stringResource(id = R.string.search_address),
+                    text = address.ifEmpty { stringResource(id = R.string.search_address) },
                     color = Color.Black,
                     fontSize = 14.sp
                 )
