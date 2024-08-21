@@ -3,15 +3,15 @@ package com.thenoughtfox.orasulmeu.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.thenoughtfox.orasulmeu.ui.screens.login.LoginController
-import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import kotlinx.serialization.Serializable
 
 interface RootNavDestinations {
@@ -28,6 +28,8 @@ interface RootNavDestinations {
 @Composable
 fun RootGraph(startDestinations: RootNavDestinations) {
     val navController = rememberNavController()
+    val sharedViewModel: SharedViewModel = hiltViewModel()
+
     CompositionLocalProvider(LocalRootNavigator provides navController) {
         NavHost(
             navController = navController,
@@ -35,8 +37,8 @@ fun RootGraph(startDestinations: RootNavDestinations) {
             modifier = Modifier.fillMaxSize()
         ) {
             composable<RootNavDestinations.Auth> { LoginController() }
-            composable<RootNavDestinations.Main> { MainGraph() }
-            composable<RootNavDestinations.CreatePostScreen> { CreatePostGraph() }
+            composable<RootNavDestinations.Main> { MainGraph(sharedViewModel) }
+            composable<RootNavDestinations.CreatePostScreen> { CreatePostGraph(sharedViewModel) }
         }
     }
 }

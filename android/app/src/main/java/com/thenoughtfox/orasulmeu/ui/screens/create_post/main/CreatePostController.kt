@@ -11,13 +11,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.thenoughtfox.orasulmeu.navigation.CreatePostDestinations
 import com.thenoughtfox.orasulmeu.navigation.LocalCreatePostNavigator
 import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
+import com.thenoughtfox.orasulmeu.navigation.RootNavDestinations
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun CreatePostController(viewModel: CreatePostViewModel) {
+fun CreatePostController(viewModel: CreatePostViewModel, sharedViewModel: SharedViewModel) {
 
     val scope = rememberCoroutineScope()
     val navController = LocalCreatePostNavigator.current
@@ -29,7 +32,15 @@ fun CreatePostController(viewModel: CreatePostViewModel) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.action.collect { action ->
                 when (action) {
-                    CreatePostContract.Action.GoMain -> rootNavigator.navigateUp()
+                    CreatePostContract.Action.GoMain -> {
+                        sharedViewModel.sendEvent(Event.CreatePost)
+                        rootNavigator.navigate(RootNavDestinations.Main) {
+                            popUpTo(RootNavDestinations.Main) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
                     else -> Unit
                 }
             }

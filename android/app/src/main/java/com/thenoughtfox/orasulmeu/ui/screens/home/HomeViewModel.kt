@@ -14,6 +14,7 @@ import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListEvents
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListSorting
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.State
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.PostType
@@ -150,13 +151,18 @@ class HomeViewModel @Inject constructor(
 
                 Event.Refresh -> {
                     _state.update { it.copy(isRefreshing = true) }
-                    if (state.value.postListSorting == HomeContract.PostListSorting.New) {
+                    if (state.value.postListSorting == PostListSorting.New) {
                         newPostsInvalidatingSourceFactory.invalidate()
                     } else {
                         popularPostsInvalidatingSourceFactory.invalidate()
                     }
 
                     _state.update { it.copy(isRefreshing = false) }
+                }
+
+                Event.RefreshNewPosts -> {
+                    _state.update { it.copy(postListSorting = PostListSorting.New) }
+                    newPostsInvalidatingSourceFactory.invalidate()
                 }
             }
         }
@@ -202,7 +208,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun applyNewSorting(newValue: HomeContract.PostListSorting) {
+    private fun applyNewSorting(newValue: PostListSorting) {
         _state.update { it.copy(postListSorting = newValue) }
     }
 

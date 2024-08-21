@@ -19,11 +19,8 @@ import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.camera.CameraController
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.map.MapSearchController
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.CreatePostMediaController
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import kotlinx.serialization.Serializable
-
-/**
- * @author Knurenko Bogdan 28.06.2024
- */
 
 interface CreatePostDestinations {
     @Serializable
@@ -40,7 +37,7 @@ interface CreatePostDestinations {
 }
 
 @Composable
-fun CreatePostGraph() {
+fun CreatePostGraph(sharedViewModel: SharedViewModel) {
     val createPostNavController = rememberNavController()
     val createPostViewModel: CreatePostViewModel = hiltViewModel()
 
@@ -58,7 +55,7 @@ fun CreatePostGraph() {
             }
 
             composable<CreatePostDestinations.CreatePostScreen> {
-                CreatePostController(createPostViewModel)
+                CreatePostController(createPostViewModel, sharedViewModel)
             }
 
             composable<CreatePostDestinations.MapSearchScreen> {

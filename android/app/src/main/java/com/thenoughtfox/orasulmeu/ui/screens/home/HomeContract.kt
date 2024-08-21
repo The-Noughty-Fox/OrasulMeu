@@ -25,6 +25,7 @@ interface HomeContract {
         data class SelectListSorting(val sortType: PostListSorting) : Event
         data class SearchPostWithText(val searchText: String) : Event
         data object Refresh : Event
+        data object RefreshNewPosts : Event
     }
 
     sealed interface Action{

@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeController
 import com.thenoughtfox.orasulmeu.ui.screens.home.search.SearchPostsController
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavBar
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
 import kotlinx.serialization.Serializable
@@ -39,7 +40,7 @@ interface MainGraphDestinations {
 }
 
 @Composable
-fun MainGraph() {
+fun MainGraph(sharedViewModel: SharedViewModel) {
     val navController = rememberNavController()
 
     CompositionLocalProvider(LocalMainNavigator provides navController) {
@@ -108,7 +109,7 @@ fun MainGraph() {
                         .padding(bottom = padding.calculateBottomPadding())
                 ) {
                     composable<MainGraphDestinations.HomeScreen> {
-                        HomeController()
+                        HomeController(sharedViewModel)
                     }
 
                     composable<MainGraphDestinations.SearchPostsScreen> {

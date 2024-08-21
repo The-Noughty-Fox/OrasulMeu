@@ -2,7 +2,7 @@ package com.thenoughtfox.orasulmeu.ui.post
 
 import org.openapitools.client.models.MediaSupabaseDto
 
-interface PostContract {
+object PostContract {
 
     data class State(
         val id: Int = 0,
