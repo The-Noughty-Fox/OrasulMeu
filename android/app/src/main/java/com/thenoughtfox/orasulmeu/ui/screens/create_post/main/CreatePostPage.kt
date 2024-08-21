@@ -55,7 +55,7 @@ import com.thenoughtfox.orasulmeu.ui.theme.outlinedTextFieldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 
-const val MAX_TITLE_SYMBOL = 50
+const val MAX_TITLE_SYMBOL = 40
 const val MAX_DESC_SYMBOL = 500
 
 @Composable
