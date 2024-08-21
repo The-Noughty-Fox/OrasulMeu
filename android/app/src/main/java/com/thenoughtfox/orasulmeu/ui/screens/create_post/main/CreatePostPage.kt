@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -54,6 +55,9 @@ import com.thenoughtfox.orasulmeu.ui.theme.outlinedTextFieldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 
+const val MAX_TITLE_SYMBOL = 50
+const val MAX_DESC_SYMBOL = 500
+
 @Composable
 fun CreatePostPage(
     uiState: State,
@@ -68,6 +72,7 @@ fun CreatePostPage(
             .pageModifier()
             .padding(horizontal = 16.dp)
             .verticalScroll(outState)
+            .imePadding()
     ) {
         TopBar(
             titleText = stringResource(id = R.string.create_post_toolbar_title),
@@ -88,8 +93,11 @@ fun CreatePostPage(
         )
 
         OutlinedTextField(
-            value = uiState.title, onValueChange = { text ->
-                onSendEvent(Event.SetTitle(text))
+            value = uiState.title,
+            onValueChange = { text ->
+                if (text.length <= MAX_TITLE_SYMBOL) {
+                    onSendEvent(Event.SetTitle(text))
+                }
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Text,
@@ -111,8 +119,11 @@ fun CreatePostPage(
         )
 
         OutlinedTextField(
-            value = uiState.description, onValueChange = { text ->
-                onSendEvent(Event.SetDescription(text))
+            value = uiState.description,
+            onValueChange = { text ->
+                if (text.length <= MAX_DESC_SYMBOL) {
+                    onSendEvent(Event.SetDescription(text))
+                }
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Text,
@@ -125,7 +136,6 @@ fun CreatePostPage(
                 .outlinedTextFieldModifier()
                 .defaultMinSize(minHeight = 186.dp)
         )
-
 
         //Address
         Text(
