@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -95,19 +96,23 @@ fun PostView(
                 }
             )
 
-            PagerIndicator(pagerState = pagerState, modifier = Modifier.constrainAs(pagerIndication) {
-                centerTo(parent)
-            })
+            PagerIndicator(
+                pagerState = pagerState,
+                modifier = Modifier.constrainAs(pagerIndication) {
+                    centerTo(parent)
+                })
 
-            ThreeDotsIcon(
-                onReportClick = { shouldShowReportAlert = true },
-                modifier = Modifier.constrainAs(threeDots) {
-                    end.linkTo(parent.end)
-                    centerVerticallyTo(parent)
-                }
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
+//TODO uncomment when will be report
+//            ThreeDotsIcon(
+//                onReportClick = { shouldShowReportAlert = true },
+//                modifier = Modifier
+//                    .constrainAs(threeDots) {
+//                        end.linkTo(parent.end)
+//                        centerVerticallyTo(parent)
+//                    }
+//                    .size(24.dp)
+//                    .clip(RoundedCornerShape(16.dp))
+//            )
         }
 
         Text(
@@ -215,24 +220,35 @@ private fun ThreeDotsIcon(onReportClick: () -> Unit, modifier: Modifier = Modifi
 
         )
 
-        DropdownMenu(expanded = isDropDownExpanded,
-            onDismissRequest = { isDropDownExpanded = false }) {
-            DropdownMenuItem(text = {
-                Text(
-                    text = stringResource(R.string.report_post_button_text), style = TextStyle(
-                        color = colorResource(R.color.error), fontSize = 17.sp
-                    )
-                )
-            }, trailingIcon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_report),
-                    tint = colorResource(R.color.error),
-                    contentDescription = stringResource(R.string.report_post_icon_desc)
-                )
-            }, onClick = {
-                isDropDownExpanded = false
-                onReportClick()
-            })
+        MaterialTheme(
+            shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp))
+        ) {
+            DropdownMenu(
+                modifier = Modifier.background(
+                    color = colorResource(R.color.white)
+                ),
+                expanded = isDropDownExpanded,
+                onDismissRequest = { isDropDownExpanded = false }) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(R.string.report_post_button_text),
+                            style = TextStyle(
+                                color = colorResource(R.color.error),
+                                fontSize = 17.sp
+                            )
+                        )
+                    }, trailingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_report),
+                            tint = colorResource(R.color.error),
+                            contentDescription = stringResource(R.string.report_post_icon_desc)
+                        )
+                    }, onClick = {
+                        isDropDownExpanded = false
+                        onReportClick()
+                    })
+            }
         }
     }
 }
