@@ -9,6 +9,7 @@ data class State(
     val isLoading: Boolean = false,
     val suggestions: List<SearchSuggestion> = listOf(),
     val isSuggestionListShow: Boolean = false,
+    val lastLocation: Point? = null,
     val address: String = "",
     val currentPoint: Point = Point.fromLngLat(0.0, 0.0),
     val searchText: String = ""

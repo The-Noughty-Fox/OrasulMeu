@@ -135,14 +135,18 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 factory = {
                     mapView.apply {
+                        if (state.lastLocation != null) {
+                            redirectToLocation(point = state.lastLocation!!)
+                        }
+
                         onLoadMap {
+                            if (state.lastLocation != null) return@onLoadMap
                             locationRequester.launch(
                                 arrayOf(
                                     Manifest.permission.ACCESS_FINE_LOCATION,
                                     Manifest.permission.ACCESS_COARSE_LOCATION,
                                 )
                             )
-
                         }
 
                         onCameraTrackingDismissed {

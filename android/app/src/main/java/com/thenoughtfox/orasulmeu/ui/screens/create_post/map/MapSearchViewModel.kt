@@ -17,6 +17,7 @@ import com.mapbox.search.common.IsoLanguageCode
 import com.mapbox.search.result.SearchAddress
 import com.mapbox.search.result.SearchResult
 import com.mapbox.search.result.SearchSuggestion
+import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.utils.toPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -31,6 +32,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapSearchViewModel @Inject constructor(
+    private val userSharedPrefs: UserSharedPrefs
 ) : ViewModel() {
 
     val event = Channel<Event>(Channel.UNLIMITED)
@@ -59,6 +61,7 @@ class MapSearchViewModel @Inject constructor(
 
     init {
         handleEvents()
+        setInitialLocation()
     }
 
     private fun handleEvents() = viewModelScope.launch {
@@ -70,6 +73,7 @@ class MapSearchViewModel @Inject constructor(
                         ReverseGeoOptions(center = point), reverseSearchCallback
                     )
 
+                    _state.update { it.copy(lastLocation = point) }
                     _action.emit(Action.MoveToLocation(point))
                 }
 
@@ -91,7 +95,12 @@ class MapSearchViewModel @Inject constructor(
                     searchEngine.select(event.suggestion, selectCallback)
                 }
 
-                Event.ClearSearchText -> _state.update { it.copy(searchText = "", isSuggestionListShow = false) }
+                Event.ClearSearchText -> _state.update {
+                    it.copy(
+                        searchText = "",
+                        isSuggestionListShow = false
+                    )
+                }
             }
         }
     }
@@ -182,6 +191,18 @@ class MapSearchViewModel @Inject constructor(
         }
 
         override fun onError(e: Exception) {}
+    }
+
+    private fun setInitialLocation() {
+        val lat = userSharedPrefs.user?.latitude ?: return
+        val lon = userSharedPrefs.user?.longitude ?: return
+
+        _state.update {
+            it.copy(
+                lastLocation = Point.fromLngLat(lon, lat),
+                isLoading = true
+            )
+        }
     }
 
 }
