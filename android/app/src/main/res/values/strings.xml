@@ -76,4 +76,6 @@
     <string name="search_screen_title">Cautare</string>
     <string name="search_for_posts">Cauta postarile</string>
     <string name="search_posts_no_results_message">Niciun rezultat pentru căutarea ta.</string>
+
+    <string name="post_more"> more</string>
 </resources>

@@ -255,20 +255,40 @@ private fun ThreeDotsIcon(onReportClick: () -> Unit, modifier: Modifier = Modifi
 
 @Composable
 private fun CombinedTitleWithBody(title: String, body: String) {
+    val maxLength = 85
+    var isBodyTooLong = false
+    var shouldShowFullComment by remember { mutableStateOf(false) }
+
     val text = buildAnnotatedString {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
             append(title)
         }
 
-        append(" $body")
+        isBodyTooLong = body.count() > maxLength
+        val displayText = if (isBodyTooLong && !shouldShowFullComment) {
+            body.take(maxLength) + "..."
+        } else {
+            body
+        }
+
+        append(" $displayText")
+        if (isBodyTooLong && !shouldShowFullComment) {
+            withStyle(style = SpanStyle(color = colorResource(R.color.comment_area))) {
+                append(stringResource(id = R.string.post_more))
+            }
+        }
     }
 
     Text(
         text = text,
         style = TextStyle(fontSize = 14.sp),
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            .clickable {
+                if (isBodyTooLong) {
+                    shouldShowFullComment = !shouldShowFullComment
+                }
+            },
     )
 }
 
