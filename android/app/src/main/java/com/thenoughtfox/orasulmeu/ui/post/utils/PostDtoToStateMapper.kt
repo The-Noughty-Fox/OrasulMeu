@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.openapitools.client.models.PostDto
 import org.openapitools.client.models.PostReactionsDto
 
@@ -16,7 +17,8 @@ object PostDtoToStateMapper {
         media = this.media,
         reaction = this.reactions.mapReaction(),
         address = this.locationAddress,
-        time = DateTime.parse(this.createdAt).toString("HH:mm - dd.MM.yyyy")
+        time = DateTime.parse(this.createdAt).withZone(DateTimeZone.getDefault())
+            .toString("HH:mm - dd.MM.yyyy")
     )
 
     private fun PostReactionsDto.mapReaction(): PostContract.Reaction {
