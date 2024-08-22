@@ -18,13 +18,13 @@ export const getPaginationSchema = (
         example,
       },
       total: {
-        type: 'number',
+        type: 'integer',
       },
       page: {
-        type: 'number',
+        type: 'integer',
       },
       limit: {
-        type: 'number',
+        type: 'integer',
       },
     },
   }) as SchemaObject & Partial<ReferenceObject>;
