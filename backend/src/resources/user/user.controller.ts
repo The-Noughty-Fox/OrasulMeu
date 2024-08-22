@@ -52,7 +52,7 @@ export class UserController {
 
   @Get('profile/:id')
   @ApiOperation({ operationId: 'get-user-profile' })
-  @ApiParam({ name: 'id', description: 'User id', type: 'number' })
+  @ApiParam({ name: 'id', description: 'User id', type: 'integer' })
   @ApiResponse({
     description: 'User profile found',
     type: UserProfileDto,
@@ -67,7 +67,7 @@ export class UserController {
     description: 'User found',
     type: UserDto,
   })
-  @ApiParam({ name: 'id', description: 'User id', type: 'number' })
+  @ApiParam({ name: 'id', description: 'User id', type: 'integer' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }

@@ -82,7 +82,7 @@ paths:
           in: path
           description: User id
           schema:
-            type: number
+            type: integer
       responses:
         default:
           description: User profile found
@@ -101,7 +101,7 @@ paths:
           in: path
           description: User id
           schema:
-            type: number
+            type: integer
       responses:
         default:
           description: User found
@@ -241,11 +241,11 @@ paths:
                     items:
                       $ref: "#/components/schemas/PostDto"
                   total:
-                    type: number
+                    type: integer
                   page:
-                    type: number
+                    type: integer
                   limit:
-                    type: number
+                    type: integer
       tags: *a3
   /posts/search:
     get:
@@ -282,11 +282,11 @@ paths:
                     items:
                       $ref: "#/components/schemas/PostDto"
                   total:
-                    type: number
+                    type: integer
                   page:
-                    type: number
+                    type: integer
                   limit:
-                    type: number
+                    type: integer
       tags: *a3
   /posts/reaction:
     get:
@@ -318,11 +318,11 @@ paths:
                     items:
                       $ref: "#/components/schemas/PostDto"
                   total:
-                    type: number
+                    type: integer
                   page:
-                    type: number
+                    type: integer
                   limit:
-                    type: number
+                    type: integer
       tags: *a3
   /posts/my:
     get:
@@ -354,11 +354,11 @@ paths:
                     items:
                       $ref: "#/components/schemas/PostDto"
                   total:
-                    type: number
+                    type: integer
                   page:
-                    type: number
+                    type: integer
                   limit:
-                    type: number
+                    type: integer
       tags: *a3
   /posts/{id}:
     get:
