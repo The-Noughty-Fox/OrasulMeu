@@ -192,8 +192,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun applyPostListEvents(
-        paging: PagingData<PostDto>,
-        events: PostListEvents
+        paging: PagingData<PostDto>, events: PostListEvents
     ): PagingData<PostDto> {
         return when (events) {
             is PostListEvents.Reaction -> {
@@ -205,6 +204,8 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+
+            else -> paging
         }
     }
 

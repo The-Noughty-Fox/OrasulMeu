@@ -6,7 +6,7 @@ import org.openapitools.client.models.PostReactionsDto
 
 interface HomeContract {
     data class State(
-        val popularPosts : List<PostDto> = emptyList(),
+        val popularPosts: List<PostDto> = emptyList(),
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,
         val lastLocation: Point? = null,
@@ -28,7 +28,7 @@ interface HomeContract {
         data object RefreshNewPosts : Event
     }
 
-    sealed interface Action{
+    sealed interface Action {
         data class MoveToLocation(val point: Point) : Action
     }
 
@@ -38,6 +38,8 @@ interface HomeContract {
 
     sealed interface PostListEvents {
         data class Reaction(val postId: Int, val reactionsDto: PostReactionsDto) : PostListEvents
+        data class Delete(val postId: Int) : PostListEvents
+        data class Edit(val post: PostDto) : PostListEvents
     }
 
     enum class PostListSorting {

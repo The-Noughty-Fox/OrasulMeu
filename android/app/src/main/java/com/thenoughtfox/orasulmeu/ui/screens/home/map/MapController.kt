@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -151,22 +150,24 @@ private fun MapView(
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 onDismissRequest = { postToShow = null }) {
                 postToShow?.toState()?.let {
-                    PostView(state = it) { action ->
-                        when (action) {
-                            PostContract.Action.ConfirmReport ->
+                    PostView(state = it) { event ->
+                        when (event) {
+                            PostContract.Event.ConfirmReport ->
                                 sendEvent(HomeContract.Event.SendReport(it.id))
 
 
-                            PostContract.Action.Dislike ->
+                            PostContract.Event.Dislike ->
                                 sendEvent(HomeContract.Event.DislikePost(it.id))
 
 
-                            PostContract.Action.Like ->
+                            PostContract.Event.Like ->
                                 sendEvent(HomeContract.Event.LikePost(it.id))
 
 
-                            PostContract.Action.RevokeReaction ->
+                            PostContract.Event.RevokeReaction ->
                                 sendEvent(HomeContract.Event.RevokeReaction(it.id))
+
+                            else -> Unit
                         }
                     }
                 }

@@ -116,23 +116,25 @@ fun SearchPostsScreen(
                                     val post = searchPosts[index]
                                     // Display the message or a placeholder.
                                     if (post != null) {
-                                        PostView(state = post.toState()) { e ->
-                                            when (e) {
-                                                PostContract.Action.ConfirmReport -> {
+                                        PostView(state = post.toState()) { event ->
+                                            when (event) {
+                                                PostContract.Event.ConfirmReport -> {
                                                     sendEvent(HomeContract.Event.SendReport(post.id))
                                                 }
 
-                                                PostContract.Action.Dislike -> {
+                                                PostContract.Event.Dislike -> {
                                                     sendEvent(HomeContract.Event.DislikePost(post.id))
                                                 }
 
-                                                PostContract.Action.Like -> {
+                                                PostContract.Event.Like -> {
                                                     sendEvent(HomeContract.Event.LikePost(post.id))
                                                 }
 
-                                                PostContract.Action.RevokeReaction -> {
+                                                PostContract.Event.RevokeReaction -> {
                                                     sendEvent(HomeContract.Event.RevokeReaction(post.id))
                                                 }
+
+                                                else -> Unit
                                             }
                                         }
                                     } else {

@@ -141,23 +141,25 @@ fun PostListScreen(
                                     } else {
                                         Modifier
                                     }
-                                ) { action ->
-                                    when (action) {
-                                        PostContract.Action.ConfirmReport -> {
+                                ) { event ->
+                                    when (event) {
+                                        PostContract.Event.ConfirmReport -> {
                                             sendEvent(HomeContract.Event.SendReport(post.id))
                                         }
 
-                                        PostContract.Action.Dislike -> {
+                                        PostContract.Event.Dislike -> {
                                             sendEvent(HomeContract.Event.DislikePost(post.id))
                                         }
 
-                                        PostContract.Action.Like -> {
+                                        PostContract.Event.Like -> {
                                             sendEvent(HomeContract.Event.LikePost(post.id))
                                         }
 
-                                        PostContract.Action.RevokeReaction -> {
+                                        PostContract.Event.RevokeReaction -> {
                                             sendEvent(HomeContract.Event.RevokeReaction(post.id))
                                         }
+
+                                        else -> Unit
                                     }
                                 }
                             } else {

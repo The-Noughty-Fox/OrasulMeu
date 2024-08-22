@@ -1,8 +1,5 @@
-@file:OptIn(ExperimentalFoundationApi::class, ExperimentalFoundationApi::class)
-
 package com.thenoughtfox.orasulmeu.ui.post
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +17,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -42,7 +40,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,7 +55,8 @@ import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 fun PostView(
     modifier: Modifier = Modifier,
     state: PostContract.State,
-    onSendEvent: (PostContract.Action) -> Unit
+    type: PostScreenType = PostScreenType.LIST,
+    sendEvent: (PostContract.Event) -> Unit = {}
 ) {
 
     var shouldShowReportAlert by remember { mutableStateOf(false) }
@@ -86,9 +84,9 @@ fun PostView(
         ) {
             val (reaction, pagerIndication, threeDots) = createRefs()
             ReactionButton(reaction = state.reaction,
-                onLike = { onSendEvent(PostContract.Action.Like) },
-                onDislike = { onSendEvent(PostContract.Action.Dislike) },
-                onRevokeReaction = { onSendEvent(PostContract.Action.RevokeReaction) },
+                onLike = { sendEvent(PostContract.Event.Like) },
+                onDislike = { sendEvent(PostContract.Event.Dislike) },
+                onRevokeReaction = { sendEvent(PostContract.Event.RevokeReaction) },
                 modifier = Modifier.constrainAs(reaction) {
                     start.linkTo(parent.start)
                     top.linkTo(parent.top, 8.dp)
@@ -102,17 +100,19 @@ fun PostView(
                     centerTo(parent)
                 })
 
-//TODO uncomment when will be report
-//            ThreeDotsIcon(
-//                onReportClick = { shouldShowReportAlert = true },
-//                modifier = Modifier
-//                    .constrainAs(threeDots) {
-//                        end.linkTo(parent.end)
-//                        centerVerticallyTo(parent)
-//                    }
-//                    .size(24.dp)
-//                    .clip(RoundedCornerShape(16.dp))
-//            )
+            ThreeDotsIcon(
+                type = type,
+                onReportClick = { shouldShowReportAlert = true },
+                onEditClick = { sendEvent(PostContract.Event.Edit) },
+                onDeleteClick = { sendEvent(PostContract.Event.Delete) },
+                modifier = Modifier
+                    .constrainAs(threeDots) {
+                        end.linkTo(parent.end)
+                        centerVerticallyTo(parent)
+                    }
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
         }
 
         Text(
@@ -174,7 +174,7 @@ fun PostView(
                 onDismissRequest = { shouldShowReportAlert = false },
                 confirmButton = {
                     Button(onClick = {
-                        onSendEvent(PostContract.Action.ConfirmReport)
+                        sendEvent(PostContract.Event.ConfirmReport)
                         shouldShowReportAlert = false
                     }) {
                         Text(text = "Raport")
@@ -208,7 +208,15 @@ private fun PagerIndicator(pagerState: PagerState, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun ThreeDotsIcon(onReportClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ThreeDotsIcon(
+    type: PostScreenType,
+    onReportClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    //TODO: Impl report
+    if (type == PostScreenType.LIST) return
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.clickable { isDropDownExpanded = true }) {
@@ -225,29 +233,83 @@ private fun ThreeDotsIcon(onReportClick: () -> Unit, modifier: Modifier = Modifi
         ) {
             DropdownMenu(
                 modifier = Modifier.background(
-                    color = colorResource(R.color.white)
+                    color = colorResource(
+                        if (type == PostScreenType.LIST) {
+                            R.color.white
+                        } else {
+                            R.color.slate_100
+                        }
+                    )
                 ),
                 expanded = isDropDownExpanded,
                 onDismissRequest = { isDropDownExpanded = false }) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(R.string.report_post_button_text),
-                            style = TextStyle(
-                                color = colorResource(R.color.error),
-                                fontSize = 17.sp
-                            )
-                        )
-                    }, trailingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_report),
-                            tint = colorResource(R.color.error),
-                            contentDescription = stringResource(R.string.report_post_icon_desc)
-                        )
-                    }, onClick = {
-                        isDropDownExpanded = false
-                        onReportClick()
-                    })
+                when (type) {
+                    PostScreenType.LIST -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.report_post_button_text),
+                                    style = TextStyle(
+                                        color = colorResource(R.color.error),
+                                        fontSize = 17.sp
+                                    )
+                                )
+                            }, trailingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_report),
+                                    tint = colorResource(R.color.error),
+                                    contentDescription = stringResource(R.string.report_post_icon_desc)
+                                )
+                            }, onClick = {
+                                isDropDownExpanded = false
+                                onReportClick()
+                            })
+                    }
+
+                    PostScreenType.PROFILE -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.menu_edit_post),
+                                    style = TextStyle(
+                                        color = colorResource(R.color.slate_950),
+                                        fontSize = 17.sp
+                                    )
+                                )
+                            }, trailingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_edit),
+                                    tint = colorResource(R.color.slate_950),
+                                    contentDescription = "edit"
+                                )
+                            }, onClick = {
+                                isDropDownExpanded = false
+                                onEditClick()
+                            })
+
+                        Divider()
+
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.menu_delete_post),
+                                    style = TextStyle(
+                                        color = colorResource(R.color.error),
+                                        fontSize = 17.sp
+                                    )
+                                )
+                            }, trailingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_delete),
+                                    tint = colorResource(R.color.error),
+                                    contentDescription = "delete"
+                                )
+                            }, onClick = {
+                                isDropDownExpanded = false
+                                onDeleteClick()
+                            })
+                    }
+                }
             }
         }
     }
@@ -292,8 +354,13 @@ private fun CombinedTitleWithBody(title: String, body: String) {
     )
 }
 
+enum class PostScreenType {
+    LIST,
+    PROFILE
+}
+
 @Preview(showBackground = true, backgroundColor = 0xffffff, showSystemUi = true)
 @Composable
 private fun Preview() = OrasulMeuTheme {
-    PostView(state = PostPreviewPlaceholders.postState, onSendEvent = {})
+    PostView(state = PostPreviewPlaceholders.postState, sendEvent = {})
 }

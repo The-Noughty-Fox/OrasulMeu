@@ -15,11 +15,13 @@ object PostContract {
         val time: String = ""
     )
 
-    sealed interface Action {
-        data object Like : Action
-        data object Dislike : Action
-        data object RevokeReaction : Action
-        data object ConfirmReport : Action
+    sealed interface Event {
+        data object Like : Event
+        data object Dislike : Event
+        data object RevokeReaction : Event
+        data object ConfirmReport : Event
+        data object Delete : Event
+        data object Edit : Event
     }
 
     enum class Reactions {

@@ -33,6 +33,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.ui.post.PostContract
+import com.thenoughtfox.orasulmeu.ui.post.PostScreenType
 import com.thenoughtfox.orasulmeu.ui.post.PostView
 import com.thenoughtfox.orasulmeu.ui.post.utils.PostDtoToStateMapper.toState
 import com.thenoughtfox.orasulmeu.ui.screens.home.PostLoading
@@ -148,7 +150,20 @@ fun ProfileScreen(
                         ) { index ->
                             val post = posts[index]
                             if (post != null) {
-                                PostView(state = post.toState()) { }
+                                PostView(state = post.toState(), type = PostScreenType.PROFILE,
+                                    sendEvent = { event ->
+                                        when (event) {
+                                            PostContract.Event.Edit -> {
+                                                sendEvent(Event.EditPost(post))
+                                            }
+
+                                            PostContract.Event.Delete -> {
+                                                sendEvent(Event.DeletePost(post.id))
+                                            }
+
+                                            else -> Unit
+                                        }
+                                    })
                             } else {
                                 Box(
                                     Modifier

@@ -29,6 +29,8 @@ interface ProfileContract {
         data class ChangePicture(val image: Uri) : Event
         data object EnterSettings : Event
         data object Refresh : Event
+        data class EditPost(val post: PostDto) : Event
+        data class DeletePost(val postId: Int) : Event
     }
 
     sealed interface Action {

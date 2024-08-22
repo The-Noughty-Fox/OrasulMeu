@@ -78,4 +78,6 @@
     <string name="search_posts_no_results_message">Niciun rezultat pentru căutarea ta.</string>
 
     <string name="post_more"> more</string>
+    <string name="menu_edit_post">Editeaza postarea</string>
+    <string name="menu_delete_post">Sterge postarea</string>
 </resources>

@@ -8,8 +8,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.map
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
+import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListEvents
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.PostType
 import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.Action
@@ -27,6 +30,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -35,6 +39,7 @@ import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.apis.UsersApi
 import org.openapitools.client.models.MediaSupabaseDto
 import org.openapitools.client.models.PostDto
+import org.openapitools.client.models.UpdatePostDto
 import org.openapitools.client.models.UserDto
 import org.openapitools.client.models.UserUpdateDto
 import javax.inject.Inject
@@ -60,10 +65,18 @@ class ProfileViewModel @Inject constructor(
         CombinedPostsPagingSource(postsApi).getPostsPagingSource(type = PostType.MY)
     }
 
-    val myPosts: Flow<PagingData<PostDto>> = Pager(
-        config = PagingConfig(pageSize = 20),
+    private val modificationEvents = MutableStateFlow<List<PostListEvents>>(emptyList())
+
+    val myPosts = Pager(
+        PagingConfig(pageSize = 20),
         pagingSourceFactory = postsInvalidatingSourceFactory
-    ).flow.cachedIn(viewModelScope)
+    ).flow
+        .cachedIn(viewModelScope)
+        .combine(modificationEvents) { pagingData, modifications ->
+            modifications.fold(pagingData) { acc, event ->
+                applyPostListEvents(acc, event)
+            }
+        }
 
     init {
         handleEvents()
@@ -112,6 +125,8 @@ class ProfileViewModel @Inject constructor(
                 }
 
                 Event.LoadProfile -> getUserProfile()
+                is Event.DeletePost -> deletePost(event.postId)
+                is Event.EditPost -> editPost(event.post)
             }
         }
     }
@@ -199,5 +214,53 @@ class ProfileViewModel @Inject constructor(
             .onError {
                 _action.emit(Action.ShowToast("Failed to load user profile"))
             }
+    }
+
+    private fun deletePost(id: Int) = viewModelScope.launch {
+        postsApi.deletePost(id)
+            .toOperationResult { it }
+            .onSuccess {
+                modificationEvents.value += PostListEvents.Delete(id)
+            }
+            .onError { }
+    }
+
+    private fun editPost(post: PostDto) = viewModelScope.launch {
+        //TODO: implement edit post
+//        postsApi.updatePost(
+//            id = post.id,
+//            UpdatePostDto(
+//                title = post.title,
+//                content = post.content,
+//                locationAddress = post.locationAddress,
+//                location = post.location
+//            )
+//        ).toOperationResult { it }
+//            .onSuccess {
+//                modificationEvents.value += PostListEvents.Edit(it)
+//            }
+//            .onError { }
+    }
+
+    private fun applyPostListEvents(
+        paging: PagingData<PostDto>, events: PostListEvents
+    ): PagingData<PostDto> {
+        return when (events) {
+            is PostListEvents.Delete -> {
+                paging.filter { it.id != events.postId }
+            }
+
+            is PostListEvents.Edit -> {
+                paging.map {
+                    if (it.id == events.post.id) {
+                        events.post
+                    } else {
+                        it
+                    }
+                }
+            }
+
+            else -> paging
+        }
     }
 }
