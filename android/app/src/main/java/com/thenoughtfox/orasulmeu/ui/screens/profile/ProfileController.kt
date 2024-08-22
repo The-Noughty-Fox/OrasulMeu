@@ -57,6 +57,12 @@ fun ProfileController() {
         }
     }
 
+    LaunchedEffect(Unit) {
+        scope.launch {
+            viewModel.event.send(ProfileContract.Event.LoadProfile)
+        }
+    }
+
     ProfileScreen(
         posts = viewModel.myPosts.collectAsLazyPagingItems(),
         state = viewModel.state.collectAsState().value,

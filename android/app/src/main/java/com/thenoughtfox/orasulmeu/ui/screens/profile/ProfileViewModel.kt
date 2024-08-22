@@ -67,15 +67,6 @@ class ProfileViewModel @Inject constructor(
 
     init {
         handleEvents()
-        userSharedPrefs.user?.let { user ->
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    name = user.userName ?: "empty name",
-                    imageUrl = user.socialProfilePictureUrl,
-                )
-            }
-        }
     }
 
     private fun handleEvents() = viewModelScope.launch {
@@ -119,6 +110,8 @@ class ProfileViewModel @Inject constructor(
                     postsInvalidatingSourceFactory.invalidate()
                     _state.update { it.copy(isRefreshing = false) }
                 }
+
+                Event.LoadProfile -> getUserProfile()
             }
         }
     }
@@ -181,5 +174,30 @@ class ProfileViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun getUserProfile() = viewModelScope.launch {
+        val id = userSharedPrefs.user?.id?.toBigDecimal()
+        if (id == null) {
+            _action.emit(Action.ShowToast("Failed to load user profile"))
+            return@launch
+        }
+
+        usersApi.getUserProfile(id)
+            .toOperationResult { it }
+            .onSuccess { userProfile ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        reactionsCount = userProfile.reactionsCount,
+                        postsCount = userProfile.publicationsCount,
+                        name = userProfile.username,
+                        imageUrl = userProfile.socialProfilePictureUrl,
+                    )
+                }
+            }
+            .onError {
+                _action.emit(Action.ShowToast("Failed to load user profile"))
+            }
     }
 }

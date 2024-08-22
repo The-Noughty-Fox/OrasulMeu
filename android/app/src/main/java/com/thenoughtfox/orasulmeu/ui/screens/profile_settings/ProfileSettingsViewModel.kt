@@ -47,7 +47,7 @@ class ProfileSettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun logout() {
+    private fun logout() = viewModelScope.launch {
         userSharedPrefs.apply {
             cookies = null
             user = null

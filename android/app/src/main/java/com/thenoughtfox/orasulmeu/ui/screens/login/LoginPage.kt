@@ -90,11 +90,12 @@ fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Skip",
-                style = bodyModifier().copy(color = colorResource(id = R.color.grey)),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+
+//            Text(
+//                text = "Skip",
+//                style = bodyModifier().copy(color = colorResource(id = R.color.grey)),
+//                modifier = Modifier.padding(top = 8.dp)
+//            )
 
             Row(modifier = Modifier.padding(top = 26.dp, bottom = 16.dp)) {
                 Image(

@@ -21,6 +21,7 @@ interface ProfileContract {
     )
 
     sealed interface Event {
+        data object LoadProfile : Event
         data object EditProfile : Event
         data object DiscardChanges : Event
         data object SaveChanges : Event
