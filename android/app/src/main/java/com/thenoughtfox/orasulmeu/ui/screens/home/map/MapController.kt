@@ -58,7 +58,7 @@ fun MapController(viewModel: HomeViewModel) {
             viewModel.action.collect { action ->
                 when (action) {
                     is HomeContract.Action.MoveToLocation -> {
-                        mapView.redirectToLocation(action.point)
+                        mapView.redirectToLocation(action.point, isSmoothing = true)
                     }
                 }
             }

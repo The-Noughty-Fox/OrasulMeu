@@ -134,13 +134,19 @@ fun CreatePostMediaPage(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        RoundButton(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .align(Alignment.CenterHorizontally),
+        val isValid = uiState.images.isNotEmpty()
+        RoundButton(modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.create_post_button_next),
-            onClick = { sendNavEvent(NavEvent.CreatePost) }
-        )
+            backgroundColor = colorResource(id = if (isValid) R.color.dark_blue else R.color.white),
+            textColor = colorResource(id = if (isValid) R.color.white else R.color.black),
+            isLoading = uiState.isLoading,
+            onClick = {
+                if (isValid) {
+                    sendNavEvent(NavEvent.CreatePost)
+                }
+            })
     }
 }
 

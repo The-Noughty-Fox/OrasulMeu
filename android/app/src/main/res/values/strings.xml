@@ -15,7 +15,7 @@
     <string name="built_by_the_noughty_fox">Built by The Noughty Fox</string>
     <string name="toolbar_back">Back</string>
 
-    <string name="create_post_toolbar_title">Creaza reclamație</string>
+    <string name="create_post_toolbar_title">Creaza postarea</string>
     <string name="create_post_button_next">Mai departe</string>
     <string name="create_post_button_upload_media">Upload photo/video</string>
     <string name="create_post_button_upload_open_camera">Open camera</string>
