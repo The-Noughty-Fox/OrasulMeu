@@ -12,6 +12,7 @@ import androidx.paging.filter
 import androidx.paging.map
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
+import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListEvents
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.PostType
@@ -21,11 +22,11 @@ import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.State
 import com.thenoughtfox.orasulmeu.utils.MimeType
 import com.thenoughtfox.orasulmeu.utils.UploadUtils.toMultiPart
 import com.thenoughtfox.orasulmeu.utils.getRealPathFromURI
+import com.thenoughtfox.orasulmeu.utils.urlEncode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -39,7 +40,6 @@ import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.apis.UsersApi
 import org.openapitools.client.models.MediaSupabaseDto
 import org.openapitools.client.models.PostDto
-import org.openapitools.client.models.UpdatePostDto
 import org.openapitools.client.models.UserDto
 import org.openapitools.client.models.UserUpdateDto
 import javax.inject.Inject
@@ -126,7 +126,11 @@ class ProfileViewModel @Inject constructor(
 
                 Event.LoadProfile -> getUserProfile()
                 is Event.DeletePost -> deletePost(event.postId)
-                is Event.EditPost -> editPost(event.post)
+                is Event.EditPost -> editPost(event.postId)
+
+                is Event.RefreshEditedPost -> {
+                    modificationEvents.value += PostListEvents.Edit(event.post)
+                }
             }
         }
     }
@@ -225,21 +229,29 @@ class ProfileViewModel @Inject constructor(
             .onError { }
     }
 
-    private fun editPost(post: PostDto) = viewModelScope.launch {
-        //TODO: implement edit post
-//        postsApi.updatePost(
-//            id = post.id,
-//            UpdatePostDto(
-//                title = post.title,
-//                content = post.content,
-//                locationAddress = post.locationAddress,
-//                location = post.location
-//            )
-//        ).toOperationResult { it }
-//            .onSuccess {
-//                modificationEvents.value += PostListEvents.Edit(it)
-//            }
-//            .onError { }
+    private fun editPost(id: Int) = viewModelScope.launch {
+        postsApi.getPost(id)
+            .toOperationResult { it }
+            .onSuccess {
+                val media = it.media.map { media ->
+                    media.url.urlEncode()
+                }
+
+                val post = Post(
+                    id = it.id,
+                    title = it.title,
+                    content = it.content,
+                    media = media,
+                    locationAddress = it.locationAddress,
+                    latitude = it.location.latitude,
+                    longitude = it.location.longitude
+                )
+
+                _action.emit(Action.GoEditPost(post))
+            }
+            .onError {
+                _action.emit(Action.ShowToast("Failed to load post"))
+            }
     }
 
     private fun applyPostListEvents(

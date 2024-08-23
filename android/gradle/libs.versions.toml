@@ -43,7 +43,7 @@ mapboxSearch = "2.0.0-beta.4"
 recyclerview = "1.3.2"
 playServicesMaps = "18.2.0"
 cameraX = "1.3.2"
-composeNavigation = "2.8.0-beta07"
+composeNavigation = "2.8.0-rc01"
 serialization = "1.6.3"
 uiViewbinding = "1.6.8"
 coilVideo = "2.4.0"
@@ -127,7 +127,8 @@ camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.
 
 
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.3" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -154,7 +154,7 @@ fun ProfileScreen(
                                     sendEvent = { event ->
                                         when (event) {
                                             PostContract.Event.Edit -> {
-                                                sendEvent(Event.EditPost(post))
+                                                sendEvent(Event.EditPost(post.id))
                                             }
 
                                             PostContract.Event.Delete -> {

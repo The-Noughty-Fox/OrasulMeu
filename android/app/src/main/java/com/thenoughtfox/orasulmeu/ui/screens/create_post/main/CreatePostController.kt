@@ -33,12 +33,17 @@ fun CreatePostController(viewModel: CreatePostViewModel, sharedViewModel: Shared
             viewModel.action.collect { action ->
                 when (action) {
                     CreatePostContract.Action.GoMain -> {
-                        sharedViewModel.sendEvent(Event.CreatePost)
+                        sharedViewModel.sendEvent(Event.UpdatePosts)
                         rootNavigator.navigate(RootNavDestinations.Main) {
                             popUpTo(RootNavDestinations.Main) {
                                 inclusive = true
                             }
                         }
+                    }
+
+                    is CreatePostContract.Action.GoBackToProfile -> {
+                        sharedViewModel.sendEvent(Event.UpdatePost(action.post))
+                        rootNavigator.navigateUp()
                     }
 
                     else -> Unit

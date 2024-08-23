@@ -121,8 +121,8 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
 
     ConstraintLayout(
         modifier = Modifier
-            .fillMaxSize()
             .imePadding()
+            .fillMaxSize()
             .background(color = colorResource(R.color.background_color))
     ) {
         val (map, search, suggestion, pin, buttonNext) = createRefs()

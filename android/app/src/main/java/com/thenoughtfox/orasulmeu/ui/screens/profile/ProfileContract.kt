@@ -1,9 +1,7 @@
 package com.thenoughtfox.orasulmeu.ui.screens.profile
 
 import android.net.Uri
-import androidx.paging.PagingData
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import org.openapitools.client.models.PostDto
 
 interface ProfileContract {
@@ -29,12 +27,14 @@ interface ProfileContract {
         data class ChangePicture(val image: Uri) : Event
         data object EnterSettings : Event
         data object Refresh : Event
-        data class EditPost(val post: PostDto) : Event
+        data class RefreshEditedPost(val post: PostDto) : Event
+        data class EditPost(val postId: Int) : Event
         data class DeletePost(val postId: Int) : Event
     }
 
     sealed interface Action {
         data class ShowToast(val msg: String) : Action
+        data class GoEditPost(val post: Post) : Action
     }
 
     sealed interface NavEvent {

@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeController
 import com.thenoughtfox.orasulmeu.ui.screens.home.search.SearchPostsController
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
@@ -80,7 +81,7 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
                             }
 
                             BottomNavTabs.Create.name -> {
-                                rootNavigator.navigate(RootNavDestinations.CreatePostScreen)
+                                rootNavigator.navigate(RootNavDestinations.CreatePost(Post()))
                             }
 
                             BottomNavTabs.Profile.name -> {
@@ -117,7 +118,7 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
                     }
 
                     composable<MainGraphDestinations.ProfileScreen> {
-                        ProfileGraph()
+                        ProfileGraph(sharedViewModel)
                     }
                 }
             }

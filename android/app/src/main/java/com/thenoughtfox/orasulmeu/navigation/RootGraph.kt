@@ -6,13 +6,18 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import com.thenoughtfox.orasulmeu.ui.screens.login.LoginController
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
+import com.thenoughtfox.orasulmeu.utils.serializableType
 import kotlinx.serialization.Serializable
+import kotlin.reflect.typeOf
 
 interface RootNavDestinations {
     @Serializable
@@ -22,7 +27,14 @@ interface RootNavDestinations {
     data object Main : RootNavDestinations
 
     @Serializable
-    object CreatePostScreen : RootNavDestinations
+    data class CreatePost(val post: Post) : RootNavDestinations {
+        companion object {
+            val typeMap = mapOf(typeOf<Post>() to serializableType<Post>())
+
+            fun from(savedStateHandle: SavedStateHandle) =
+                savedStateHandle.toRoute<CreatePost>(typeMap)
+        }
+    }
 }
 
 @Composable
@@ -38,7 +50,11 @@ fun RootGraph(startDestinations: RootNavDestinations) {
         ) {
             composable<RootNavDestinations.Auth> { LoginController() }
             composable<RootNavDestinations.Main> { MainGraph(sharedViewModel) }
-            composable<RootNavDestinations.CreatePostScreen> { CreatePostGraph(sharedViewModel) }
+            composable<RootNavDestinations.CreatePost>(
+                typeMap = RootNavDestinations.CreatePost.typeMap
+            ) {
+                CreatePostGraph(sharedViewModel)
+            }
         }
     }
 }

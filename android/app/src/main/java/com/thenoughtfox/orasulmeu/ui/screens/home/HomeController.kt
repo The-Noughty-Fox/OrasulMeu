@@ -27,8 +27,8 @@ fun HomeController(sharedViewModel: SharedViewModel) {
     var selectedViewType: SelectedViewType by rememberSaveable { mutableStateOf(SelectedViewType.Map) }
     val sharedViewModelState by sharedViewModel.state.collectAsState()
 
-    LaunchedEffect(sharedViewModelState.isUserCreatedPost) {
-        if (sharedViewModelState.isUserCreatedPost) {
+    LaunchedEffect(sharedViewModelState.isPostUpdated) {
+        if (sharedViewModelState.isPostUpdated) {
             selectedViewType = SelectedViewType.List
             viewModel.sendEvent(Event.RefreshNewPosts)
             sharedViewModel.sendEvent(SharedContract.Event.PostsRefreshed)

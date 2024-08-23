@@ -1,6 +1,5 @@
 package com.thenoughtfox.orasulmeu.ui.screens.create_post.media
 
-import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +40,7 @@ import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.Image
 import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
 import com.thenoughtfox.orasulmeu.ui.screens.profile.components.TopBar
 import com.thenoughtfox.orasulmeu.ui.theme.bodyBoldModifier
@@ -57,13 +57,13 @@ fun CreatePostMediaPage(
     sendNavEvent: (NavEvent) -> Unit = {}
 ) {
 
-    if (uiState.removedUri != null) {
+    if (uiState.removedImage != null) {
         Alert(
             onDismissRequest = {
                 onSendEvent(Event.DismissAlert)
             },
             onConfirmation = {
-                onSendEvent(Event.RemoveImage(uiState.removedUri))
+                onSendEvent(Event.RemoveImage(uiState.removedImage))
             },
             dialogTitle = stringResource(id = R.string.create_post_remove_image_alert_title),
             dialogText = stringResource(id = R.string.create_post_remove_image_alert_desc),
@@ -89,10 +89,11 @@ fun CreatePostMediaPage(
             }
         )
 
-        val image = uiState.image ?: R.drawable.image_placeholder
-
+        val image = uiState.image?.parsedImage ?: R.drawable.image_placeholder
         AsyncImage(
-            model = image, contentDescription = "Image",
+            model = image,
+            placeholder = painterResource(id = R.drawable.image_placeholder),
+            contentDescription = "Image",
             modifier = Modifier
                 .padding(top = 36.dp)
                 .height(390.dp)
@@ -117,11 +118,11 @@ fun CreatePostMediaPage(
                         } else {
                             Color.White
                         },
-                        onClick = { uri ->
-                            onSendEvent(Event.SelectImage(uri))
+                        onClick = {
+                            onSendEvent(Event.SelectImage(it))
                         },
-                        onRemove = { uri ->
-                            onSendEvent(Event.ShowAlert(uri))
+                        onRemove = {
+                            onSendEvent(Event.ShowAlert(it))
                         })
                 }
             }
@@ -223,15 +224,15 @@ private fun UploadButton(image: Painter, text: String) {
 
 @Composable
 fun UserImage(
-    image: Uri,
+    image: Image,
     modifier: Modifier = Modifier,
     color: Color = Color.White,
-    onClick: ((Uri) -> Unit)? = null,
-    onRemove: ((Uri) -> Unit)? = null
+    onClick: ((Image) -> Unit)? = null,
+    onRemove: ((Image) -> Unit)? = null
 ) {
     Box {
         AsyncImage(
-            model = image,
+            model = image.parsedImage,
             contentDescription = "User images",
             modifier = modifier
                 .clip(shape = RoundedCornerShape(8.dp))

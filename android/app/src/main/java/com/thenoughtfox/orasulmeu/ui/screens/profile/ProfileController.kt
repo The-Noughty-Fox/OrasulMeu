@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,20 +22,27 @@ import com.luck.picture.lib.config.SelectModeConfig
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.thenoughtfox.orasulmeu.navigation.LocalProfileNavigator
+import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
 import com.thenoughtfox.orasulmeu.navigation.ProfileDestinations
+import com.thenoughtfox.orasulmeu.navigation.RootNavDestinations
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract.Event
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedContract
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.showToast
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
-fun ProfileController() {
+fun ProfileController(sharedViewModel: SharedViewModel) {
 
     val viewModel: ProfileViewModel = hiltViewModel()
     val profileNavController = LocalProfileNavigator.current
     val scope = rememberCoroutineScope()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val context = LocalContext.current
+    val rootNavigator = LocalRootNavigator.current
+    val sharedViewModelState by sharedViewModel.state.collectAsState()
 
     val pickImageLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia(),
@@ -42,16 +50,26 @@ fun ProfileController() {
             if (uri == null) return@rememberLauncherForActivityResult
 
             scope.launch {
-                viewModel.event.send(ProfileContract.Event.ChangePicture(uri))
+                viewModel.event.send(Event.ChangePicture(uri))
             }
         }
     )
+
+    LaunchedEffect(sharedViewModelState.isPostUpdated) {
+        if (sharedViewModelState.isPostUpdated) {
+            val post = sharedViewModelState.post ?: return@LaunchedEffect
+            viewModel.event.send(Event.RefreshEditedPost(post))
+            sharedViewModel.sendEvent(SharedContract.Event.PostsRefreshed)
+        }
+    }
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
             viewModel.action.collectLatest { action ->
                 when (action) {
                     is ProfileContract.Action.ShowToast -> context.showToast(action.msg)
+                    is ProfileContract.Action.GoEditPost ->
+                        rootNavigator.navigate(RootNavDestinations.CreatePost(action.post))
                 }
             }
         }
@@ -59,7 +77,7 @@ fun ProfileController() {
 
     LaunchedEffect(Unit) {
         scope.launch {
-            viewModel.event.send(ProfileContract.Event.LoadProfile)
+            viewModel.event.send(Event.LoadProfile)
         }
     }
 
@@ -83,7 +101,7 @@ fun ProfileController() {
                             scope.launch {
                                 val file = result.first()
                                 val uri = Uri.fromFile(File(file.realPath))
-                                viewModel.event.send(ProfileContract.Event.ChangePicture(uri))
+                                viewModel.event.send(Event.ChangePicture(uri))
                             }
                         }
 

@@ -1,6 +1,5 @@
 package com.thenoughtfox.orasulmeu.ui.screens.create_post.main
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -27,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,7 @@ import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.NavEvent
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.Image
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.RoundButton
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.UserImage
 import com.thenoughtfox.orasulmeu.ui.screens.profile.components.ClickableIcon
@@ -54,6 +56,8 @@ import com.thenoughtfox.orasulmeu.ui.theme.bodyModifier
 import com.thenoughtfox.orasulmeu.ui.theme.outlinedTextFieldModifier
 import com.thenoughtfox.orasulmeu.ui.theme.pageModifier
 import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 const val MAX_TITLE_SYMBOL = 40
 const val MAX_DESC_SYMBOL = 500
@@ -65,7 +69,9 @@ fun CreatePostPage(
     sendNavEvent: (NavEvent) -> Unit = {}
 ) {
 
+    val keyboardController = LocalSoftwareKeyboardController.current
     val outState = rememberScrollState()
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -119,10 +125,10 @@ fun CreatePostPage(
         )
 
         OutlinedTextField(
-            value = uiState.description,
+            value = uiState.content,
             onValueChange = { text ->
                 if (text.length <= MAX_DESC_SYMBOL) {
-                    onSendEvent(Event.SetDescription(text))
+                    onSendEvent(Event.SetContent(text))
                 }
             },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -157,7 +163,11 @@ fun CreatePostPage(
                 .clip(shape = RoundedCornerShape(8.dp))
                 .defaultMinSize(minHeight = 46.dp)
                 .clickable {
-                    sendNavEvent(NavEvent.GoToMapSearch)
+                    scope.launch {
+                        keyboardController?.hide()
+                        delay(250)
+                        sendNavEvent(NavEvent.GoToMapSearch)
+                    }
                 }, verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -202,7 +212,7 @@ fun CreatePostPage(
 }
 
 @Composable
-private fun MediaList(images: List<Uri>, outState: ScrollState, onItemClick: () -> Unit) {
+private fun MediaList(images: List<Image>, outState: ScrollState, onItemClick: () -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = Modifier
@@ -220,12 +230,12 @@ private fun MediaList(images: List<Uri>, outState: ScrollState, onItemClick: () 
                 }
             })
     ) {
-        items(images) { uri ->
+        items(images) { image ->
             Box(
                 modifier = Modifier.aspectRatio(1f),
             ) {
                 UserImage(
-                    image = uri,
+                    image = image,
                     modifier = Modifier
                         .size(106.dp)
                         .padding(vertical = 8.dp),
@@ -240,5 +250,5 @@ private fun MediaList(images: List<Uri>, outState: ScrollState, onItemClick: () 
 @Preview
 @Composable
 private fun PreviewCreatePostPage() {
-    CreatePostPage(State().copy(images = List(3) { Uri.EMPTY })) {}
+    CreatePostPage(State().copy(images = List(3) { Image() })) {}
 }

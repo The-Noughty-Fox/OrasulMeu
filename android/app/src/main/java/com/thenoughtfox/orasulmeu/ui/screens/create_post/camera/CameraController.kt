@@ -60,7 +60,6 @@ fun CameraController(viewModel: CreatePostViewModel) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
-
     val createPostNavigator = LocalCreatePostNavigator.current
 
     val pickMultipleMedia = rememberLauncherForActivityResult(

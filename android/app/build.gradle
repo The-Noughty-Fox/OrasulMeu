@@ -168,10 +168,10 @@ dependencies {
     implementation libs.androidx.fragment.ktx
 
     // navigation
-    implementation(libs.navigation.compose)
+    implementation libs.navigation.compose
 
     // serialization
-    implementation(libs.kotlinx.serialization.json)
+    implementation libs.kotlinx.serialization.json
 
     //Image
     implementation libs.coil.compose
@@ -203,6 +203,7 @@ dependencies {
 
     // material for pull_to_refresh
     implementation libs.androidx.material
+
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

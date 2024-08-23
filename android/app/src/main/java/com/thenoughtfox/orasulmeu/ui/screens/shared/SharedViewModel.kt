@@ -38,8 +38,11 @@ class SharedViewModel @Inject constructor() : ViewModel() {
     private fun handleEvents() = viewModelScope.launch {
         _event.consumeAsFlow().collect { event ->
             when (event) {
-                Event.CreatePost -> _state.update { it.copy(isUserCreatedPost = true) }
-                Event.PostsRefreshed -> _state.update { it.copy(isUserCreatedPost = false) }
+                Event.UpdatePosts -> _state.update { it.copy(isPostUpdated = true) }
+                Event.PostsRefreshed -> _state.update { it.copy(isPostUpdated = false) }
+                is Event.UpdatePost -> _state.update {
+                    it.copy(isPostUpdated = true, post = event.postDto)
+                }
             }
         }
     }

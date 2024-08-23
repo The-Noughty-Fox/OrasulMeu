@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileController
 import com.thenoughtfox.orasulmeu.ui.screens.profile_settings.ProfileSettingsController
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import kotlinx.serialization.Serializable
 
 interface ProfileDestinations {
@@ -20,12 +21,12 @@ interface ProfileDestinations {
 }
 
 @Composable
-fun ProfileGraph() {
+fun ProfileGraph(sharedViewModel: SharedViewModel) {
     val navController = rememberNavController()
     CompositionLocalProvider(LocalProfileNavigator provides navController) {
         NavHost(navController = navController, startDestination = ProfileDestinations.UserProfile) {
             composable<ProfileDestinations.UserProfile> {
-                ProfileController()
+                ProfileController(sharedViewModel)
             }
 
             composable<ProfileDestinations.ProfileSettings> {
