@@ -5,10 +5,18 @@ import {
   UploadedFile,
   UploadedFiles,
   UseGuards,
+  Delete,
+  Body,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { mbToBytes } from '@/helpers/other';
 import { JwtAuthGuard } from '../auth/passport/guards';
 import { MediaSupabaseDto } from './dto/media-supabase.dto';
@@ -52,5 +60,16 @@ export class MediaController {
   )
   uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
     return this.mediaService.create(files);
+  }
+
+  @Delete()
+  @ApiOperation({ operationId: 'delete-media' })
+  @ApiBody({
+    description: 'File data',
+    type: MediaSupabaseDto,
+  })
+  @ApiResponse({ status: 200 })
+  deleteFile(@Body() media: MediaSupabaseDto) {
+    return this.mediaService.deleteFile(media);
   }
 }

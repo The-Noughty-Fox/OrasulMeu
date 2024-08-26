@@ -88,4 +88,18 @@ export class MediaService {
 
     return results;
   }
+
+  async deleteFile({
+    id,
+    bucketPath,
+  }: Pick<MediaSupabaseDto, 'id' | 'bucketPath'>): Promise<void> {
+    const { error: deleteError } = await this.supabaseService
+      .getClient()
+      .storage.from('OrasulMeu')
+      .remove([bucketPath]);
+
+    if (!deleteError) {
+      this.supabaseService.getClient().from('media').delete().eq('id', id);
+    }
+  }
 }
