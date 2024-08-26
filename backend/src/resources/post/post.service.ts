@@ -302,7 +302,7 @@ export class PostService {
 
     const post = {
       title: updatePostDto.title || existingPost.title,
-      content: updatePostDto.content || existingPost.content,
+      content: updatePostDto.content ?? existingPost.content,
       locationAddress:
         updatePostDto.locationAddress || existingPost.locationAddress,
       location:
