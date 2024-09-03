@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import com.thenoughtfox.orasulmeu.ui.screens.login.LoginController
+import com.thenoughtfox.orasulmeu.ui.screens.logout.LogoutUseCase
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.serializableType
 import kotlinx.serialization.Serializable
@@ -38,7 +39,7 @@ interface RootNavDestinations {
 }
 
 @Composable
-fun RootGraph(startDestinations: RootNavDestinations) {
+fun RootGraph(logoutUseCase: LogoutUseCase, startDestinations: RootNavDestinations) {
     val navController = rememberNavController()
     val sharedViewModel: SharedViewModel = hiltViewModel()
 
