@@ -3,9 +3,9 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-custom';
 import { Request } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import { SocialMedia } from '../../../../shared/types';
+import { SocialMedia } from '@/shared/types';
 import { UserService } from '../../../user/user.service';
-import { GoogleConfig } from '../../../../app-config/google/google.config';
+import { GoogleConfig } from '@/app-config/google/google.config';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
