@@ -12,3 +12,6 @@ data class Post(
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
 )
+
+const val IMAGE = "image"
+const val VIDEO = "video"

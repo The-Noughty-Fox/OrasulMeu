@@ -20,6 +20,7 @@ interface CreatePostContract {
         val isLoading: Boolean = false,
         val isError: Boolean = false,
         val images: List<Image> = listOf(),
+        val removedImages: List<Image> = listOf(),
         val title: String = "",
         val content: String = "",
         val image: Image? = null,

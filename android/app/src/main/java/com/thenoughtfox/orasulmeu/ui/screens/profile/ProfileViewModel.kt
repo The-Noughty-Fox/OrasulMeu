@@ -196,7 +196,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun getUserProfile() = viewModelScope.launch {
-        val id = userSharedPrefs.user?.id?.toBigDecimal()
+        val id = userSharedPrefs.user?.id
         if (id == null) {
             _action.emit(Action.ShowToast("Failed to load user profile"))
             return@launch

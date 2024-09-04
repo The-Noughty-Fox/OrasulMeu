@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.mapbox.geojson.Point
 import com.thenoughtfox.orasulmeu.navigation.RootNavDestinations
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
+import com.thenoughtfox.orasulmeu.ui.post.utils.IMAGE
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
@@ -16,6 +17,8 @@ import com.thenoughtfox.orasulmeu.utils.UploadUtils.toMultiPart
 import com.thenoughtfox.orasulmeu.utils.getRealPathFromURI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +27,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.openapitools.client.apis.MediaApi
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.models.CreatePostDto
+import org.openapitools.client.models.MediaSupabaseDto
 import org.openapitools.client.models.PointDto
 import org.openapitools.client.models.PostDto
 import org.openapitools.client.models.UpdatePostDto
@@ -34,6 +39,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val postsApi: PostsApi,
+    private val mediaApi: MediaApi,
     private val application: Application,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -114,13 +120,15 @@ class CreatePostViewModel @Inject constructor(
     }
 
     private fun removeImage(image: Image) {
+        val removedImages = state.value.removedImages + listOf(image)
         val images = state.value.images.toMutableList()
         images.remove(image)
         _state.update {
             it.copy(
                 images = images,
                 image = if (images.isNotEmpty()) images.first() else null,
-                removedImage = null
+                removedImage = null,
+                removedImages = removedImages
             )
         }
     }
@@ -143,7 +151,7 @@ class CreatePostViewModel @Inject constructor(
 
         postsApi.createPost(post)
             .toOperationResult { it }
-            .onSuccess { postDto -> sendPostMedia(postDto.id, postDto) }
+            .onSuccess { postDto -> sendPostMedia(postDto) }
             .onError {
                 _state.update { it.copy(isLoading = false) }
                 _action.emit(Action.ShowToast(it))
@@ -174,7 +182,7 @@ class CreatePostViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false) }
                     _action.emit(Action.GoBackToProfile(post))
                 } else {
-                    sendPostMedia(post.id, post)
+                //    deleteImages(post)
                 }
             }
             .onError { error ->
@@ -183,7 +191,46 @@ class CreatePostViewModel @Inject constructor(
             }
     }
 
-    private suspend fun sendPostMedia(id: Int, postDto: PostDto) {
+//    private fun deleteImages(post: PostDto) = viewModelScope.launch {
+//        val removedImages = state.value.removedImages.filterNot { it.isUri }
+//        if (removedImages.isNotEmpty()) {
+//            val deletionTasks = removedImages.map { image ->
+//                async {
+//                    val type = if (media.type == IMAGE) {
+//                        MediaSupabaseDto.Type.image
+//                    } else {
+//                        MediaSupabaseDto.Type.video
+//                    }
+//
+//                    mediaApi.deleteMedia(
+//                        MediaSupabaseDto(
+//                            id = media.id, type = type, url = media.url,
+//                            bucketPath = media.bucketPath, fileName = media.fileName
+//                        )
+//                    ).toOperationResult { it }
+//                }
+//            }
+//
+//            try {
+//                deletionTasks.awaitAll().forEach { result ->
+//                    result.onError { error ->
+//                        _state.update { it.copy(isLoading = false, isError = true) }
+//                        _action.emit(Action.ShowToast(error))
+//                        return@onError
+//                    }
+//                }
+//
+//                sendPostMedia(post)
+//            } catch (e: Exception) {
+//                _state.update { it.copy(isLoading = false, isError = true) }
+//                _action.emit(Action.ShowToast(e.message ?: "Unknown error"))
+//            }
+//        } else {
+//            sendPostMedia(post)
+//        }
+//    }
+
+    private suspend fun sendPostMedia(postDto: PostDto) {
         val parts = state.value.images.mapNotNull { image ->
             if (image.isUri) {
                 val uri = Uri.parse(image.image)
@@ -201,7 +248,7 @@ class CreatePostViewModel @Inject constructor(
             }
         }
 
-        postsApi.uploadPostMedia(id = id, parts)
+        postsApi.uploadPostMedia(id = postDto.id, parts)
             .toOperationResult { it }
             .onSuccess {
                 _state.update { it.copy(isLoading = false) }
@@ -212,7 +259,7 @@ class CreatePostViewModel @Inject constructor(
                 }
             }
             .onError { error ->
-                _state.update { it.copy(isLoading = false) }
+                _state.update { it.copy(isLoading = false, isError = true) }
                 _action.emit(Action.ShowToast(error))
             }
     }
