@@ -500,7 +500,8 @@ paths:
                 $ref: "#/components/schemas/MediaSupabaseDto"
       tags: &a4
         - media
-    delete:
+  /media/delete:
+    post:
       operationId: delete-media
       summary: ""
       parameters: []
