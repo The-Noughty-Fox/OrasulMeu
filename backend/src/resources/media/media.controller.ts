@@ -5,7 +5,6 @@ import {
   UploadedFile,
   UploadedFiles,
   UseGuards,
-  Delete,
   Body,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
@@ -46,6 +45,17 @@ export class MediaController {
     return newFile;
   }
 
+  @Post('/delete')
+  @ApiOperation({ operationId: 'delete-media' })
+  @ApiBody({
+    description: 'File data',
+    type: MediaSupabaseDto,
+  })
+  @ApiResponse({ status: 200 })
+  deleteFile(@Body() media: MediaSupabaseDto) {
+    return this.mediaService.deleteFile(media);
+  }
+
   @Post('files')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -60,16 +70,5 @@ export class MediaController {
   )
   uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
     return this.mediaService.create(files);
-  }
-
-  @Post()
-  @ApiOperation({ operationId: 'delete-media' })
-  @ApiBody({
-    description: 'File data',
-    type: MediaSupabaseDto,
-  })
-  @ApiResponse({ status: 200 })
-  deleteFile(@Body() media: MediaSupabaseDto) {
-    return this.mediaService.deleteFile(media);
   }
 }

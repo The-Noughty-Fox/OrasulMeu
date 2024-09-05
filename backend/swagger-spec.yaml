@@ -482,6 +482,26 @@ paths:
       tags: *a3
   /media:
     post:
+      operationId: upload
+      parameters: []
+      requestBody:
+        required: true
+        description: File data
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MediaSingleDto"
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaSupabaseDto"
+      tags: &a4
+        - media
+  /media/delete:
+    post:
       operationId: delete-media
       summary: ""
       parameters: []
@@ -495,8 +515,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: &a4
-        - media
+      tags: *a4
   /media/files:
     post:
       operationId: uploadFiles
