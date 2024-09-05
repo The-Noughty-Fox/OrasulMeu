@@ -62,7 +62,7 @@ export class MediaController {
     return this.mediaService.create(files);
   }
 
-  @Delete()
+  @Post()
   @ApiOperation({ operationId: 'delete-media' })
   @ApiBody({
     description: 'File data',
