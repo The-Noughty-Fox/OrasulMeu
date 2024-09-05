@@ -180,7 +180,11 @@ class CreatePostViewModel @Inject constructor(
         )
             .toOperationResult { it }
             .onSuccess { post ->
-                if (state.value.images.none { it.isUri }) {
+                val areAllImagesUploaded =
+                    state.value.images.none { it.isUri }
+                            && state.value.removedImages.filterNot { it.isUri }.isEmpty()
+
+                if (areAllImagesUploaded) {
                     _state.update { it.copy(isLoading = false) }
                     _action.emit(Action.GoBackToProfile(post))
                 } else {
