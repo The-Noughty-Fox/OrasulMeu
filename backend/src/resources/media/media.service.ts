@@ -83,7 +83,10 @@ export class MediaService {
         );
       }
 
-      results.push(data);
+      results.push({
+        ...data,
+        id: uploadData.id,
+      });
     }
 
     return results;
