@@ -9,6 +9,7 @@ import com.mapbox.geojson.Point
 import com.thenoughtfox.orasulmeu.navigation.RootNavDestinations
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.ui.post.utils.IMAGE
+import com.thenoughtfox.orasulmeu.ui.post.utils.Media
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Action
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostContract.State
@@ -88,20 +89,21 @@ class CreatePostViewModel @Inject constructor(
     }
 
     private fun getPostData() {
+        val post = navDestinationPost.post
         if (navDestinationPost.post.id != null) {
+            val postMedia = navDestinationPost.post.media
             _state.update {
                 it.copy(
-                    title = navDestinationPost.post.title,
-                    content = navDestinationPost.post.content,
-                    address = navDestinationPost.post.locationAddress,
+                    title = post.title,
+                    content = post.content,
+                    address = post.locationAddress,
                     currentPoint = Point.fromLngLat(
-                        navDestinationPost.post.longitude,
-                        navDestinationPost.post.latitude
+                        post.longitude, post.latitude
                     ),
-                    images = navDestinationPost.post.media.map { url ->
-                        Image(image = url, isUri = false)
+                    images = postMedia.map { media ->
+                        Image(media = media, isUri = false)
                     },
-                    image = Image(image = navDestinationPost.post.media.first(), isUri = false),
+                    image = Image(media = postMedia.first(), isUri = false),
                     isEdit = true
                 )
             }
@@ -110,7 +112,7 @@ class CreatePostViewModel @Inject constructor(
 
     private fun addImages(images: List<Uri>) {
         val allImages = state.value.images + images.map {
-            Image(it.toString())
+            Image(Media(url = it.toString()))
         }
 
         val image = allImages.first()
@@ -182,7 +184,7 @@ class CreatePostViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false) }
                     _action.emit(Action.GoBackToProfile(post))
                 } else {
-                //    deleteImages(post)
+                    deleteImages(post)
                 }
             }
             .onError { error ->
@@ -191,49 +193,50 @@ class CreatePostViewModel @Inject constructor(
             }
     }
 
-//    private fun deleteImages(post: PostDto) = viewModelScope.launch {
-//        val removedImages = state.value.removedImages.filterNot { it.isUri }
-//        if (removedImages.isNotEmpty()) {
-//            val deletionTasks = removedImages.map { image ->
-//                async {
-//                    val type = if (media.type == IMAGE) {
-//                        MediaSupabaseDto.Type.image
-//                    } else {
-//                        MediaSupabaseDto.Type.video
-//                    }
-//
-//                    mediaApi.deleteMedia(
-//                        MediaSupabaseDto(
-//                            id = media.id, type = type, url = media.url,
-//                            bucketPath = media.bucketPath, fileName = media.fileName
-//                        )
-//                    ).toOperationResult { it }
-//                }
-//            }
-//
-//            try {
-//                deletionTasks.awaitAll().forEach { result ->
-//                    result.onError { error ->
-//                        _state.update { it.copy(isLoading = false, isError = true) }
-//                        _action.emit(Action.ShowToast(error))
-//                        return@onError
-//                    }
-//                }
-//
-//                sendPostMedia(post)
-//            } catch (e: Exception) {
-//                _state.update { it.copy(isLoading = false, isError = true) }
-//                _action.emit(Action.ShowToast(e.message ?: "Unknown error"))
-//            }
-//        } else {
-//            sendPostMedia(post)
-//        }
-//    }
+    private fun deleteImages(post: PostDto) = viewModelScope.launch {
+        val removedImages = state.value.removedImages.filterNot { it.isUri }
+        if (removedImages.isNotEmpty()) {
+            val deletionTasks = removedImages.map { image ->
+                async {
+                    val media = image.media
+                    val type = if (media.type == IMAGE) {
+                        MediaSupabaseDto.Type.image
+                    } else {
+                        MediaSupabaseDto.Type.video
+                    }
+
+                    mediaApi.deleteMedia(
+                        MediaSupabaseDto(
+                            id = media.id, type = type, url = media.url,
+                            bucketPath = media.bucketPath, fileName = media.fileName
+                        )
+                    ).toOperationResult { it }
+                }
+            }
+
+            try {
+                deletionTasks.awaitAll().forEach { result ->
+                    result.onError { error ->
+                        _state.update { it.copy(isLoading = false, isError = true) }
+                        _action.emit(Action.ShowToast(error))
+                        return@onError
+                    }
+                }
+
+                sendPostMedia(post)
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoading = false, isError = true) }
+                _action.emit(Action.ShowToast(e.message ?: "Unknown error"))
+            }
+        } else {
+            sendPostMedia(post)
+        }
+    }
 
     private suspend fun sendPostMedia(postDto: PostDto) {
         val parts = state.value.images.mapNotNull { image ->
             if (image.isUri) {
-                val uri = Uri.parse(image.image)
+                val uri = Uri.parse(image.media.url)
                 val FILES_FORM_DATA = "files"
                 val path =
                     getRealPathFromURI(contentUri = uri, context = application.applicationContext)

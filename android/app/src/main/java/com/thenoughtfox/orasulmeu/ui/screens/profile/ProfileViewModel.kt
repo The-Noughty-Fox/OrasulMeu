@@ -13,6 +13,7 @@ import androidx.paging.map
 import com.thenoughtfox.orasulmeu.net.helper.toOperationResult
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
 import com.thenoughtfox.orasulmeu.ui.post.utils.Post
+import com.thenoughtfox.orasulmeu.ui.post.utils.Media
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.PostListEvents
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.CombinedPostsPagingSource
 import com.thenoughtfox.orasulmeu.ui.screens.home.utils.PostType
@@ -234,17 +235,23 @@ class ProfileViewModel @Inject constructor(
             .toOperationResult { it }
             .onSuccess {
                 val media = it.media.map { media ->
-                    media.url.urlEncode()
+                    Media(
+                        id = media.id,
+                        type = media.type.value,
+                        url = media.url.urlEncode(),
+                        bucketPath = media.bucketPath.urlEncode(),
+                        fileName = media.fileName
+                    )
                 }
 
                 val post = Post(
                     id = it.id,
                     title = it.title,
                     content = it.content,
-                    media = media,
                     locationAddress = it.locationAddress,
                     latitude = it.location.latitude,
-                    longitude = it.location.longitude
+                    longitude = it.location.longitude,
+                    media = media
                 )
 
                 _action.emit(Action.GoEditPost(post))
