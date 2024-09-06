@@ -2,16 +2,17 @@ package com.thenoughtfox.orasulmeu.ui.screens.create_post
 
 import android.net.Uri
 import com.mapbox.geojson.Point
+import com.thenoughtfox.orasulmeu.ui.post.utils.Media
 import org.openapitools.client.models.PostDto
 
 data class Image(
-    val image: String = "",
+    val media: Media = Media(),
     val isUri: Boolean = true
 ) {
     val parsedImage = if (isUri) {
-        Uri.parse(image)
+        Uri.parse(media.url)
     } else {
-        image
+        media.url
     }
 }
 
@@ -20,6 +21,7 @@ interface CreatePostContract {
         val isLoading: Boolean = false,
         val isError: Boolean = false,
         val images: List<Image> = listOf(),
+        val removedImages: List<Image> = listOf(),
         val title: String = "",
         val content: String = "",
         val image: Image? = null,

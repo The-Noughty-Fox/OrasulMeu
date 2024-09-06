@@ -197,7 +197,7 @@ fun CreatePostPage(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val isValid = uiState.title.isNotEmpty() && uiState.address.isNotEmpty()
+        val isValid = uiState.title.isNotEmpty() && uiState.address.isNotEmpty() && !uiState.isError
         RoundButton(modifier = Modifier.align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.create_post_button_submit),
             backgroundColor = colorResource(id = if (isValid) R.color.dark_blue else R.color.white),
@@ -243,7 +243,6 @@ private fun MediaList(images: List<Image>, outState: ScrollState, onItemClick: (
                 )
             }
         }
-
     }
 }
 

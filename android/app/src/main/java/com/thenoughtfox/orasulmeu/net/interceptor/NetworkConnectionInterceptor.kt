@@ -9,7 +9,7 @@ import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.utils.showToast
 import okhttp3.Interceptor
 import okhttp3.Response
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import java.io.IOException
 import java.net.SocketException
 
@@ -48,7 +48,7 @@ class NetworkConnectionInterceptor(private val context: Context) : Interceptor {
             .protocol(okhttp3.Protocol.HTTP_1_1)
             .code(503) // Service Unavailable
             .message(message)
-            .body(ResponseBody.create(null, ""))
+            .body("".toResponseBody(null))
             .build()
     }
 
