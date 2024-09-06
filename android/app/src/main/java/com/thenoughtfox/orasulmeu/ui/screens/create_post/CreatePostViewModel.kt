@@ -227,13 +227,21 @@ class CreatePostViewModel @Inject constructor(
                     }
                 }
 
-                sendPostMedia(post)
+                if (state.value.images.none { it.isUri }) {
+                    _action.emit(Action.GoBackToProfile(post))
+                } else {
+                    sendPostMedia(post)
+                }
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, isError = true) }
                 _action.emit(Action.ShowToast(e.message ?: "Unknown error"))
             }
         } else {
-            sendPostMedia(post)
+            if (state.value.images.none { it.isUri }) {
+                _action.emit(Action.GoBackToProfile(post))
+            } else {
+                sendPostMedia(post)
+            }
         }
     }
 
