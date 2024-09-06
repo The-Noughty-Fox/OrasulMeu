@@ -500,18 +500,16 @@ paths:
                 $ref: "#/components/schemas/MediaSupabaseDto"
       tags: &a4
         - media
-  /media/delete:
-    post:
+  /media/{id}:
+    delete:
       operationId: delete-media
       summary: ""
-      parameters: []
-      requestBody:
-        required: true
-        description: File data
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/MediaSupabaseDto"
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
       responses:
         "200":
           description: ""
