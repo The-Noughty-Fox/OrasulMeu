@@ -5,7 +5,9 @@ import {
   UploadedFile,
   UploadedFiles,
   UseGuards,
-  Body,
+  ParseIntPipe,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -13,6 +15,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -45,15 +48,12 @@ export class MediaController {
     return newFile;
   }
 
-  @Post('/delete')
+  @Delete(':id')
+  @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'delete-media' })
-  @ApiBody({
-    description: 'File data',
-    type: MediaSupabaseDto,
-  })
   @ApiResponse({ status: 200 })
-  deleteFile(@Body() media: MediaSupabaseDto) {
-    return this.mediaService.deleteFile(media);
+  deleteFile(@Param('id', ParseIntPipe) id: number) {
+    return this.mediaService.deleteFile(id);
   }
 
   @Post('files')

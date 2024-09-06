@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
@@ -83,26 +84,43 @@ export class MediaService {
         );
       }
 
-      results.push({
-        ...data,
-        id: uploadData.id,
-      });
+      results.push(data);
     }
 
     return results;
   }
 
-  async deleteFile({
-    id,
-    bucketPath,
-  }: Pick<MediaSupabaseDto, 'id' | 'bucketPath'>): Promise<void> {
-    const { error: deleteError } = await this.supabaseService
+  async deleteFile(id: number): Promise<void> {
+    const { data: fileData, error: fileError } = await this.supabaseService
+      .getClient()
+      .from('media')
+      .select('id, bucketPath')
+      .eq('id', id)
+      .single();
+
+    if (fileError || !fileData) {
+      throw new NotFoundException('Media not found');
+    }
+
+    const { error: deleteFromBucketError } = await this.supabaseService
       .getClient()
       .storage.from('OrasulMeu')
-      .remove([bucketPath]);
+      .remove([fileData.bucketPath]);
 
-    if (!deleteError) {
-      this.supabaseService.getClient().from('media').delete().eq('id', id);
+    if (deleteFromBucketError) {
+      throw new InternalServerErrorException(
+        'Failed to delete file from bucket',
+      );
+    }
+
+    const { error: mediaError } = await this.supabaseService
+      .getClient()
+      .from('media')
+      .delete()
+      .eq('id', id);
+
+    if (mediaError) {
+      throw new InternalServerErrorException('Could not delete media');
     }
   }
 }
