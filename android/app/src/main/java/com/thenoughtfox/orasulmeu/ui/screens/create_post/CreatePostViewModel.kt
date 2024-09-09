@@ -92,18 +92,25 @@ class CreatePostViewModel @Inject constructor(
         val post = navDestinationPost.post
         if (navDestinationPost.post.id != null) {
             val postMedia = navDestinationPost.post.media
+            val media = postMedia.firstOrNull() ?: Media()
+            val images = postMedia.map {
+                Image(media = it, isUri = false)
+            }.let { imageList ->
+                if (imageList.size == 1) {
+                    imageList.map { it.copy(shouldBeRemoved = false) }
+                } else {
+                    imageList
+                }
+            }
+
             _state.update {
                 it.copy(
                     title = post.title,
                     content = post.content,
                     address = post.locationAddress,
-                    currentPoint = Point.fromLngLat(
-                        post.longitude, post.latitude
-                    ),
-                    images = postMedia.map { media ->
-                        Image(media = media, isUri = false)
-                    },
-                    image = Image(media = postMedia.first(), isUri = false),
+                    currentPoint = Point.fromLngLat(post.longitude, post.latitude),
+                    images = images,
+                    image = Image(media = media, isUri = false),
                     isEdit = true
                 )
             }
@@ -111,20 +118,27 @@ class CreatePostViewModel @Inject constructor(
     }
 
     private fun addImages(images: List<Uri>) {
-        val allImages = state.value.images + images.map {
+        val allImages = (state.value.images + images.map {
             Image(Media(url = it.toString()))
-        }
+        }).map {
+            it.copy(shouldBeRemoved = true)
+        }.distinct()
 
         val image = allImages.first()
         _state.update {
-            it.copy(images = allImages.distinct(), image = image)
+            it.copy(images = allImages, image = image)
         }
     }
 
     private fun removeImage(image: Image) {
         val removedImages = state.value.removedImages + listOf(image)
-        val images = state.value.images.toMutableList()
-        images.remove(image)
+        val images = state.value.images.toMutableList().apply {
+            remove(image)
+            if (size == 1) {
+                this[0] = this[0].copy(shouldBeRemoved = false)
+            }
+        }
+
         _state.update {
             it.copy(
                 images = images,
@@ -199,22 +213,15 @@ class CreatePostViewModel @Inject constructor(
 
     private fun deleteImages(post: PostDto) = viewModelScope.launch {
         val removedImages = state.value.removedImages.filterNot { it.isUri }
+        val postWithoutRemovedImages = post.copy(
+            media = post.media.filterNot { media ->
+                removedImages.any { it.media.id == media.id }
+            })
+
         if (removedImages.isNotEmpty()) {
             val deletionTasks = removedImages.map { image ->
                 async {
-                    val media = image.media
-                    val type = if (media.type == IMAGE) {
-                        MediaSupabaseDto.Type.image
-                    } else {
-                        MediaSupabaseDto.Type.video
-                    }
-
-                    mediaApi.deleteMedia(
-                        MediaSupabaseDto(
-                            id = media.id, type = type, url = media.url,
-                            bucketPath = media.bucketPath, fileName = media.fileName
-                        )
-                    ).toOperationResult { it }
+                    mediaApi.deleteMedia(image.media.id).toOperationResult { it }
                 }
             }
 
@@ -228,9 +235,9 @@ class CreatePostViewModel @Inject constructor(
                 }
 
                 if (state.value.images.none { it.isUri }) {
-                    _action.emit(Action.GoBackToProfile(post))
+                    _action.emit(Action.GoBackToProfile(postWithoutRemovedImages))
                 } else {
-                    sendPostMedia(post)
+                    sendPostMedia(postWithoutRemovedImages)
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, isError = true) }
@@ -238,9 +245,9 @@ class CreatePostViewModel @Inject constructor(
             }
         } else {
             if (state.value.images.none { it.isUri }) {
-                _action.emit(Action.GoBackToProfile(post))
+                _action.emit(Action.GoBackToProfile(postWithoutRemovedImages))
             } else {
-                sendPostMedia(post)
+                sendPostMedia(postWithoutRemovedImages)
             }
         }
     }
@@ -265,10 +272,10 @@ class CreatePostViewModel @Inject constructor(
 
         postsApi.uploadPostMedia(id = postDto.id, parts)
             .toOperationResult { it }
-            .onSuccess {
+            .onSuccess { post ->
                 _state.update { it.copy(isLoading = false) }
                 if (state.value.isEdit) {
-                    _action.emit(Action.GoBackToProfile(postDto))
+                    _action.emit(Action.GoBackToProfile(post))
                 } else {
                     _action.emit(Action.GoMain)
                 }

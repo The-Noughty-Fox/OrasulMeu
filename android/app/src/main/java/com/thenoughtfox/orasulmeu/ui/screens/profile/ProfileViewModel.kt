@@ -272,7 +272,12 @@ class ProfileViewModel @Inject constructor(
             is PostListEvents.Edit -> {
                 paging.map {
                     if (it.id == events.post.id) {
-                        events.post
+                        it.copy(
+                            title = events.post.title,
+                            content = events.post.content,
+                            media = events.post.media,
+                            reactions = it.reactions
+                        )
                     } else {
                         it
                     }

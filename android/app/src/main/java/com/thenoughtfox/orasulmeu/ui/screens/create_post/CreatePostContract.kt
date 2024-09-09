@@ -7,7 +7,8 @@ import org.openapitools.client.models.PostDto
 
 data class Image(
     val media: Media = Media(),
-    val isUri: Boolean = true
+    val isUri: Boolean = true,
+    val shouldBeRemoved: Boolean = true
 ) {
     val parsedImage = if (isUri) {
         Uri.parse(media.url)

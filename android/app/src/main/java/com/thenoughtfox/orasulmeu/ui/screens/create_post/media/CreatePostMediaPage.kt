@@ -245,15 +245,17 @@ fun UserImage(
                 .background(color = Color.White)
         )
 
-        onRemove?.let { callback ->
-            Image(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(start = 32.dp)
-                    .clickable { callback(image) },
-                painter = painterResource(id = R.drawable.ic_remove),
-                contentDescription = "RemoveIcon",
-            )
+        if (image.shouldBeRemoved) {
+            onRemove?.let { callback ->
+                Image(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(start = 32.dp)
+                        .clickable { callback(image) },
+                    painter = painterResource(id = R.drawable.ic_remove),
+                    contentDescription = "RemoveIcon",
+                )
+            }
         }
     }
 }
