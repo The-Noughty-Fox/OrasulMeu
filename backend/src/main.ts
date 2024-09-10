@@ -43,6 +43,6 @@ async function bootstrap() {
   fs.writeFileSync(filePath, yamlString);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT);
+  await app.listen(process.env.PORT, '0.0.0.0');
 }
 bootstrap();

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Template for Orasul Meu API
+Description: Template for the noughty fox blog
 
 Parameters:
   DomainName:
@@ -35,8 +35,6 @@ Parameters:
     Type: String
     Description: CloudWatch logs group name for ECS tasks
 
-Conditions:
-  ShouldCreateLogsGroup: !Equals [true, !Ref CreateLogsGroup]
 
 Resources:
   ACMCertificate:
@@ -92,35 +90,6 @@ Resources:
       DeploymentController:
         Type: ECS
 
-  TaskRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub '${AWS::StackName}-task-role'
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ecs-tasks.amazonaws.com
-            Action:
-              - sts:AssumeRole
-
-  TaskExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub '${AWS::StackName}-task-execution-role'
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ecs-tasks.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
-
   TaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -136,14 +105,6 @@ Resources:
           IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-
-  TaskLogsGroup:
-    Type: AWS::Logs::LogGroup
-    Condition: ShouldCreateLogsGroup
-    DeletionPolicy: Retain
-    Properties:
-      LogGroupName: !Ref LogsGroupName
-      RetentionInDays: 30
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
