@@ -1,8 +1,10 @@
 package com.thenoughtfox.orasulmeu.ui.screens.home.map
 
 import android.Manifest
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -95,11 +97,27 @@ private fun MapView(
         }
     }
 
+    val settingResultRequest =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { activityResult ->
+            if (activityResult.resultCode == RESULT_OK)
+                locationClient.getLastLocation()
+            else {
+                context.showToast("Please provide location permissions")
+            }
+        }
+
     val locationRequester = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
         if (results.all { it.value }) {
-            locationClient.getLastLocation()
+            locationClient.startLocationRequest(onSuccess = {
+                locationClient.getLastLocation()
+            }, onFailure = { exception ->
+                val intentSenderRequest = IntentSenderRequest.Builder(exception.resolution).build()
+                settingResultRequest.launch(intentSenderRequest)
+            })
         } else {
             context.showToast("Please provide location permissions")
         }

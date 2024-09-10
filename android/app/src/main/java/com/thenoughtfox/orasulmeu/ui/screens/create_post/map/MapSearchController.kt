@@ -1,7 +1,9 @@
 package com.thenoughtfox.orasulmeu.ui.screens.create_post.map
 
 import android.Manifest
+import android.app.Activity.RESULT_OK
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -66,6 +68,8 @@ import com.thenoughtfox.orasulmeu.ui.screens.create_post.CreatePostViewModel
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.map.view.MapboxMapView
 import com.thenoughtfox.orasulmeu.ui.screens.create_post.media.RoundButton
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
+import com.thenoughtfox.orasulmeu.utils.findActivity
+import com.thenoughtfox.orasulmeu.utils.getActivity
 import com.thenoughtfox.orasulmeu.utils.showToast
 import kotlinx.coroutines.launch
 
@@ -87,11 +91,27 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
         }
     }
 
+    val settingResultRequest =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { activityResult ->
+            if (activityResult.resultCode == RESULT_OK)
+                locationClient.getLastLocation()
+            else {
+                context.showToast("Please provide location permissions")
+            }
+        }
+
     val locationRequester = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
         if (results.all { it.value }) {
-            locationClient.getLastLocation()
+            locationClient.startLocationRequest(onSuccess = {
+                locationClient.getLastLocation()
+            }, onFailure = { exception ->
+                val intentSenderRequest = IntentSenderRequest.Builder(exception.resolution).build()
+                settingResultRequest.launch(intentSenderRequest)
+            })
         } else {
             context.showToast("Please provide location permissions")
         }

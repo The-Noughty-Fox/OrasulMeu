@@ -1,5 +1,6 @@
 package com.thenoughtfox.orasulmeu.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.drawable.Drawable
@@ -31,4 +32,13 @@ fun Context.getActivity(): ComponentActivity? = when (this) {
     is ComponentActivity -> this
     is ContextWrapper -> baseContext.getActivity()
     else -> null
+}
+
+internal fun Context.findActivity(): Activity {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    throw IllegalStateException("Permissions should be called in the context of an Activity")
 }
