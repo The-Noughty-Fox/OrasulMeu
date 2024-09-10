@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -33,8 +34,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,6 +48,8 @@ import coil.decode.VideoFrameDecoder
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.main.MAX_DESC_SYMBOL
+import com.thenoughtfox.orasulmeu.ui.screens.create_post.main.MAX_TITLE_SYMBOL
 import com.thenoughtfox.orasulmeu.ui.theme.OrasulMeuTheme
 
 @Composable
@@ -53,6 +59,7 @@ fun ProfileView(
     postCount: Int,
     reactionsCount: Int,
     isEditionModeEnabled: Boolean,
+    isEnabled: Boolean = true,
     onEditPress: () -> Unit,
     onChangeImagePress: () -> Unit,
     onNameTextChange: (String) -> Unit
@@ -105,7 +112,11 @@ fun ProfileView(
                     .clip(CircleShape)
                     .zIndex(2f)
                     .background(color = Color(0xFF003566))
-                    .clickable { onChangeImagePress() }
+                    .clickable {
+                        if (isEnabled) {
+                            onChangeImagePress()
+                        }
+                    }
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_profile_edit_photo),
@@ -127,17 +138,28 @@ fun ProfileView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isEditionModeEnabled) {
-                var nameEditable: String by remember { mutableStateOf(name) }
+                var nameEditable: String by remember { mutableStateOf(name.trim()) }
                 val onNameChange: (String) -> Unit = {
-                    onNameTextChange(it)
-                    nameEditable = it
+                    if (it.length <= MAX_TITLE_SYMBOL) {
+                        val normalized = normalizeName(it)
+                        onNameTextChange(normalized)
+                        nameEditable = normalized
+                    }
                 }
 
                 BasicTextField(
                     value = nameEditable,
-                    onValueChange = { onNameChange(it) },
+                    onValueChange = {
+                        if (isEnabled) {
+                            onNameChange(it)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
                     modifier = Modifier
-                        .padding(top = 120.dp)
+                        .padding(top = 120.dp, start = 16.dp, end = 16.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(color = OrasulMeuTheme.colors.backgroundWhite.copy(alpha = .4f))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -155,7 +177,11 @@ fun ProfileView(
                         color = colorResource(R.color.black),
                         fontWeight = FontWeight(700)
                     ),
-                    modifier = Modifier.padding(top = 100.dp)
+                    modifier = Modifier
+                        .padding(top = 100.dp, start = 16.dp, end = 16.dp)
+                        .clickable {
+                            onEditPress()
+                        }
                 )
             }
 
@@ -166,7 +192,7 @@ fun ProfileView(
                     .clickable { onEditPress() }
                     .padding(4.dp)) {
                     Text(
-                        text = "Atinge pentru a edita", style = TextStyle(
+                        text = stringResource(id = R.string.profile_tap_to_edit), style = TextStyle(
                             fontSize = 16.sp,
                             fontWeight = FontWeight(400),
                             color = colorResource(R.color.grey)
@@ -214,6 +240,10 @@ private fun ProfileInfoItem(title: String, value: String, modifier: Modifier = M
             )
         )
     }
+
+private fun normalizeName(name: String): String {
+    return name.split("\\s+".toRegex()).joinToString("  ")
+}
 
 @Preview(showBackground = true)
 @Composable

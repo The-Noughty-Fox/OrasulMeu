@@ -83,7 +83,8 @@ fun PostView(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             val (reaction, pagerIndication, threeDots) = createRefs()
-            ReactionButton(reaction = state.reaction,
+            ReactionButton(
+                reaction = state.reaction,
                 onLike = { sendEvent(PostContract.Event.Like) },
                 onDislike = { sendEvent(PostContract.Event.Dislike) },
                 onRevokeReaction = { sendEvent(PostContract.Event.RevokeReaction) },

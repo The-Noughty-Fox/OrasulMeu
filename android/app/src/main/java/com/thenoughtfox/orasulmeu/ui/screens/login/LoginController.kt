@@ -30,7 +30,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginController() {
-    val navigator = LocalRootNavigator.current
+
+    val rootNavigator = LocalRootNavigator.current
     val viewModel: LoginViewModel = hiltViewModel()
 
     val scope = rememberCoroutineScope()
@@ -99,8 +100,8 @@ fun LoginController() {
                     }
 
                     Action.Proceed -> {
-                        navigator.navigate(RootNavDestinations.Main) {
-                            popUpTo(RootNavDestinations.Main) {
+                        rootNavigator.navigate(RootNavDestinations.Main) {
+                            popUpTo(RootNavDestinations.Auth) {
                                 inclusive = true
                             }
                         }

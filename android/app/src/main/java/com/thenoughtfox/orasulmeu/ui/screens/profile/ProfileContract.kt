@@ -13,6 +13,7 @@ interface ProfileContract {
         val postsCount: Int = 0,
         val reactionsCount: Int = 0,
         val isEditing: Boolean = false,
+        val isEnabledToChangeUser: Boolean = true,
         val newName: String? = null,
         val newImageUri: Uri? = null,
         val isRefreshing: Boolean = false

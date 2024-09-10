@@ -67,6 +67,9 @@
     <string name="profile_settings_delete_dialog_ok">Sterge</string>
     <string name="profile_settings_delete_dialog_cancel">Anuleaza</string>
 
+    <string name="profile_my_post">Postările mele</string>
+    <string name="profile_tap_to_edit">Atinge pentru a edita</string>
+
     <string name="home_view_type_list">Listă</string>
     <string name="home_view_type_map">Hartă</string>
 
@@ -80,4 +83,5 @@
     <string name="post_more"> more</string>
     <string name="menu_edit_post">Editeaza postarea</string>
     <string name="menu_delete_post">Sterge postarea</string>
+
 </resources>

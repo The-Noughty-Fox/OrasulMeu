@@ -28,10 +28,16 @@ fun ProfileSettingsController() {
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-            viewModel.action.collectLatest {
-                when (it) {
-                    is ProfileSettingsContract.Action.ShowToast -> context.showToast(it.msg)
-                    ProfileSettingsContract.Action.Logout -> rootNavigator.popBackStack()
+            viewModel.action.collect { action ->
+                when (action) {
+                    is ProfileSettingsContract.Action.ShowToast -> context.showToast(action.msg)
+                    ProfileSettingsContract.Action.Logout -> {
+                        rootNavigator.navigate(RootNavDestinations.Auth) {
+                            popUpTo(RootNavDestinations.Main) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 }
             }
         }

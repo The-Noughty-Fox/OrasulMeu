@@ -137,16 +137,13 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun updateUser() = viewModelScope.launch {
-        val updateUserNameDeferred = async {
-            if (state.value.newName == null) {
-                return@async null
-            }
-
-            usersApi.editUser(UserUpdateDto(username = state.value.name)).toOperationResult { it }
+        if (state.value.isLoading) {
+            return@launch
         }
 
-        val updateUserPhotoDeferred = async {
-            val imageUri = state.value.newImageUri ?: return@async null
+        _state.update { it.copy(isLoading = true, isEnabledToChangeUser = false) }
+        if (state.value.newImageUri != null) {
+            val imageUri = state.value.newImageUri ?: return@launch
 
             val path = getRealPathFromURI(
                 contentUri = imageUri,
@@ -160,39 +157,73 @@ class ProfileViewModel @Inject constructor(
                 toMultiPart(path, FILE_FORM_DATA, MimeType.IMAGE.mimeTypes.first())
             }
 
-            mediaApi.upload(part).toOperationResult { it }
-        }
+            mediaApi.upload(part)
+                .toOperationResult { it }
+                .onSuccess { media ->
+                    usersApi.editUser(
+                        UserUpdateDto(
+                            username = state.value.newName, socialProfilePictureUrl = media.url
+                        )
+                    )
+                        .toOperationResult { it }
+                        .onSuccess { user ->
+                            userSharedPrefs.user =
+                                userSharedPrefs.user?.copy(
+                                    userName = user.username,
+                                    socialProfilePictureUrl = media.url
+                                )
 
-        val results = awaitAll(updateUserNameDeferred, updateUserPhotoDeferred)
+                            _state.update {
+                                it.copy(
+                                    isEditing = false,
+                                    isLoading = false,
+                                    isEnabledToChangeUser = true
+                                )
+                            }
+                        }
 
-        val updateUserNameResult = results[0]
-        val updateUserPhotoResult = results[1]
+                        .onError {
+                            _state.update {
+                                it.copy(
+                                    isEditing = false,
+                                    isLoading = false,
+                                    isEnabledToChangeUser = true
+                                )
+                            }
+                            _action.emit(Action.ShowToast("Failed to update user"))
+                        }
+                }
+                .onError {
+                    _state.update {
+                        it.copy(
+                            isEditing = false,
+                            isLoading = false,
+                            isEnabledToChangeUser = true
+                        )
+                    }
+                    _action.emit(Action.ShowToast("Failed to update user"))
+                }
+        } else {
+            usersApi.editUser(UserUpdateDto(username = state.value.newName))
+                .toOperationResult { it }
+                .onSuccess { user ->
+                    userSharedPrefs.user =
+                        userSharedPrefs.user?.copy(userName = user.username)
 
-        _state.update { it.copy(isEditing = false) }
-        updateUserNameResult?.onSuccess { user ->
-            val username = (user as? UserDto)?.username
-            userSharedPrefs.user = userSharedPrefs.user?.copy(userName = username)
-        }?.onError {
-            _action.emit(Action.ShowToast("Failed to update user name"))
-            _state.update {
-                it.copy(
-                    isEditing = false,
-                    name = userSharedPrefs.user?.userName ?: "empty name",
-                )
-            }
-        }
-
-        updateUserPhotoResult?.onSuccess { media ->
-            val url = (media as? MediaSupabaseDto)?.url
-            userSharedPrefs.user = userSharedPrefs.user?.copy(socialProfilePictureUrl = url)
-        }?.onError {
-            _action.emit(Action.ShowToast("Failed to update user photo"))
-            _state.update {
-                it.copy(
-                    isEditing = false,
-                    imageUrl = userSharedPrefs.user?.socialProfilePictureUrl
-                )
-            }
+                    _state.update {
+                        it.copy(
+                            isEditing = false, isLoading = false, isEnabledToChangeUser = true
+                        )
+                    }
+                }
+                .onError {
+                    _state.update {
+                        it.copy(
+                            isEditing = false, isLoading = false, isEnabledToChangeUser = true
+                        )
+                    }
+                    _action.emit(Action.ShowToast("Failed to update user name"))
+                }
         }
     }
 
