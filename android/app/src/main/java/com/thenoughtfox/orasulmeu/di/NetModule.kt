@@ -1,6 +1,7 @@
 package com.thenoughtfox.orasulmeu.di
 
 import android.content.Context
+import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.net.interceptor.HeaderInterceptor
 import com.thenoughtfox.orasulmeu.net.interceptor.NetworkConnectionInterceptor
 import com.thenoughtfox.orasulmeu.service.UserSharedPrefs
@@ -51,10 +52,10 @@ object NetModule {
     fun provideApiClient(
         okHttpBuilder: OkHttpClient.Builder,
         @ApplicationContext context: Context
-    ): ApiClient {
-        val baseUrl = "http://54.173.52.195/"
-        return ApiClient(okHttpClientBuilder = okHttpBuilder, baseUrl = baseUrl)
-    }
+    ): ApiClient = ApiClient(
+        okHttpClientBuilder = okHttpBuilder,
+        baseUrl = context.getString(R.string.base_url)
+    )
 
     @Provides
     @Singleton
