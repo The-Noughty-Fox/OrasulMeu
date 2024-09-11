@@ -113,7 +113,11 @@ fun ProfileScreen(
                 sendEvent(Event.Refresh)
             })
 
-            Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+            Box(
+                modifier = Modifier
+                    .pullRefresh(pullRefreshState)
+                    .background(color = colorResource(R.color.background_color))
+            ) {
                 if (posts.loadState.refresh is LoadState.Loading) {
                     PostLoading(
                         modifier = Modifier
@@ -124,7 +128,6 @@ fun ProfileScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(color = colorResource(R.color.background_color))
                             .padding(top = padding.calculateTopPadding())
                     ) {
                         item {

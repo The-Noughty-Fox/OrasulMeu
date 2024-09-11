@@ -197,13 +197,11 @@ dependencies {
 
     //Paging
     implementation libs.androidx.paging.compose
-//    implementation 'com.github.yusufarisoy:compose-paging:1.0.1'
 
     implementation libs.pictureselector
 
     // material for pull_to_refresh
     implementation libs.androidx.material
-
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
