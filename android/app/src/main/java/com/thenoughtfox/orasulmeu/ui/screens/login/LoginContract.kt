@@ -7,6 +7,7 @@ import com.thenoughtfox.orasulmeu.R
 data class State(
     val isLoadingGoogle: Boolean = false,
     val isLoadingFacebook: Boolean = false,
+    val isProceed: Boolean = false,
     val isError: Boolean = false
 )
 

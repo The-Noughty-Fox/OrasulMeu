@@ -40,6 +40,13 @@ class LoginViewModel @Inject constructor(
         event.consumeAsFlow().collect { event ->
             when (event) {
                 is Event.Auth -> {
+                    if (state.value.isLoadingGoogle ||
+                        state.value.isLoadingFacebook ||
+                        state.value.isProceed
+                    ) {
+                        return@collect
+                    }
+
                     when (event.type) {
                         SingInType.Google -> _state.update { it.copy(isLoadingGoogle = true) }
                         SingInType.Facebook -> _state.update { it.copy(isLoadingFacebook = true) }
@@ -51,7 +58,6 @@ class LoginViewModel @Inject constructor(
                 is Event.SendToken -> {
                     when (event.type) {
                         SingInType.Google -> {
-                            _state.update { it.copy(isLoadingGoogle = false) }
                             authApi.authWithGoogle(ApiBodyWithToken(event.token))
                                 .toOperationResult { it }
                                 .onSuccess {
@@ -63,15 +69,24 @@ class LoginViewModel @Inject constructor(
                                             userName = it.username
                                         )
 
+                                    _state.update {
+                                        it.copy(
+                                            isLoadingGoogle = false, isProceed = true
+                                        )
+                                    }
                                     _action.emit(Action.Proceed)
                                 }
                                 .onError {
+                                    _state.update {
+                                        it.copy(
+                                            isLoadingGoogle = false, isProceed = false
+                                        )
+                                    }
                                     _action.emit(Action.ShowToast(it))
                                 }
                         }
 
                         SingInType.Facebook -> {
-                            _state.update { it.copy(isLoadingFacebook = false) }
                             authApi.authWithFacebook(ApiBodyWithToken(event.token))
                                 .toOperationResult { it }
                                 .onSuccess {
@@ -83,9 +98,19 @@ class LoginViewModel @Inject constructor(
                                             userName = it.username
                                         )
 
+                                    _state.update {
+                                        it.copy(
+                                            isLoadingFacebook = false, isProceed = true
+                                        )
+                                    }
                                     _action.emit(Action.Proceed)
                                 }
                                 .onError {
+                                    _state.update {
+                                        it.copy(
+                                            isLoadingFacebook = false, isProceed = false
+                                        )
+                                    }
                                     _action.emit(Action.ShowToast(it))
                                 }
                         }

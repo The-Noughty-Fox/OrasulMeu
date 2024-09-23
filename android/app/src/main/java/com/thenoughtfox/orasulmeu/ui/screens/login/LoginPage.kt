@@ -37,10 +37,11 @@ import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
 @Composable
 fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
 
-    Column(modifier = Modifier
-        .pageModifier()
-        .statusBarsPadding()
-        .navigationBarsPadding()
+    Column(
+        modifier = Modifier
+            .pageModifier()
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -74,14 +75,14 @@ fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
                 }
             )
 
-            SignInButton(
-                modifier = Modifier.padding(top = 25.dp),
-                isLoading = uiState.isLoadingFacebook,
-                type = SingInType.Facebook,
-                onClick = {
-                    onSendEvent(Event.Auth(it))
-                }
-            )
+//            SignInButton(
+//                modifier = Modifier.padding(top = 25.dp),
+//                isLoading = uiState.isLoadingFacebook,
+//                type = SingInType.Facebook,
+//                onClick = {
+//                    onSendEvent(Event.Auth(it))
+//                }
+//            )
         }
 
         Spacer(Modifier.weight(1f))
@@ -130,7 +131,10 @@ private fun SignInButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.clickable { onClick.invoke(type) }
+            modifier = Modifier.clickable {
+                if (isLoading) return@clickable
+                onClick.invoke(type)
+            }
         ) {
             if (!isLoading) {
                 Image(
