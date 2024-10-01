@@ -109,7 +109,6 @@ dependencies {
     implementation libs.androidx.material3
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.recyclerview
-    implementation libs.androidx.constraintlayout.compose
 
     //ConstraintLayout
     implementation libs.androidx.constraintlayout.compose
@@ -122,8 +121,6 @@ dependencies {
 
     //Lifecycle
     implementation libs.lifecycle.viewmodel
-    implementation libs.lifecycle.livedata
-    implementation libs.lifecycle.service
 
     //Permission
     implementation libs.permission.dispetcher.ktx
@@ -166,7 +163,6 @@ dependencies {
     //ViewBinding
     implementation libs.view.binding.property.delegate
     implementation libs.androidx.ui.viewbinding
-
 
     //Fragment
     implementation libs.androidx.fragment.ktx

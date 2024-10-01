@@ -15,6 +15,7 @@ sealed class Event {
     data class Auth(val type: SingInType) : Event()
     data class SendToken(val type: SingInType, val token: String) : Event()
     data class FailedAuth(val type: SingInType, val msg: String) : Event()
+    data object Skip : Event()
 }
 
 sealed class Action {

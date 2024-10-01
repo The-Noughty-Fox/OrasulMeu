@@ -69,19 +69,21 @@ class LoginViewModel @Inject constructor(
                                             userName = it.username
                                         )
 
-                                    _state.update {
-                                        it.copy(
+                                    _state.update { uiState ->
+                                        uiState.copy(
                                             isLoadingGoogle = false, isProceed = true
                                         )
                                     }
+
                                     _action.emit(Action.Proceed)
                                 }
                                 .onError {
-                                    _state.update {
-                                        it.copy(
+                                    _state.update { uiState ->
+                                        uiState.copy(
                                             isLoadingGoogle = false, isProceed = false
                                         )
                                     }
+
                                     _action.emit(Action.ShowToast(it))
                                 }
                         }
@@ -98,16 +100,17 @@ class LoginViewModel @Inject constructor(
                                             userName = it.username
                                         )
 
-                                    _state.update {
-                                        it.copy(
+                                    _state.update { uiState ->
+                                        uiState.copy(
                                             isLoadingFacebook = false, isProceed = true
                                         )
                                     }
+
                                     _action.emit(Action.Proceed)
                                 }
                                 .onError {
-                                    _state.update {
-                                        it.copy(
+                                    _state.update { uiState ->
+                                        uiState.copy(
                                             isLoadingFacebook = false, isProceed = false
                                         )
                                     }
@@ -125,6 +128,8 @@ class LoginViewModel @Inject constructor(
 
                     _action.emit(Action.ShowToast(event.msg))
                 }
+
+                Event.Skip -> _action.emit(Action.Proceed)
             }
         }
     }

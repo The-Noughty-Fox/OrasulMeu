@@ -35,7 +35,7 @@ import com.thenoughtfox.orasulmeu.ui.theme.subTitleModifier
 import com.thenoughtfox.orasulmeu.utils.view.CircleProgress
 
 @Composable
-fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
+fun LoginPage(uiState: State, sendEvent: (Event) -> Unit) {
 
     Column(
         modifier = Modifier
@@ -71,7 +71,7 @@ fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
                 isLoading = uiState.isLoadingGoogle,
                 type = SingInType.Google,
                 onClick = {
-                    onSendEvent(Event.Auth(it))
+                    sendEvent(Event.Auth(it))
                 }
             )
 
@@ -92,11 +92,11 @@ fun LoginPage(uiState: State, onSendEvent: (Event) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-//            Text(
-//                text = "Skip",
-//                style = bodyModifier().copy(color = colorResource(id = R.color.grey)),
-//                modifier = Modifier.padding(top = 8.dp)
-//            )
+            Text(
+                text = stringResource(R.string.skip),
+                style = bodyModifier().copy(color = colorResource(id = R.color.grey)),
+                modifier = Modifier.padding(top = 8.dp).clickable { sendEvent(Event.Skip) }
+            )
 
             Row(modifier = Modifier.padding(top = 26.dp, bottom = 16.dp)) {
                 Image(

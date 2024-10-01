@@ -10,9 +10,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.thenoughtfox.orasulmeu.ui.post.utils.Post
+import com.thenoughtfox.orasulmeu.ui.screens.login.AnonymousLoginDialog
 import com.thenoughtfox.orasulmeu.ui.screens.login.LoginController
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.serializableType
@@ -35,6 +37,9 @@ interface RootNavDestinations {
                 savedStateHandle.toRoute<CreatePost>(typeMap)
         }
     }
+
+    @Serializable
+    data object AnonymousDialog : RootNavDestinations
 }
 
 @Composable
@@ -48,12 +53,24 @@ fun RootGraph(startDestinations: RootNavDestinations) {
             startDestination = startDestinations,
             modifier = Modifier.fillMaxSize()
         ) {
-            composable<RootNavDestinations.Auth> { LoginController() }
+            composable<RootNavDestinations.Auth> { LoginController(sharedViewModel) }
             composable<RootNavDestinations.Main> { MainGraph(sharedViewModel) }
             composable<RootNavDestinations.CreatePost>(
                 typeMap = RootNavDestinations.CreatePost.typeMap
             ) {
                 CreatePostGraph(sharedViewModel)
+            }
+
+            dialog<RootNavDestinations.AnonymousDialog>() {
+                AnonymousLoginDialog(onDismissRequest = {
+                    navController.popBackStack()
+                }, onConfirmation = {
+                    navController.navigate(RootNavDestinations.Auth) {
+                        popUpTo(RootNavDestinations.Main) {
+                            inclusive = true
+                        }
+                    }
+                })
             }
         }
     }

@@ -19,10 +19,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeController
 import com.thenoughtfox.orasulmeu.ui.screens.home.search.SearchPostsController
+import com.thenoughtfox.orasulmeu.ui.screens.login.AnonymousLoginDialog
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavBar
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
@@ -81,17 +83,25 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
                             }
 
                             BottomNavTabs.Create.name -> {
-                                rootNavigator.navigate(RootNavDestinations.CreatePost(Post()))
+                                if (sharedViewModel.state.value.isAnonUser) {
+                                    rootNavigator.navigate(RootNavDestinations.AnonymousDialog)
+                                } else {
+                                    rootNavigator.navigate(RootNavDestinations.CreatePost(Post()))
+                                }
                             }
 
                             BottomNavTabs.Profile.name -> {
-                                navController.navigate(MainGraphDestinations.ProfileScreen) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
+                                if (sharedViewModel.state.value.isAnonUser) {
+                                    rootNavigator.navigate(RootNavDestinations.AnonymousDialog)
+                                } else {
+                                    navController.navigate(MainGraphDestinations.ProfileScreen) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
 
-                                    launchSingleTop = true
-                                    restoreState = true
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
                             }
                         }

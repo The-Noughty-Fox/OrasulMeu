@@ -24,12 +24,14 @@ import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
 import com.thenoughtfox.orasulmeu.navigation.RootNavDestinations
 import com.thenoughtfox.orasulmeu.ui.MainActivity
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedContract
+import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.getActivity
 import com.thenoughtfox.orasulmeu.utils.showToast
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginController() {
+fun LoginController(sharedViewModel: SharedViewModel) {
 
     val rootNavigator = LocalRootNavigator.current
     val viewModel: LoginViewModel = hiltViewModel()
@@ -111,9 +113,26 @@ fun LoginController() {
         }
     }
 
-    LoginPage(uiState = viewModel.state.collectAsState().value) {
+
+    LoginPage(uiState = viewModel.state.collectAsState().value) { event ->
         scope.launch {
-            viewModel.event.send(it)
+            when (event) {
+                Event.Skip -> {
+                    sharedViewModel.sendEvent(
+                        SharedContract.Event.SetAnonUser(isAnonUser = true)
+                    )
+                }
+
+                is Event.SendToken -> {
+                    sharedViewModel.sendEvent(
+                        SharedContract.Event.SetAnonUser(isAnonUser = false)
+                    )
+                }
+
+                else -> Unit
+            }
+
+            viewModel.event.send(event)
         }
     }
 }
