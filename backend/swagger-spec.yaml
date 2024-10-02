@@ -192,6 +192,138 @@ paths:
                 $ref: "#/components/schemas/UserDto"
         "401":
           description: ""
+  /posts/anonymous:
+    get:
+      operationId: get-all-posts-anonymous
+      summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+      tags: &a3
+        - posts
+  /posts/search/anonymous:
+    get:
+      operationId: get-posts-by-phrase-anonymous
+      summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+        - name: phrase
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+      tags: *a3
+  /posts/reaction/anonymous:
+    get:
+      operationId: get-all-posts-ordered-by-reactions-count-anonymous
+      summary: ""
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          required: true
+          in: query
+          schema:
+            default: 10
+            type: integer
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostDto"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+      tags: *a3
+  /posts/{id}/anonymous:
+    get:
+      operationId: get-post-anonymous
+      summary: ""
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
+      responses:
+        default:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDto"
+      tags: *a3
   /posts:
     post:
       operationId: create-post
@@ -210,8 +342,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDto"
-      tags: &a3
-        - posts
+      tags: *a3
     get:
       operationId: get-all-posts
       summary: ""
@@ -693,31 +824,6 @@ components:
           type: string
       required:
         - token
-    PointDto:
-      type: object
-      properties:
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-      required:
-        - latitude
-        - longitude
-    CreatePostDto:
-      type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-        locationAddress:
-          type: string
-        location:
-          $ref: "#/components/schemas/PointDto"
-      required:
-        - title
     PostReactionsDto:
       type: object
       properties:
@@ -761,6 +867,18 @@ components:
         - url
         - bucketPath
         - fileName
+    PointDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      required:
+        - latitude
+        - longitude
     PostDto:
       type: object
       properties:
@@ -798,6 +916,19 @@ components:
         - createdAt
         - locationAddress
         - location
+    CreatePostDto:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        locationAddress:
+          type: string
+        location:
+          $ref: "#/components/schemas/PointDto"
+      required:
+        - title
     UpdatePostDto:
       type: object
       properties:
