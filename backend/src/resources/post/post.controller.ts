@@ -34,12 +34,61 @@ import { mbToBytes } from '@/helpers/other';
 import { PostsByPhraseQueryDto } from './dto/posts-by-phrase-query.dto';
 import { MediaDto } from '@/resources/media/dto/media.dto';
 
-@UseGuards(JwtAuthGuard)
 @ApiTags('posts')
 @Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  // ========================================================================
+  // =                controllers for anonymous users                       =
+  // ========================================================================
+
+  @Get('anonymous')
+  @ApiOperation({ operationId: 'get-all-posts-anonymous' })
+  @ApiResponse({
+    schema: getPaginationSchema(PostDto),
+  })
+  findAllForAnonymousUser(@Query() paginationQuery: PaginationQueryDto) {
+    return this.postService.findAllForAnonymousUser(paginationQuery);
+  }
+
+  @Get('search/anonymous')
+  @ApiOperation({ operationId: 'get-posts-by-phrase-anonymous' })
+  @ApiResponse({
+    schema: getPaginationSchema(PostDto),
+  })
+  findByPhraseForAnonymousUser(@Query() query: PostsByPhraseQueryDto) {
+    return this.postService.findByPhraseForAnonymousUser(query);
+  }
+
+  @Get('reaction/anonymous')
+  @ApiOperation({
+    operationId: 'get-all-posts-ordered-by-reactions-count-anonymous',
+  })
+  @ApiResponse({
+    schema: getPaginationSchema(PostDto),
+  })
+  findAllReactionCountOrderForAnonymousUser(
+    @Query() paginationQuery: PaginationQueryDto,
+  ) {
+    return this.postService.findAllReactionCountOrderForAnonymousUser(
+      paginationQuery,
+    );
+  }
+
+  @Get(':id/anonymous')
+  @ApiParam({ name: 'id', type: 'integer' })
+  @ApiOperation({ operationId: 'get-post-anonymous' })
+  @ApiResponse({ type: PostDto })
+  findOneForAnonymousUser(@Param('id', ParseIntPipe) id: number) {
+    return this.postService.findOneForAnonymousUser(id);
+  }
+
+  // ========================================================================
+  // =                    controllers for loged users                       =
+  // ========================================================================
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiBody({ type: CreatePostDto })
   @ApiOperation({ operationId: 'create-post' })
@@ -51,15 +100,18 @@ export class PostController {
     return this.postService.create(createPostDto, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ operationId: 'get-all-posts' })
   @ApiResponse({
     schema: getPaginationSchema(PostDto),
   })
   findAll(@Query() paginationQuery: PaginationQueryDto, @Req() req) {
+    console.log('in here');
     return this.postService.findAll(paginationQuery, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('search')
   @ApiOperation({ operationId: 'get-posts-by-phrase' })
   @ApiResponse({
@@ -69,6 +121,7 @@ export class PostController {
     return this.postService.findByPhrase(query, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('reaction')
   @ApiOperation({ operationId: 'get-all-posts-ordered-by-reactions-count' })
   @ApiResponse({
@@ -84,6 +137,7 @@ export class PostController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('my')
   @ApiOperation({ operationId: 'get-my-posts' })
   @ApiResponse({
@@ -93,6 +147,7 @@ export class PostController {
     return this.postService.findMyPosts(req.user.id, paginationQuery);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'get-post' })
@@ -101,6 +156,7 @@ export class PostController {
     return this.postService.findOne(id, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiBody({ type: UpdatePostDto })
@@ -114,6 +170,7 @@ export class PostController {
     return this.postService.update(id, updatePostDto, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'delete-post' })
@@ -122,6 +179,7 @@ export class PostController {
     return this.postService.remove(id, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':id/react')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'react-to-post' })
@@ -137,6 +195,7 @@ export class PostController {
     return this.postService.react(id, req.user.id, body.reaction);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id/react')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiOperation({ operationId: 'retrieve-reaction-to-post' })
@@ -145,6 +204,7 @@ export class PostController {
     return this.postService.retrieveReaction(id, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':id/media')
   @ApiParam({ name: 'id', type: 'integer' })
   @ApiBody({

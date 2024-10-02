@@ -521,4 +521,163 @@ export class PostService {
       throw new InternalServerErrorException('Could not upload media');
     }
   }
+
+  // ========================================================================
+  // =                   services for anonymous users                       =
+  // ========================================================================
+
+  async findAllForAnonymousUser(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 10 } = paginationQuery;
+
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_posts_anonymous', {
+        page_input: page,
+        limit_input: limit,
+      });
+
+    if (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Could not get the posts');
+    }
+
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts');
+
+    if (countError) {
+      console.log(countError);
+      throw new InternalServerErrorException('Could not count the posts');
+    }
+
+    return {
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
+  }
+
+  async findByPhraseForAnonymousUser(
+    query: PostsByPhraseQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 10, phrase } = query;
+
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('search_posts_by_phrase_anonymous', {
+        phrase_input: phrase,
+        limit_input: limit,
+        page_input: page,
+      });
+
+    if (error) {
+      throw new InternalServerErrorException('Could not get the posts');
+    }
+
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts_with_phrase', { phrase_input: phrase });
+
+    if (countError) {
+      throw new InternalServerErrorException('Could not count the posts');
+    }
+
+    return {
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
+  }
+
+  async findAllReactionCountOrderForAnonymousUser(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResultDto<PostDto>> {
+    const { page = 1, limit = 10 } = paginationQuery;
+
+    const { data: posts, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_posts_by_reactions_count_anonymous', {
+        page_input: page,
+        limit_input: limit,
+      });
+
+    if (error) {
+      throw new InternalServerErrorException('Could not find the posts');
+    }
+
+    const { data: postsCount, error: countError } = await this.supabaseService
+      .getClient()
+      .rpc('count_posts');
+
+    if (countError) {
+      throw new InternalServerErrorException('Could not count the posts');
+    }
+
+    return {
+      data: posts.map((post) => ({
+        ...post,
+        createdAt: timestamptzToDate(post.createdAt),
+        reactions: {
+          ...post.reactions,
+        },
+        media: post.media.map((mediaItem) => ({
+          ...mediaItem,
+          type: mapToMediaType(mediaItem.type),
+        })),
+      })),
+      page: page,
+      limit: limit,
+      total: postsCount,
+    };
+  }
+
+  async findOneForAnonymousUser(id: number): Promise<PostDto> {
+    const { data: post, error } = await this.supabaseService
+      .getClient()
+      .rpc('get_post_anonymous', {
+        post_id_input: id,
+      });
+
+    if (error && error.code === CUSTOM_ERROR_CODES.POST_NOT_FOUND) {
+      throw new NotFoundException(POST_NOT_FOUND(id));
+    } else if (error || !post) {
+      throw new InternalServerErrorException('Could not find the post');
+    }
+
+    return {
+      ...post,
+      createdAt: timestamptzToDate(post.createdAt),
+      reactions: {
+        ...post.reactions,
+      },
+      media: post.media.map((mediaItem) => ({
+        ...mediaItem,
+        type: mapToMediaType(mediaItem.type),
+      })),
+    };
+  }
 }
