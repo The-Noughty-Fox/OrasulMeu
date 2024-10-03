@@ -29,7 +29,7 @@ interface RootNavDestinations {
     data object Main : RootNavDestinations
 
     @Serializable
-    data class CreatePost(val post: Post) : RootNavDestinations {
+    data class CreatePost(val post: Post, val isAnonymous: Boolean) : RootNavDestinations {
         companion object {
             val typeMap = mapOf(typeOf<Post>() to serializableType<Post>())
 
@@ -39,7 +39,7 @@ interface RootNavDestinations {
     }
 
     @Serializable
-    data object AnonymousDialog : RootNavDestinations
+    data class AnonymousDialog(val text: String) : RootNavDestinations
 }
 
 @Composable
@@ -61,8 +61,9 @@ fun RootGraph(startDestinations: RootNavDestinations) {
                 CreatePostGraph(sharedViewModel)
             }
 
-            dialog<RootNavDestinations.AnonymousDialog>() {
-                AnonymousLoginDialog(onDismissRequest = {
+            dialog<RootNavDestinations.AnonymousDialog> { dialog ->
+                val descText = dialog.arguments?.getString("text") ?: ""
+                AnonymousLoginDialog(descText, onDismissRequest = {
                     navController.popBackStack()
                 }, onConfirmation = {
                     navController.navigate(RootNavDestinations.Auth) {

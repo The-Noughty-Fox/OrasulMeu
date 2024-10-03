@@ -44,7 +44,7 @@ class SharedViewModel @Inject constructor() : ViewModel() {
                     it.copy(isPostUpdated = true, post = event.postDto)
                 }
 
-                is Event.SetAnonUser -> _state.update { it.copy(isAnonUser = event.isAnonUser) }
+                is Event.SetAnonUser -> _state.update { it.copy(isAnonymous = event.isAnonUser) }
             }
         }
     }

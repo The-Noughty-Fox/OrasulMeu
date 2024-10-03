@@ -69,7 +69,11 @@ fun ProfileController(sharedViewModel: SharedViewModel) {
                 when (action) {
                     is ProfileContract.Action.ShowToast -> context.showToast(action.msg)
                     is ProfileContract.Action.GoEditPost ->
-                        rootNavigator.navigate(RootNavDestinations.CreatePost(action.post))
+                        rootNavigator.navigate(
+                            RootNavDestinations.CreatePost(
+                                post = action.post, isAnonymous = false
+                            )
+                        )
                 }
             }
         }

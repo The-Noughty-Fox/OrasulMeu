@@ -10,6 +10,7 @@ data class State(
     val suggestions: List<SearchSuggestion> = listOf(),
     val isSuggestionListShow: Boolean = false,
     val lastLocation: Point? = null,
+    val chisinauCenter: Point = Point.fromLngLat(28.8306, 47.0244),
     val address: String = "",
     val currentPoint: Point = Point.fromLngLat(0.0, 0.0),
     val searchText: String = ""
@@ -21,7 +22,7 @@ sealed class Event {
     data class DoOnTextLocationChanged(val text: String) : Event()
     data class OnCameraTrackingDismissed(val geo: ReverseGeoOptions) : Event()
     data class OnSearchSuggestionClicked(val suggestion: SearchSuggestion) : Event()
-    data object ClearSearchText: Event()
+    data object ClearSearchText : Event()
 }
 
 sealed class Action {

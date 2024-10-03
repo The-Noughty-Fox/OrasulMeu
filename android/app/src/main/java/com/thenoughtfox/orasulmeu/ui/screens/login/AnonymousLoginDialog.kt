@@ -34,6 +34,7 @@ import com.thenoughtfox.orasulmeu.R
 
 @Composable
 fun AnonymousLoginDialog(
+    descText: String = "",
     onDismissRequest: () -> Unit = {},
     onConfirmation: () -> Unit
 ) {
@@ -72,7 +73,7 @@ fun AnonymousLoginDialog(
                 )
 
                 Text(
-                    text = stringResource(R.string.auth_screen_desc),
+                    text = descText,
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight(400),
@@ -113,5 +114,5 @@ fun AnonymousLoginDialog(
 @Preview
 @Composable
 fun AnonymousLoginDialogPreview() {
-    AnonymousLoginDialog({}, {})
+    AnonymousLoginDialog("", {}, {})
 }

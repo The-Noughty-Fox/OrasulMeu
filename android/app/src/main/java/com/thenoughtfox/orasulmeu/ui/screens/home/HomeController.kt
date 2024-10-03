@@ -18,6 +18,7 @@ import com.thenoughtfox.orasulmeu.ui.basic.ChangeViewTypeButton
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeContract.Event
 import com.thenoughtfox.orasulmeu.ui.screens.home.map.MapController
 import com.thenoughtfox.orasulmeu.ui.screens.home.post_list.PostListController
+import com.thenoughtfox.orasulmeu.ui.screens.profile.ProfileContract
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedContract
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 
@@ -38,7 +39,10 @@ fun HomeController(sharedViewModel: SharedViewModel) {
     Box(modifier = Modifier.fillMaxSize()) {
         when (selectedViewType) {
             SelectedViewType.Map -> MapController(viewModel = viewModel)
-            SelectedViewType.List -> PostListController(viewModel = viewModel)
+            SelectedViewType.List -> PostListController(
+                viewModel = viewModel,
+                sharedViewModel = sharedViewModel
+            )
         }
 
         ChangeViewTypeButton(

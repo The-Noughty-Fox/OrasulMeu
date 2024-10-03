@@ -25,8 +25,6 @@ import com.thenoughtfox.orasulmeu.utils.UploadUtils.toMultiPart
 import com.thenoughtfox.orasulmeu.utils.getRealPathFromURI
 import com.thenoughtfox.orasulmeu.utils.urlEncode
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,9 +37,7 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.apis.MediaApi
 import org.openapitools.client.apis.PostsApi
 import org.openapitools.client.apis.UsersApi
-import org.openapitools.client.models.MediaSupabaseDto
 import org.openapitools.client.models.PostDto
-import org.openapitools.client.models.UserDto
 import org.openapitools.client.models.UserUpdateDto
 import javax.inject.Inject
 
@@ -62,8 +58,13 @@ class ProfileViewModel @Inject constructor(
 
     val event = Channel<Event>(Channel.UNLIMITED)
 
-    private val postsInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
-        CombinedPostsPagingSource(postsApi).getPostsPagingSource(type = PostType.MY)
+    private val postsInvalidatingSourceFactory by lazy {
+        InvalidatingPagingSourceFactory {
+            CombinedPostsPagingSource(postsApi).getPostsPagingSource(
+                type = PostType.MY,
+                isAnonymous = false
+            )
+        }
     }
 
     private val modificationEvents = MutableStateFlow<List<PostListEvents>>(emptyList())

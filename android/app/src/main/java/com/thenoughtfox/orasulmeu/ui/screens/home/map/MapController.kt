@@ -32,6 +32,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.thenoughtfox.orasulmeu.R
+import com.thenoughtfox.orasulmeu.navigation.LocalMainNavigator
+import com.thenoughtfox.orasulmeu.navigation.LocalRootNavigator
+import com.thenoughtfox.orasulmeu.navigation.RootNavDestinations
 import com.thenoughtfox.orasulmeu.service.LocationClient
 import com.thenoughtfox.orasulmeu.ui.basic.FindMeOnMapButton
 import com.thenoughtfox.orasulmeu.ui.post.PostContract
@@ -54,6 +58,7 @@ fun MapController(viewModel: HomeViewModel) {
     val mapView = remember { MapboxMapView(context) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val scope = rememberCoroutineScope()
+    val rootNavigator = LocalRootNavigator.current
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -61,6 +66,14 @@ fun MapController(viewModel: HomeViewModel) {
                 when (action) {
                     is HomeContract.Action.MoveToLocation -> {
                         mapView.redirectToLocation(action.point, isSmoothing = true)
+                    }
+
+                    HomeContract.Action.GoToAuth -> {
+                        rootNavigator.navigate(
+                            RootNavDestinations.AnonymousDialog(
+                                context.getString(R.string.auth_screen_desc_react)
+                            )
+                        )
                     }
                 }
             }
@@ -127,9 +140,8 @@ private fun MapView(
         AndroidView(
             factory = {
                 mapView.apply {
-                    if (state.lastLocation != null) {
-                        redirectToLocation(point = state.lastLocation)
-                    }
+                    val location = state.lastLocation ?: state.chisinauCenter
+                    redirectToLocation(location)
 
                     onLoadMap {
                         if (state.lastLocation != null) return@onLoadMap

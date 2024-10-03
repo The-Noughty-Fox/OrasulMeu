@@ -9,22 +9,44 @@ import java.io.IOException
 
 class CombinedPostsPagingSource(private val api: PostsApi) {
 
-    fun getPostsPagingSource(type: PostType, phrase: String = "") = PostsSource(type, phrase)
+    fun getPostsPagingSource(type: PostType, phrase: String = "", isAnonymous: Boolean) =
+        PostsSource(type, phrase, isAnonymous)
 
-    inner class PostsSource(private val postsType: PostType, private val phrase: String) :
+    inner class PostsSource(
+        private val postsType: PostType,
+        private val phrase: String,
+        private val isAnonymous: Boolean
+    ) :
         PagingSource<Int, PostDto>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PostDto> {
             val position = params.key ?: 1
             return try {
                 val response = when (postsType) {
                     PostType.POPULAR -> {
-                        api.getAllPostsOrderedByReactionsCount(position, params.loadSize)
+                        if (isAnonymous) {
+                            api.getAllPostsOrderedByReactionsCountAnonymous(
+                                position, params.loadSize
+                            )
+                        } else {
+                            api.getAllPostsOrderedByReactionsCount(position, params.loadSize)
+                        }
                     }
 
-                    PostType.NEW -> api.getAllPosts(position, params.loadSize)
+                    PostType.NEW -> {
+                        if (isAnonymous) {
+                            api.getAllPostsAnonymous(position, params.loadSize)
+                        } else {
+                            api.getAllPosts(position, params.loadSize)
+                        }
+                    }
+
                     PostType.SEARCH -> {
                         if (phrase.isNotEmpty()) {
-                            api.getPostsByPhrase(position, params.loadSize, phrase)
+                            if (isAnonymous) {
+                                api.getPostsByPhraseAnonymous(position, params.loadSize, phrase)
+                            } else {
+                                api.getPostsByPhrase(position, params.loadSize, phrase)
+                            }
                         } else {
                             return LoadResult.Page(emptyList(), null, null)
                         }

@@ -155,9 +155,8 @@ fun MapSearchController(createPostViewModel: CreatePostViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 factory = {
                     mapView.apply {
-                        if (state.lastLocation != null) {
-                            redirectToLocation(point = state.lastLocation!!)
-                        }
+                        val location = state.lastLocation ?: state.chisinauCenter
+                        redirectToLocation(location)
 
                         onLoadMap {
                             if (state.lastLocation != null) return@onLoadMap

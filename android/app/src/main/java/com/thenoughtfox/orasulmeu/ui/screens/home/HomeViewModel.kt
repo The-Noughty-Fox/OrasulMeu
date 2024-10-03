@@ -1,5 +1,6 @@
 package com.thenoughtfox.orasulmeu.ui.screens.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.InvalidatingPagingSourceFactory
@@ -38,21 +39,27 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val api: PostsApi,
-    private val userSharedPrefs: UserSharedPrefs
+    private val userSharedPrefs: UserSharedPrefs,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State(isLoading = true))
     val state = _state.asStateFlow()
 
-    private val _event: Channel<Event> = Channel(Channel.UNLIMITED)
+    val event: Channel<Event> = Channel(Channel.UNLIMITED)
 
     private val _action = MutableSharedFlow<Action>()
     val action: SharedFlow<Action> = _action
 
     private val modificationEvents = MutableStateFlow<List<PostListEvents>>(emptyList())
 
+    private val isAnonymous: Boolean = savedStateHandle.get<Boolean>("isAnonymous") ?: false
+
     private val newPostsInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
-        CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.NEW)
+        CombinedPostsPagingSource(api).getPostsPagingSource(
+            type = PostType.NEW,
+            isAnonymous = isAnonymous
+        )
     }
 
     val newPostsPager = Pager(
@@ -67,7 +74,10 @@ class HomeViewModel @Inject constructor(
         }
 
     private val popularPostsInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
-        CombinedPostsPagingSource(api).getPostsPagingSource(type = PostType.POPULAR)
+        CombinedPostsPagingSource(api).getPostsPagingSource(
+            type = PostType.POPULAR,
+            isAnonymous = isAnonymous
+        )
     }
 
     val popularPostsPager = Pager(
@@ -81,11 +91,14 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-    private val searchInvalidatingSourceFactory = InvalidatingPagingSourceFactory {
-        CombinedPostsPagingSource(api).getPostsPagingSource(
-            type = PostType.SEARCH, phrase = state.value.searchText
-        )
-    }
+    private val searchInvalidatingSourceFactory =
+        InvalidatingPagingSourceFactory {
+            CombinedPostsPagingSource(api).getPostsPagingSource(
+                type = PostType.SEARCH,
+                phrase = state.value.searchText,
+                isAnonymous = isAnonymous
+            )
+        }
 
     val searchPostsPager = Pager(
         PagingConfig(pageSize = 20),
@@ -99,7 +112,7 @@ class HomeViewModel @Inject constructor(
         }
 
     suspend fun sendEvent(a: Event) {
-        _event.send(a)
+        event.send(a)
     }
 
     init {
@@ -109,13 +122,23 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun handleEvents() = viewModelScope.launch {
-        _event.consumeAsFlow().collect { event ->
+        event.consumeAsFlow().collect { event ->
             when (event) {
                 is Event.DislikePost -> {
+                    if (isAnonymous) {
+                        _action.emit(Action.GoToAuth)
+                        return@collect
+                    }
+
                     reactToPost(event.postId, Reaction.dislike)
                 }
 
                 is Event.LikePost -> {
+                    if (isAnonymous) {
+                        _action.emit(Action.GoToAuth)
+                        return@collect
+                    }
+
                     reactToPost(event.postId, Reaction.like)
                 }
 
@@ -181,7 +204,13 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getAllPopularPosts() = viewModelScope.launch(Dispatchers.IO) {
-        api.getAllPostsOrderedByReactionsCount(limit = 100)
+        val allPostsApi = if (isAnonymous) {
+            api.getAllPostsOrderedByReactionsCountAnonymous(limit = 100)
+        } else {
+            api.getAllPostsOrderedByReactionsCount(limit = 100)
+        }
+
+        allPostsApi
             .toOperationResult { it }
             .onSuccess { response ->
                 val reactedPosts = response.data ?: emptyList()

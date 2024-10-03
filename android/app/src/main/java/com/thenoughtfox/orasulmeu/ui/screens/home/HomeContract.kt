@@ -10,6 +10,7 @@ interface HomeContract {
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false,
         val lastLocation: Point? = null,
+        val chisinauCenter: Point = Point.fromLngLat(28.8306, 47.0244),
         val messageToShow: String? = null,
         val postListSorting: PostListSorting = PostListSorting.Popular,
         val searchText: String = ""
@@ -30,6 +31,7 @@ interface HomeContract {
 
     sealed interface Action {
         data class MoveToLocation(val point: Point) : Action
+        data object GoToAuth: Action
     }
 
     sealed interface NavEvent {

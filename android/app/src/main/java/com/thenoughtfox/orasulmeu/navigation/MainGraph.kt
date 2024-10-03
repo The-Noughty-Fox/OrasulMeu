@@ -8,23 +8,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
+import com.thenoughtfox.orasulmeu.R
 import com.thenoughtfox.orasulmeu.ui.post.utils.Post
 import com.thenoughtfox.orasulmeu.ui.screens.home.HomeController
 import com.thenoughtfox.orasulmeu.ui.screens.home.search.SearchPostsController
-import com.thenoughtfox.orasulmeu.ui.screens.login.AnonymousLoginDialog
 import com.thenoughtfox.orasulmeu.ui.screens.shared.SharedViewModel
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavBar
 import com.thenoughtfox.orasulmeu.utils.view.BottomNavTabs
@@ -33,10 +34,10 @@ import kotlinx.serialization.Serializable
 interface MainGraphDestinations {
 
     @Serializable
-    data object HomeScreen : MainGraphDestinations
+    data class HomeScreen(val isAnonymous: Boolean) : MainGraphDestinations
 
     @Serializable
-    data object SearchPostsScreen : MainGraphDestinations
+    data class SearchPostsScreen(val isAnonymous: Boolean) : MainGraphDestinations
 
     @Serializable
     data object ProfileScreen : MainGraphDestinations
@@ -50,6 +51,7 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
         var currentNavItem by remember { mutableStateOf(BottomNavTabs.Map) }
         val rootNavigator = LocalRootNavigator.current
         val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val context = LocalContext.current
 
         LaunchedEffect(navBackStackEntry) {
             when (navBackStackEntry?.destination?.route?.substringAfterLast(".")) {
@@ -72,7 +74,11 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
                         if (navTabs == currentNavItem) return@BottomNavBar
                         when (navTabs.name) {
                             BottomNavTabs.Map.name -> {
-                                navController.navigate(MainGraphDestinations.HomeScreen) {
+                                navController.navigate(
+                                    MainGraphDestinations.HomeScreen(
+                                        isAnonymous = sharedViewModel.state.value.isAnonymous
+                                    )
+                                ) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
@@ -83,16 +89,27 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
                             }
 
                             BottomNavTabs.Create.name -> {
-                                if (sharedViewModel.state.value.isAnonUser) {
-                                    rootNavigator.navigate(RootNavDestinations.AnonymousDialog)
+                                if (sharedViewModel.state.value.isAnonymous) {
+                                    rootNavigator.navigate(
+                                        RootNavDestinations.AnonymousDialog(
+                                            context.getString(R.string.auth_screen_desc_create_post)
+                                        )
+                                    )
                                 } else {
-                                    rootNavigator.navigate(RootNavDestinations.CreatePost(Post()))
+                                    rootNavigator.navigate(
+                                        RootNavDestinations.CreatePost(
+                                            post = Post(),
+                                            isAnonymous = sharedViewModel.state.value.isAnonymous
+                                        )
+                                    )
                                 }
                             }
 
                             BottomNavTabs.Profile.name -> {
-                                if (sharedViewModel.state.value.isAnonUser) {
-                                    rootNavigator.navigate(RootNavDestinations.AnonymousDialog)
+                                if (sharedViewModel.state.value.isAnonymous) {
+                                    rootNavigator.navigate(RootNavDestinations.AnonymousDialog(
+                                        context.getString(R.string.auth_screen_desc_profile)
+                                    ))
                                 } else {
                                     navController.navigate(MainGraphDestinations.ProfileScreen) {
                                         popUpTo(navController.graph.findStartDestination().id) {
@@ -114,7 +131,9 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
             content = { padding ->
                 NavHost(
                     navController = navController,
-                    startDestination = MainGraphDestinations.HomeScreen,
+                    startDestination = MainGraphDestinations.HomeScreen(
+                        isAnonymous = sharedViewModel.state.collectAsState().value.isAnonymous
+                    ),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = padding.calculateBottomPadding())

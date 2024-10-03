@@ -85,7 +85,9 @@
     <string name="menu_delete_post">Sterge postarea</string>
     <string name="skip">Skip</string>
     <string name="auth_screen_title">Autentificare necesară.</string>
-    <string name="auth_screen_desc">Vă rugăm să vă autentificați pentru a putea crea postări.</string>
+    <string name="auth_screen_desc_create_post">Vă rugăm să vă autentificați pentru a putea crea postări.</string>
+    <string name="auth_screen_desc_profile">Vă rugăm să vă autentificați pentru a vedea profilul.</string>
+    <string name="auth_screen_desc_react">Vă rugăm să vă autentificați pentru a pune reacție.</string>
     <string name="auth_button">Autentificare</string>
 
 </resources>

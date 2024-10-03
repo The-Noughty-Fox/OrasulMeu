@@ -6,7 +6,7 @@ object SharedContract {
     data class State(
         val isPostUpdated: Boolean = false,
         val post: PostDto? = null,
-        val isAnonUser: Boolean = false
+        val isAnonymous: Boolean = false
     )
 
     sealed interface Event {
