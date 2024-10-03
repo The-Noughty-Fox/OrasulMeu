@@ -101,7 +101,11 @@ fun LoginController(sharedViewModel: SharedViewModel) {
                         }
                     }
 
-                    Action.Proceed -> {
+                    is Action.Proceed -> {
+                        sharedViewModel.sendEvent(
+                            SharedContract.Event.SetAnonymousUser(isAnonymous = action.isAnonymous)
+                        )
+
                         rootNavigator.navigate(RootNavDestinations.Main) {
                             popUpTo(RootNavDestinations.Auth) {
                                 inclusive = true
@@ -113,26 +117,9 @@ fun LoginController(sharedViewModel: SharedViewModel) {
         }
     }
 
-
-    LoginPage(uiState = viewModel.state.collectAsState().value) { event ->
+    LoginPage(uiState = viewModel.state.collectAsState().value) {
         scope.launch {
-            when (event) {
-                Event.Skip -> {
-                    sharedViewModel.sendEvent(
-                        SharedContract.Event.SetAnonUser(isAnonUser = true)
-                    )
-                }
-
-                is Event.SendToken -> {
-                    sharedViewModel.sendEvent(
-                        SharedContract.Event.SetAnonUser(isAnonUser = false)
-                    )
-                }
-
-                else -> Unit
-            }
-
-            viewModel.event.send(event)
+            viewModel.event.send(it)
         }
     }
 }

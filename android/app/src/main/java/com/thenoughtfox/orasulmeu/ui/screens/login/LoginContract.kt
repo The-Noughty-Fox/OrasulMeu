@@ -21,7 +21,7 @@ sealed class Event {
 sealed class Action {
     data class Auth(val type: SingInType) : Action()
     data class ShowToast(val msg: String) : Action()
-    data object Proceed : Action()
+    data class Proceed(val isAnonymous: Boolean = false) : Action()
 }
 
 enum class SingInType(

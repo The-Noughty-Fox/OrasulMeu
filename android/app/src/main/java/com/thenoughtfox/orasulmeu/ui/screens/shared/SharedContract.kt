@@ -13,7 +13,7 @@ object SharedContract {
         data object UpdatePosts : Event
         data class UpdatePost(val postDto: PostDto) : Event
         data object PostsRefreshed : Event
-        data class SetAnonUser(val isAnonUser: Boolean) : Event
+        data class SetAnonymousUser(val isAnonymous: Boolean) : Event
     }
 
     sealed interface Action

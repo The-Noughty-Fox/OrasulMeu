@@ -75,7 +75,7 @@ class LoginViewModel @Inject constructor(
                                         )
                                     }
 
-                                    _action.emit(Action.Proceed)
+                                    _action.emit(Action.Proceed())
                                 }
                                 .onError {
                                     _state.update { uiState ->
@@ -106,7 +106,7 @@ class LoginViewModel @Inject constructor(
                                         )
                                     }
 
-                                    _action.emit(Action.Proceed)
+                                    _action.emit(Action.Proceed())
                                 }
                                 .onError {
                                     _state.update { uiState ->
@@ -129,7 +129,7 @@ class LoginViewModel @Inject constructor(
                     _action.emit(Action.ShowToast(event.msg))
                 }
 
-                Event.Skip -> _action.emit(Action.Proceed)
+                Event.Skip -> _action.emit(Action.Proceed(isAnonymous = true))
             }
         }
     }
