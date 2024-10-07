@@ -43,6 +43,9 @@ interface MainGraphDestinations {
     data object ProfileScreen : MainGraphDestinations
 }
 
+const val homeScreen = "HomeScreen"
+const val profileScreen = "ProfileScreen"
+
 @Composable
 fun MainGraph(sharedViewModel: SharedViewModel) {
     val navController = rememberNavController()
@@ -54,12 +57,16 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
         val context = LocalContext.current
 
         LaunchedEffect(navBackStackEntry) {
-            when (navBackStackEntry?.destination?.route?.substringAfterLast(".")) {
-                MainGraphDestinations.HomeScreen.toString() -> {
+            val route = navBackStackEntry?.destination?.route
+                ?.substringBefore("/")
+                ?.substringAfterLast(".")
+
+            when (route) {
+                homeScreen -> {
                     currentNavItem = BottomNavTabs.Map
                 }
 
-                MainGraphDestinations.ProfileScreen.toString() -> {
+                profileScreen -> {
                     currentNavItem = BottomNavTabs.Profile
                 }
             }
@@ -107,9 +114,11 @@ fun MainGraph(sharedViewModel: SharedViewModel) {
 
                             BottomNavTabs.Profile.name -> {
                                 if (sharedViewModel.state.value.isAnonymous) {
-                                    rootNavigator.navigate(RootNavDestinations.AnonymousDialog(
-                                        context.getString(R.string.auth_screen_desc_profile)
-                                    ))
+                                    rootNavigator.navigate(
+                                        RootNavDestinations.AnonymousDialog(
+                                            context.getString(R.string.auth_screen_desc_profile)
+                                        )
+                                    )
                                 } else {
                                     navController.navigate(MainGraphDestinations.ProfileScreen) {
                                         popUpTo(navController.graph.findStartDestination().id) {

@@ -115,3 +115,8 @@
     java.lang.Object writeReplace();
     java.lang.Object readResolve();
 }
+
+-keep class com.google.googlesignin.** { *; }
+-keepnames class com.google.googlesignin.* { *; }
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.common.** { *; }
